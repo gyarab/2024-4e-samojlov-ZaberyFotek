@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-    CloseItem,
-    Item,
+    CloseIcon,
+    Icon,
     SidebarBtn,
     SidebarBtnLink,
     SidebarContainer,
@@ -16,11 +16,11 @@ function Sidebar({isOpen, toggle}) {
     return (
         <SidebarContainer isOpen={isOpen} onClick={toggle}>
 
-            <Item onClick={toggle}>
+            <Icon onClick={toggle}>
 
-                <CloseItem />
+                <CloseIcon />
 
-            </Item>
+            </Icon>
 
             <SidebarWrapper>
 
@@ -35,7 +35,7 @@ function Sidebar({isOpen, toggle}) {
 
                 <SidebarBtn>
 
-                    <SidebarBtnLink to={""}>Vyzkoušet nyní</SidebarBtnLink>
+                    <SidebarBtnLink to={"/"}>Vyzkoušet nyní</SidebarBtnLink>
 
                 </SidebarBtn>
 

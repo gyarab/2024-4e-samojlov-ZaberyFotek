@@ -14,28 +14,25 @@ export const SidebarContainer = styled.aside`
     left: 0;
     transition: 0.3s ease-in-out;
     opacity: ${({isOpen}) => (isOpen ? '100%' : '0')};
-    top: ${({isOpen}) => (isOpen ? '0' : '-100%')};
-`;
+    top: ${({isOpen}) => (isOpen ? '0' : '-100%')};`
+;
 
-export const Item = styled.div`
+export const CloseIcon = styled(FaTimes)`
+    color: white;`
+;
+
+export const Icon = styled.div`
     position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
+    top: 1.2rem;
+    right: 1.5rem;
     background: transparent;
     font-size: 2rem;
-    cursor: pointer;
-    height: 100%;
-    width: 100%;
-    outline: none;
-`;
-
-export const CloseItem = styled(FaTimes)`
-    color: white;
-`;
+    cursor: pointer;`
+;
 
 export const SidebarWrapper = styled.div`
-    color: white;
-`;
+    color: white;`
+;
 
 export const SidebarMenu = styled.ul`
     display: grid;
@@ -45,8 +42,8 @@ export const SidebarMenu = styled.ul`
 
     @media screen and (max-width: 480px) {
         grid-template-rows: repeat(6, 60px);
-    }
-`;
+    }`
+;
 
 export const SidebarLink = styled(LinkS)`
     display: flex;
@@ -62,13 +59,13 @@ export const SidebarLink = styled(LinkS)`
     &:hover {
         color: brown;
         transition: 0.2s ease-in-out;
-    }
-`;
+    }`
+;
 
 export const SidebarBtn = styled.div`
     display: flex;
-    justify-content: center;
-`;
+    justify-content: center;`
+;
 
 export const SidebarBtnLink = styled(LinkR)`
     border-radius: 50px;
@@ -86,5 +83,5 @@ export const SidebarBtnLink = styled(LinkR)`
         transition: all 0.2s ease-in-out;
         color: yellow;
         background: blue;
-    }
-`;
+    }`
+;
