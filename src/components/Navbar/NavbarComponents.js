@@ -2,110 +2,86 @@ import styled from 'styled-components';
 import {Link} from "react-router-dom";
 import {FaBars} from "react-icons/fa";
 
-export function Nav(props) {
+export const Nav = styled.nav`
+    height: 80px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem calc((100vw - 1000px) / 2);
+    background: rgba( 255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba( 0, 0, 0, 0.18 );
+    backdrop-filter: blur(50px);
+    position: fixed;
+    transition-timing-function: ease-in;
+    transition: 0.5s;
+`;
 
-    const StyledNav = styled.nav`
-        background: #000;
-        height: 80px;
-        display: flex;
-        justify-content: space-between;
-        padding: 0.5rem calc((100vw - 1000px) / 2);
-        z-index: 10;
-    `;
 
-    return <StyledNav {...props} />;
-}
+export const NavLink = styled(Link)`
+    color: black;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    padding: 0 1.2rem;
+    height: 100%;
+    cursor: pointer;
 
-export function NavLink(props) {
+    &:active {
 
-    const StyledLink = styled(Link)`
-        color: white;
-        display: flex;
-        align-items: center;
-        text-decoration: none;
-        padding: 0 1rem;
-        height: 100%;
+        color: aqua;
+    }
+`;
+
+export const Bars = styled(FaBars)`
+    display: none;
+    color: bisque;
+
+    @media screen and (max-width: 768px) {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transform: translate(-100%, 65%);
+        font-size: 1.8rem;
         cursor: pointer;
+    }
+`;
 
-        &:active {
+export const NavMenu = styled.div`
+    display: flex;
+    align-items: center;
+    margin-right: -15px;
 
-            color: aqua;
-        }
-    `;
 
-    return <StyledLink {...props} />;
-}
-
-export function Bars(props) {
-
-    const StyledBars = styled(FaBars)`
+    @media screen and (max-width: 768px) {
         display: none;
-        color: bisque;
+    }
+`;
 
-        @media screen and (max-width: 768px) {
-            display: block;
-            position: absolute;
-            right: 0;
-            top: 0;
-            transform: translate(-100%, 65%);
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
-    `;
+export const NavBtn = styled.div`
+    display: flex;
+    align-items: center;
+    margin-right: 24px;
 
-    return <StyledBars {...props} />;
-}
+    @media screen and (max-width: 768px) {
+        display: none;
+    }
+`;
 
-export function NavMenu(props) {
+export const NavBtnLink = styled(Link)`
+    border-radius: 4px;
+    background: #256ce1;
+    padding: 10px 22px;
+    color: #fff;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
 
-    const StyledNav = styled.div`
-        display: flex;
-        align-items: center;
-        margin-right: -15px;
-
-
-        @media screen and (max-width: 768px) {
-            display: none;
-        }
-    `;
-
-    return <StyledNav {...props} />;
-}
-
-export function NavBtn(props) {
-
-    const StyledNavBtn = styled.div`
-        display: flex;
-        align-items: center;
-        margin-right: 24px;
-
-        @media screen and (max-width: 768px) {
-            display: none;
-        }
-    `
-
-    return <StyledNavBtn {...props} />;
-}
-
-export function NavBtnLink(props) {
-
-    const NavBtnLink = styled(Link)`
-        border-radius: 4px;
-        background: #256ce1;
-        padding: 10px 22px;
-        color: #fff;
-        border: none;
-        outline: none;
-        cursor: pointer;
+    &:hover {
         transition: all 0.2s ease-in-out;
-        text-decoration: none;
-
-        &:hover {
-            transition: all 0.2s ease-in-out;
-            background: #fff;
-            color: #010606;
-        }`
-
-
-    return <NavBtnLink {...props} />;
-}
+        background: #fff;
+        color: #010606;
+    }`;

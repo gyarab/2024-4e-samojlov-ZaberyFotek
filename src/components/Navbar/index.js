@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Nav,
     NavLink,
@@ -12,11 +12,36 @@ import {
 
 function Navbar({ toggle }) {
 
+    /** Zdroj: https://github.com/cyrus8050/yt-react-navbar-transition/blob/master/src/Navbar.js **/
+    const [show, setShow] = useState(true)
+    const controlNavbar = () => {
+
+        if (window.scrollY > 100) {
+
+            setShow(false)
+
+        } else {
+
+            setShow(true)
+        }
+    }
+
+    useEffect(() => {
+
+        window.addEventListener('scroll', controlNavbar)
+
+        return () => {
+            window.removeEventListener('scroll', controlNavbar)
+        }
+
+    }, []);
+
     return (
         <Nav>
+
             <NavLink to={"/"}>
 
-                <h1>Logo</h1>
+                <div>Logo</div>
 
             </NavLink>
 

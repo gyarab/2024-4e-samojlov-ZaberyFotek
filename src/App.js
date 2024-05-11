@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import './App.css';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import Home from './pages/Home/Home';
-import Oprojektu from "./pages/Oprojektu";
+import Oprojektu from "./pages/O projektu/Oprojektu";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 
@@ -18,8 +18,9 @@ function App() {
 
             <Router>
 
-                <Sidebar isOpen={isOpen} toggle={toggle}/>
                 <Navbar toggle={toggle}/>
+
+                <Sidebar isOpen={isOpen} toggle={toggle}/>
 
                 <Routes>
 
