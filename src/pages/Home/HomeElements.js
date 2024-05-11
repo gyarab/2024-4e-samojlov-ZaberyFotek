@@ -3,9 +3,8 @@ import styled from "styled-components";
 export const HomeContainer = styled.div`
     display: flex;
     background: var(--color-blue-1);
-    height: 100vh; 
+    height: 100%; 
     width: 100%;
-    overflow: scroll;
     z-index: -1;
 `;
 

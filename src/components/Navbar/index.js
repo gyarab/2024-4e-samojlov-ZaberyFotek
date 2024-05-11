@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Nav,
     NavLink,
@@ -10,13 +10,16 @@ import {
 } from './NavbarComponents'
 
 
-function Navbar({ toggle }) {
+function Navbar({toggle}) {
 
     /** Zdroj: https://github.com/cyrus8050/yt-react-navbar-transition/blob/master/src/Navbar.js **/
+
     const [show, setShow] = useState(true)
     const controlNavbar = () => {
 
-        if (window.scrollY > 100) {
+        console.log(window.scrollY);
+
+        if (window.scrollY > 250) {
 
             setShow(false)
 
@@ -28,6 +31,8 @@ function Navbar({ toggle }) {
 
     useEffect(() => {
 
+        controlNavbar();
+
         window.addEventListener('scroll', controlNavbar)
 
         return () => {
@@ -36,36 +41,41 @@ function Navbar({ toggle }) {
 
     }, []);
 
-    return (
-        <Nav>
 
-            <NavLink to={"/"}>
+    if (show) {
 
-                <div>Logo</div>
+        return (
 
-            </NavLink>
+            <Nav>
 
-            <div onClick={toggle}>
-                <Bars/>
-            </div>
+                <NavLink to={"/"}>
 
-            <NavMenu>
+                    <div>Logo</div>
 
-                <NavLink to={"o-projektu"}>O projektu</NavLink>
-                <NavLink to={"sluzby"}>Služby</NavLink>
-                <NavLink to={"kontakt"}>Kontakt</NavLink>
-                <NavLink to={"prihlaseni"}>Přihlášení</NavLink>
+                </NavLink>
 
-            </NavMenu>
+                <div onClick={toggle}>
+                    <Bars/>
+                </div>
 
-            <NavBtn>
+                <NavMenu>
 
-                <NavBtnLink to={""}>Vyzkoušet nyní</NavBtnLink>
+                    <NavLink to={"o-projektu"}>O projektu</NavLink>
+                    <NavLink to={"sluzby"}>Služby</NavLink>
+                    <NavLink to={"kontakt"}>Kontakt</NavLink>
+                    <NavLink to={"prihlaseni"}>Přihlášení</NavLink>
 
-            </NavBtn>
+                </NavMenu>
 
-        </Nav>
-    );
+                <NavBtn>
+
+                    <NavBtnLink to={""}>Vyzkoušet nyní</NavBtnLink>
+
+                </NavBtn>
+
+            </Nav>
+        );
+    }
 }
 
 export default Navbar;

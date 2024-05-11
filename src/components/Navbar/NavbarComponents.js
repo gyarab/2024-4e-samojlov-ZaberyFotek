@@ -8,7 +8,7 @@ export const Nav = styled.nav`
     display: flex;
     justify-content: space-between;
     padding: 0.5rem calc((100vw - 1000px) / 2);
-    background: rgba( 255, 255, 255, 0.5);
+    background: var(--color-shadow-1);
     box-shadow: 0 8px 32px 0 rgba( 0, 0, 0, 0.18 );
     backdrop-filter: blur(50px);
     position: fixed;
