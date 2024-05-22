@@ -12,8 +12,8 @@ export const Nav = styled.nav`
     box-shadow: 0 8px 32px 0 rgba( 0, 0, 0, 0.18 );
     backdrop-filter: blur(50px);
     position: fixed;
-    transition-timing-function: ease-in;
-    transition: 0.5s;
+    transition: opacity 0.5s ease-in-out;
+    opacity: ${({ show }) => (show ? '1' : '0')};
 `;
 
 

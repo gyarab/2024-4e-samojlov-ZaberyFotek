@@ -42,40 +42,38 @@ function Navbar({toggle}) {
     }, []);
 
 
-    if (show) {
+    return (
 
-        return (
+        <Nav show={show}>
 
-            <Nav>
+            <NavLink to={"/"}>
 
-                <NavLink to={"/"}>
+                <div>Logo</div>
 
-                    <div>Logo</div>
+            </NavLink>
 
-                </NavLink>
+            <div onClick={toggle}>
+                <Bars/>
+            </div>
 
-                <div onClick={toggle}>
-                    <Bars/>
-                </div>
+            <NavMenu>
 
-                <NavMenu>
+                <NavLink to={"o-projektu"}>O projektu</NavLink>
+                <NavLink to={"sluzby"}>Služby</NavLink>
+                <NavLink to={"kontakt"}>Kontakt</NavLink>
+                <NavLink to={"prihlaseni"}>Přihlášení</NavLink>
 
-                    <NavLink to={"o-projektu"}>O projektu</NavLink>
-                    <NavLink to={"sluzby"}>Služby</NavLink>
-                    <NavLink to={"kontakt"}>Kontakt</NavLink>
-                    <NavLink to={"prihlaseni"}>Přihlášení</NavLink>
+            </NavMenu>
 
-                </NavMenu>
+            <NavBtn>
 
-                <NavBtn>
+                <NavBtnLink to={""}>Vyzkoušet nyní</NavBtnLink>
 
-                    <NavBtnLink to={""}>Vyzkoušet nyní</NavBtnLink>
+            </NavBtn>
 
-                </NavBtn>
+        </Nav>
+    );
 
-            </Nav>
-        );
-    }
 }
 
 export default Navbar;
