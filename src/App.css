@@ -18,13 +18,20 @@
     --color-shadow-8: #404147;
     --color-shadow-9: #000;
 
-    --color-blue-1: #e6f1fa;
-    --color-blue-9: #0075c9;
+    --color-blue-1: #f0f2fd;
+    --color-blue-2: #d3d7f8;
+    --color-blue-3: #b5bcf4;
+    --color-blue-4: #97a2f0;
+    --color-blue-5: #7a87eb;
+    --color-blue-6: #5c6de7;
+    --color-blue-7: #3e52e3;
+    --color-blue-8: #2137de;
+    --color-blue-9: #001fff;
 }
 
 h1 {
 
-    font-size: 6em;
+    font-size: 6rem;
     font-style: normal;
     font-weight: 700;
 }
