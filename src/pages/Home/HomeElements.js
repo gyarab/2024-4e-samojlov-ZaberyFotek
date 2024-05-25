@@ -3,20 +3,19 @@ import {FaPlus} from "react-icons/fa";
 
 export const HomeContainer = styled.div`
     display: grid;
-    background: linear-gradient(217deg, var(--color-blue-6), var(--color-blue-2) 70.71%),
-    linear-gradient(127deg, var(--color-blue-1), var(--color-blue-8) 70.71%),
-    linear-gradient(336deg, var(--color-blue-7), var(--color-blue-1) 70.71%);
-    height: 100%; 
-    width: 100%;
+    background: radial-gradient(circle at top left, var(--color-blue-9) 0%, var(--color-blue-5) 10%, transparent 20%),
+                radial-gradient(circle at bottom right, var(--color-blue-9) 0%, var(--color-blue-5) 10%, transparent 20%);
+    height: 100vh; 
+    width: 100vw;
     z-index: -1;
     justify-items: center;
+    align-content: center;
 `;
 
 export const TextElements = styled.div`
     display: block;
-    width: 100%;
     text-align: center;
-    margin-top: 75px;
+    margin-top: 50px;
 `;
 
 export const HeadingContainer = styled.h1`
@@ -32,6 +31,7 @@ export const HeadingContainer = styled.h1`
     @media screen and (max-width: 768px) {
         display: grid;
         font-size: 4em;
+        gap: 0;
     }
 
     @media screen and (max-width: 300px) {
@@ -49,23 +49,23 @@ export const HeadDescription = styled.p`
 `;
 
 export const ImageArea = styled.div`
-    display: flex;
-    align-items: center;
-    height: calc(100vw * 1 / 3);
-    width: calc(100vw * 1 / 3);
+    display: ${({ isClicked }) => (isClicked ? 'flex' : 'grid')};
+    justify-items: center;
+    height: calc(100vw * 0.40);
+    width: calc(100vw * 0.75);
+    max-width: 750px;
+    min-width: 200px;
+    min-height: 200px;
+    max-height: 500px;
     background-color: #fff;
     background-image: linear-gradient(45deg, var(--color-shadow-1) 25%, transparent 25%, transparent 75%, var(--color-shadow-1) 75%), linear-gradient(45deg, var(--color-shadow-1) 25%, transparent 25%, transparent 75%, var(--color-shadow-1) 75%);
     background-size: 40px 40px;
     background-position: 0 0, 20px 20px;
     border-radius:15px;
-    margin-top: 15px;
     justify-content: center;
+    align-content: center;
     box-shadow: 0 8px 32px 0 rgba( 0, 0, 0, 0.18 );
-`;
-
-export const TextArea = styled.div`
-    display: grid;
-    justify-items: center;
+    margin-top: 25px;
 `;
 
 
@@ -121,12 +121,20 @@ export const UploadBtn = styled.button`
     
 `;
 
-export const TextElement = styled.text`
+export const TextDesc = styled.text`
     color: black;
     font-weight: 700;
     font-size: 1.5rem;
     text-align: center;
     margin-top: 25px;
+
+    @media screen and (max-width: 600px) {
+        font-size: 1.25rem;
+    }
+
+    @media screen and (max-width: 400px) {
+        font-size: 1rem;
+    }
 `;
 
 
