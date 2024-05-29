@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import {FaPlus} from "react-icons/fa";
+import {Resizable} from "re-resizable";
 
 export const HomeContainer = styled.div`
     display: grid;
@@ -51,12 +52,15 @@ export const HeadDescription = styled.p`
 export const ImageArea = styled.div`
     display: ${({ isClicked }) => (isClicked ? 'flex' : 'grid')};
     justify-items: center;
-    height: calc(100vw * 0.40);
-    width: calc(100vw * 0.75);
+    height: ${({ isClicked, imageHeight }) =>
+            (isClicked && imageHeight.height !== 0 ? `${imageHeight.height}px` : 'calc(100vw * 0.40)')};
+    width: ${({ isClicked, imageWidth }) =>
+            (isClicked && imageWidth.width !== 0 ? `${imageWidth.width}px` : 'calc(100vw * 0.75)')};
+    transition: width 0.5s ease;
     max-width: 750px;
     min-width: 200px;
     min-height: 200px;
-    max-height: 500px;
+    max-height: ${({ maxHeight }) => (maxHeight ? '500px' : '625px')};
     background-color: #fff;
     background-image: linear-gradient(45deg, var(--color-shadow-1) 25%, transparent 25%, transparent 75%, var(--color-shadow-1) 75%), linear-gradient(45deg, var(--color-shadow-1) 25%, transparent 25%, transparent 75%, var(--color-shadow-1) 75%);
     background-size: 40px 40px;
@@ -133,8 +137,18 @@ export const TextDesc = styled.text`
     }
 
     @media screen and (max-width: 400px) {
-        font-size: 1rem;
+        display: none;
     }
 `;
 
 
+export const ResizeImage = styled(Resizable)`
+
+    display: ${({ isShowed }) => (isShowed ? 'flex' : 'none')};
+`;
+
+export const RowBtn = styled.button`
+    height: 50px;
+    width: 50px;
+    background: var(--color-blue-6);
+`;

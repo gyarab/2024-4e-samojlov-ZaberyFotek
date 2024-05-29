@@ -1,16 +1,18 @@
-import React, {useRef, useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {
     HeadDescription,
     HeadingContainer,
     HomeContainer,
     ImageArea,
     LoadedImage,
-    PlusIcon,
+    PlusIcon, ResizeImage, RowBtn,
     TextDesc,
     TextElements,
-    UploadBtn
+    UploadBtn, UploadedPhoto
 } from "./HomeElements";
 import {ReactTyped} from "react-typed";
+import {Resizable} from "re-resizable";
+import {Resizer} from "re-resizable/lib/resizer";
 
 export default function Home() {
 
@@ -53,6 +55,16 @@ export default function Home() {
         }
     };
 
+    const enable = { bottom: true };
+
+    const [isInitHeight, setIsInitHeight] = useState(true);
+
+    const onResizeStart = useCallback(() => {
+        if (!isInitHeight) return;
+
+        setIsInitHeight(false);
+    }, [isInitHeight]);
+
 
     return (
 
@@ -62,24 +74,24 @@ export default function Home() {
 
                 <HeadingContainer>
 
-                    <div> Vytvářím</div>
+                    <div> Vytvářím klipy</div>
 
-                    <ReactTyped
-                        strings={["klipy", "animace", "přechody"]}
-                        typeSpeed={200}
-                        loop
-                        backSpeed={40}
-                        cursorChar="|"
-                        showCursor={true}
-                        style={{
-                            background: "linear-gradient(176deg, #001fff, #d3d7f8)",
-                            backgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            WebkitBoxDecorationBreak: "clone",
-                            boxDecorationBreak: "clone",
-                            textShadow: "none"
-                        }}
-                    />
+                    {/*<ReactTyped*/}
+                    {/*    strings={["klipy", "animace", "přechody"]}*/}
+                    {/*    typeSpeed={200}*/}
+                    {/*    loop*/}
+                    {/*    backSpeed={40}*/}
+                    {/*    cursorChar="|"*/}
+                    {/*    showCursor={true}*/}
+                    {/*    style={{*/}
+                    {/*        background: "linear-gradient(176deg, #001fff, #d3d7f8)",*/}
+                    {/*        backgroundClip: "text",*/}
+                    {/*        WebkitTextFillColor: "transparent",*/}
+                    {/*        WebkitBoxDecorationBreak: "clone",*/}
+                    {/*        boxDecorationBreak: "clone",*/}
+                    {/*        textShadow: "none"*/}
+                    {/*    }}*/}
+                    {/*/>*/}
 
                 </HeadingContainer>
 
@@ -87,22 +99,44 @@ export default function Home() {
 
             </TextElements>
 
-            <ImageArea isClicked={isChanged}>
+            <ImageArea isClicked={isChanged} backgroundIsVisible={isChanged} imageHeight={isChanged} imageWidth={isChanged}>
 
                 {/* Načtená fotografie */}
-                {imageSrc && <img src={imageSrc} alt="Vaše fotografie"
-                                  style={{width: '100%', height: '100%', objectFit: 'contain'}}/>}
+
+
+                <ResizeImage isShowed={isChanged}
+                             minHeight={500}
+                             minWidth={250}
+                             maxWidth={500}
+                             maxHeight={625}
+                             onResize={onResizeStart}
+                             enable={enable}
+                >
+
+                    {imageSrc && (
+                        <img src={imageSrc} alt="Vaše fotografie"
+                             style={{width: '100%', height: '100%', objectFit: 'contain'}}/>
+                    )}
+
+                </ResizeImage>
+
+                {/*<RowBtn>+</RowBtn>*/}
+
+                {/*<ColumnBtn>*/}
+
+
+                {/*</ColumnBtn>*/}
 
 
                 {isUploadBtnVisible && (<UploadBtn onClick={fileBtnClick}>
 
-                        <PlusIcon/>
-                        <span>Vyberte fotografii</span>
+                    <PlusIcon/>
+                    <span>Vyberte fotografii</span>
 
-                        {/* Vstup uživatele - obrázek */}
-                        <input type="file" accept="image/*" onChange={imageUpload} ref={fileInputRef} hidden/>
+                    {/* Vstup uživatele - obrázek */}
+                    <input type="file" accept="image/*" onChange={imageUpload} ref={fileInputRef} hidden/>
 
-                    </UploadBtn>)
+                </UploadBtn>)
                 }
 
                 {isUploadBtnVisible && <TextDesc>Nebo můžete přetáhnout obrázek sem</TextDesc>}
