@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {FaPlus} from "react-icons/fa";
+import {FaArrowRight, FaPlus} from "react-icons/fa";
 import {Resizable} from "re-resizable";
 
 export const HomeContainer = styled.div`
@@ -47,6 +47,8 @@ export const HeadDescription = styled.p`
     font-weight: 400;
     color: var(--color-shadow-7);
     margin-top: 10px;
+    margin-left: 25px;
+    margin-right: 25px;
 `;
 
 export const ImageArea = styled.div`
@@ -62,14 +64,14 @@ export const ImageArea = styled.div`
     min-height: 200px;
     max-height: ${({ maxHeight }) => (maxHeight ? '500px' : '625px')};
     background-color: #fff;
-    background-image: linear-gradient(45deg, var(--color-shadow-1) 25%, transparent 25%, transparent 75%, var(--color-shadow-1) 75%), linear-gradient(45deg, var(--color-shadow-1) 25%, transparent 25%, transparent 75%, var(--color-shadow-1) 75%);
+    background-image: ${({ backgroundIsVisible }) => (backgroundIsVisible ? 'none' : 'linear-gradient(45deg, var(--color-shadow-1) 25%, transparent 25%, transparent 75%, var(--color-shadow-1) 75%), linear-gradient(45deg, var(--color-shadow-1) 25%, transparent 25%, transparent 75%, var(--color-shadow-1) 75%);')}; 
     background-size: 40px 40px;
     background-position: 0 0, 20px 20px;
     border-radius:15px;
     justify-content: center;
     align-content: center;
     box-shadow: 0 8px 32px 0 rgba( 0, 0, 0, 0.18 );
-    margin-top: 25px;
+    margin: 25px;
 `;
 
 
@@ -151,4 +153,26 @@ export const RowBtn = styled.button`
     height: 50px;
     width: 50px;
     background: var(--color-blue-6);
+`;
+
+export const BtnContinue = styled.button`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background: var(--color-blue-8);
+    padding: 15px;
+    border-radius: 0.5rem;
+    font-size: 1.25rem;
+    letter-spacing: 0.05rem;
+    width: 200px;
+    min-width: 150px;
+`;
+
+export const ArrowIcon = styled(FaArrowRight)`
+    border-radius: 50%;
+    color: white;
+    margin-left: 15px;
+    background: var(--color-blue-7);
+    transform: scale(1.25);
 `;
