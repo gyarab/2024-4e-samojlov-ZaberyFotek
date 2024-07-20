@@ -14,6 +14,7 @@ export const Nav = styled.nav`
     position: fixed;
     transition: opacity 0.5s ease-in-out;
     opacity: ${({ show }) => (show ? '1' : '0')};
+    z-index: 1000;
 `;
 
 
@@ -35,7 +36,7 @@ export const NavLink = styled(Link)`
 
 export const Bars = styled(FaBars)`
     display: none;
-    color: bisque;
+    color: var(--color-blue-6);
 
     @media screen and (max-width: 768px) {
         display: block;
@@ -52,8 +53,7 @@ export const NavMenu = styled.div`
     display: flex;
     align-items: center;
     margin-right: -15px;
-
-
+    
     @media screen and (max-width: 768px) {
         display: none;
     }

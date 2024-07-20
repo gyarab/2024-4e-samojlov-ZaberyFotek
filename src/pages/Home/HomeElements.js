@@ -26,7 +26,7 @@ export const HeadingContainer = styled.h1`
     justify-content: center;
     font-size: 6em;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 75px;
     gap: 20px;
 
     @media screen and (max-width: 768px) {
@@ -83,7 +83,7 @@ export const PlusIcon = styled(FaPlus)`
     transform: scale(1.25);
 `;
 
-export const UploadBtn = styled.button`
+export const DefaultBtn = styled.button`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -98,7 +98,11 @@ export const UploadBtn = styled.button`
     border-radius: 0.5rem;
     font-size: 1.25rem;
     letter-spacing: 0.05rem;
-    width: 75%;
+    width: 300px;
+
+    @media screen and (max-width: 400px) {
+        max-width: 200px;
+    }
 
     &::before {
         content: "";

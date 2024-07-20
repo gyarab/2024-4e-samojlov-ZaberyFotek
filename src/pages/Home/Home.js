@@ -1,7 +1,7 @@
 import React, {useCallback, useRef, useState} from 'react';
 import {
     ArrowIcon,
-    BtnContinue,
+    DefaultBtn,
     HeadDescription,
     HeadingContainer,
     HomeContainer,
@@ -10,15 +10,13 @@ import {
     PlusIcon, ResizeImage, RowBtn,
     TextDesc,
     TextElements,
-    UploadBtn, UploadedPhoto
 } from "./HomeElements";
 import {ReactTyped} from "react-typed";
-import Typography from '@mui/material/Typography';
 import {Resizable} from "re-resizable";
 import {Resizer} from "re-resizable/lib/resizer";
 import {useNavigate} from "react-router-dom";
 
-export default function Home() {
+function Home() {
 
     const [isUploadBtnVisible, setIsUploadBtnVisible] = useState(true);
 
@@ -63,7 +61,7 @@ export default function Home() {
     const navigate = useNavigate()
 
     const redirectPage = ()=> {
-        navigate("/o-projektu");
+        navigate("/zabery");
     }
 
     const enable = { bottom: true };
@@ -141,7 +139,7 @@ export default function Home() {
                 {/*</ColumnBtn>*/}
 
 
-                {isUploadBtnVisible && (<UploadBtn onClick={fileBtnClick}>
+                {isUploadBtnVisible && (<DefaultBtn onClick={fileBtnClick}>
 
                     <PlusIcon/>
                     <span>Vyberte fotografii</span>
@@ -149,15 +147,17 @@ export default function Home() {
                     {/* Vstup uživatele - obrázek */}
                     <input type="file" accept="image/*" onChange={imageUpload} ref={fileInputRef} hidden/>
 
-                </UploadBtn>)
+                </DefaultBtn>)
                 }
 
                 {isUploadBtnVisible && <TextDesc>Nebo můžete přetáhnout obrázek sem</TextDesc>}
 
             </ImageArea>
 
-            {imageSrc && <BtnContinue onClick={() => redirectPage()}>Pokračovat <ArrowIcon /> </BtnContinue>}
+            {imageSrc && <DefaultBtn onClick={() => redirectPage()}>Pokračovat <ArrowIcon /> </DefaultBtn>}
 
         </HomeContainer>
     );
-};
+}
+
+export default Home;

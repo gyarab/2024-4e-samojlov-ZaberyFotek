@@ -35,3 +35,25 @@ h1 {
     font-style: normal;
     font-weight: 700;
 }
+
+.slide-in {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(90deg, rgba(0,31,255,1) 0%, rgba(240,242,253,1) 100%);
+    transform-origin: top;
+    z-index: 0;
+}
+
+.slide-out {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(90deg, rgba(0,31,255,1) 0%, rgba(240,242,253,1) 100%);
+    transform-origin: bottom;
+    z-index: 0;
+}
