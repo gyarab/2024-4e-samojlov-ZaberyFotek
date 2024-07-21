@@ -3,12 +3,14 @@ import Transition from "../../Transition";
 import Home from "../../pages/Home/Home";
 import Oprojektu from "../../pages/O projektu/Oprojektu";
 import {AnimatePresence} from "framer-motion";
-import React from "react";
+import React, {useState} from "react";
 import Zabery from "../../pages/Zabery/Zabery";
 
-function AnimatedRoutes() {
+function AnimatedRoutes(props) {
 
     const location = useLocation();
+
+    const [image, setImage] = useState(null)
 
     return (
 
@@ -16,9 +18,9 @@ function AnimatedRoutes() {
 
             <Routes location={location} key={location.pathname}>
 
-                <Route path="/" element={<Transition Component={Home}/>}/>
-                <Route path="o-projektu" element={<Transition Component={Oprojektu}/>}/>
-                <Route path="zabery" element={<Transition Component={Zabery}/>}/>
+                <Route path="/" element={<Home setImage={setImage}/>}/>
+                <Route path="o-projektu" element={<Oprojektu />}/>
+                <Route path="zabery" element={<Zabery image={image}/>}/>
 
             </Routes>
 

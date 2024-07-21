@@ -16,7 +16,7 @@ import {Resizable} from "re-resizable";
 import {Resizer} from "re-resizable/lib/resizer";
 import {useNavigate} from "react-router-dom";
 
-function Home() {
+function Home(props) {
 
     const [isUploadBtnVisible, setIsUploadBtnVisible] = useState(true);
 
@@ -50,10 +50,14 @@ function Home() {
                 setImageSrc(e.target.result);
             };
 
-            // přečtení souboru jako URL
+            // Přečtení souboru jako URL
             reader.readAsDataURL(file);
             changeAreaDisplay(!isChanged);
             setIsUploadBtnVisible(false);
+
+            // Nastavení fotky jako nově vytvořené url souboru obrázku
+            props.setImage(URL.createObjectURL(file));
+
         }
     };
 
@@ -123,10 +127,12 @@ function Home() {
                 {/*>*/}
 
                     {imageSrc && (
-                        <img src={imageSrc} alt="Vaše fotografie"
+                        <img id={"foto"} src={imageSrc} alt="Vaše fotografie"
                              style={{
                                  width: '100%', height: '100%', objectFit: 'contain', padding: '25px'
-                             }}/>
+                             }}
+                        />
+
                     )}
 
                 {/*</ResizeImage>*/}

@@ -14,7 +14,7 @@ export const Nav = styled.nav`
     position: fixed;
     transition: opacity 0.5s ease-in-out;
     opacity: ${({ show }) => (show ? '1' : '0')};
-    z-index: 1000;
+    z-index: 100;
 `;
 
 
@@ -30,7 +30,7 @@ export const NavLink = styled(Link)`
 
     &:active {
 
-        color: aqua;
+        color: var(--color-blue-4);
     }
 `;
 

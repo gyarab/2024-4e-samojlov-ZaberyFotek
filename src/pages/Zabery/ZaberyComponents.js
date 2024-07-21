@@ -1,11 +1,81 @@
 import styled from "styled-components";
+import React from "react";
+
+
+export const ZaberyPage = styled.div`
+    display: flex;  
+    height: 100vh;  
+    overflow: hidden;
+    padding-top: 80px;
+    align-items: center;
+`;
+
 
 export const ZaberySidebarContainer = styled.nav`
-    height: 100vh;
-    width: 75px;
-    display: flex;
+    height: 75vh;
+    width: 250px;
+    margin-left: 50px;
     flex-direction: column;
-    background: black;
+    background: var(--color-shadow-9);
     position: fixed;
-    z-index: 1;
+    display: flex;
+    border-radius: 25px;
+
+    // 520px
+    @media screen and (max-width: 520px) {
+        height: 100px;
+        width: 100%;
+        flex-direction: row;
+        bottom: 0;
+    }
+`;
+
+
+export const ZaberySidebarItem = styled.div`
+    padding: 15px;
+    border-radius: 25px;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    text-decoration: none;
+    width: 100%;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.25s ease-in-out;
+    box-sizing: border-box;
+    gap: 10px;
+    text-align: left;
+
+    &:hover {
+        opacity: 1;
+        background: var(--color-shadow-8);
+    }
+`;
+
+
+export const Foto = styled.div`
+    flex: 1;  
+    height: 100%;
+    // 250px + margin-left 50px Container
+    margin-left: 300px;  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    right: 50%;
+    left: 50%;
+
+    img {
+        max-width: 75%;  
+        max-height: 75%; 
+        width: calc(100vw * 0.75);
+        height: calc(100vw * 0.75);
+        object-fit: contain;  
+    }
+
+    // 520px
+    @media screen and (max-width: 520px) {
+        margin-left: 0;
+    }
 `;
