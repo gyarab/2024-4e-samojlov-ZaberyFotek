@@ -159,20 +159,6 @@ export const RowBtn = styled.button`
     background: var(--color-blue-6);
 `;
 
-export const BtnContinue = styled.button`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    background: var(--color-blue-8);
-    padding: 15px;
-    border-radius: 0.5rem;
-    font-size: 1.25rem;
-    letter-spacing: 0.05rem;
-    width: 200px;
-    min-width: 150px;
-`;
-
 export const ArrowIcon = styled(FaArrowRight)`
     border-radius: 50%;
     color: white;

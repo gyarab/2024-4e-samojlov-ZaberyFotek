@@ -22,7 +22,7 @@ export const ZaberySidebarContainer = styled.nav`
     border-radius: 25px;
 
     // 520px
-    @media screen and (max-width: 520px) {
+    @media screen and (max-width: 768px) {
         height: 100px;
         width: 100%;
         flex-direction: row;
@@ -34,7 +34,8 @@ export const ZaberySidebarContainer = styled.nav`
 export const ZaberySidebarItem = styled.div`
     padding: 15px;
     border-radius: 25px;
-    color: white;
+    color: ${({ isClicked }) => (isClicked ? '#00cc66' : 'white')};
+    background: ${({ isClicked }) => (isClicked ? 'var(--color-shadow-8)' : 'transparent')};;
     font-size: 18px;
     display: flex;
     align-items: center;
@@ -42,7 +43,7 @@ export const ZaberySidebarItem = styled.div`
     text-decoration: none;
     width: 100%;
     cursor: pointer;
-    opacity: 0.5;
+    opacity: ${({ isClicked }) => (isClicked ? '1' : '0.5')};
     transition: opacity 0.25s ease-in-out;
     box-sizing: border-box;
     gap: 10px;
@@ -56,6 +57,7 @@ export const ZaberySidebarItem = styled.div`
 
 
 export const Foto = styled.div`
+    position: relative;
     flex: 1;  
     height: 100%;
     // 250px + margin-left 50px Container
@@ -63,8 +65,7 @@ export const Foto = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    right: 50%;
-    left: 50%;
+    max-width: 1250px;
 
     img {
         max-width: 75%;  
@@ -75,7 +76,47 @@ export const Foto = styled.div`
     }
 
     // 520px
-    @media screen and (max-width: 520px) {
+    @media screen and (max-width: 768px) {
         margin-left: 0;
     }
+`;
+
+export const PiecesContainer = styled.p`
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 15px;
+    text-align: left;
+`;
+
+export const AddBtn = styled.button`
+    cursor: pointer;
+    width: 34px;
+    height: 34px;
+    margin-right: 2px;
+    border-radius: 50px;
+    opacity: 0.5;
+    transition: opacity 0.25s ease-in-out;
+    
+    &:hover {
+        opacity: 1;
+    }
+`;
+
+export const ShowNum = styled.div`
+    width: 68px;
+    height: 34px;
+    border-radius: 50px;
+    color: white;
+    background: var(--color-blue-4);
+    text-align: center;
+    font-size: 20px;
+    margin-right: 15px;
+`;
+
+export const HorizontalLine = styled.div`
+    position: absolute;
+    height: 3px;
+    background-color: red;
+    width: 75%;
 `;
