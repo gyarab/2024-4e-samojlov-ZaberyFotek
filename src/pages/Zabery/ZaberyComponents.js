@@ -67,7 +67,7 @@ export const Foto = styled.div`
     justify-content: center;
     max-width: 1250px;
 
-    img {
+    canvas {
         max-width: 75%;  
         max-height: 75%; 
         width: calc(100vw * 0.75);
@@ -114,9 +114,9 @@ export const ShowNum = styled.div`
     margin-right: 15px;
 `;
 
-export const HorizontalLine = styled.div`
-    position: absolute;
-    height: 3px;
-    background-color: red;
-    width: 75%;
-`;
+// export const HorizontalLine = styled.div`
+//     position: absolute;
+//     height: 3px;
+//     background-color: red;
+//     width: 75%;
+// `;
