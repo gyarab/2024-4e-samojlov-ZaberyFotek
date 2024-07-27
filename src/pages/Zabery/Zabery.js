@@ -8,25 +8,44 @@ import {
     HorizontalLine,
     ZaberyPage,
     ZaberySidebarContainer,
-    ZaberySidebarItem, FotoContainer, CanvasImage
+    ZaberySidebarItem
 } from "./ZaberyComponents";
-import {PiNumberCircleOne, PiNumberCircleTwo} from "react-icons/pi";
+import {PiNumberCircleFour, PiNumberCircleOne, PiNumberCircleThree, PiNumberCircleTwo} from "react-icons/pi";
 import {MinusCircleIcon, PlusCircleIcon} from "@heroicons/react/16/solid";
 
 function Zabery(props) {
 
-    const [isVisible, setIsVisible] = useState(false);
+    const [items, setItems] = useState([{}]);
+
+    const addItem = (newItem) => {
+
+        const updatedItems = [...items, newItem];
+
+        setItems(updatedItems)
+    };
+
+    // Aktivní prvek v seznamu
+    const [activeItem, setActiveItem] = useState(null);
+
+    // Funkce pro zobrazení jednoho prvku
+    const handleVisibility = (item) => {
+        setActiveItem(prevActiveItem => (prevActiveItem === item ? null : item));
+    };
+
+    // Počet aktuálních sloupců a řádků v paneli nástrojů
     const [row, setAsRows] = useState(0);
     const [column, setAsColumns] = useState(0);
 
     // Ukládání dat o liniích
     const [lines, setLines] = useState({vertical: [], horizontal: []});
 
+    // Stav tahu linie
     const [dragging, setDragging] = useState(null);
 
     // Inicializace plochy
     const canvasRef = useRef(null);
 
+    // Souřadnice liní
     const [startOffset, setStartOffset] = useState(null);
 
     /** Funkce pro přidání nebo odebrání řádků **/
@@ -54,7 +73,7 @@ function Zabery(props) {
 
             setLines(newLines);
 
-            // Odebírání linií
+        // Odebírání linií
         } else {
 
             if (type !== 0) {
@@ -81,22 +100,12 @@ function Zabery(props) {
         drawCanvas();
     };
 
+    // Responzivita plochy
     useEffect(() => {
-        function handleResize() {
-            const canvas = canvasRef.current;
-            if (canvas) {
-                canvas.width = window.innerWidth * 0.75;
-                drawCanvas();
-            }
-        }
 
-        handleResize(); // Initial call to set size and draw canvas
+        window.addEventListener('resize', drawCanvas);
 
-        // Add resize event listener
-        window.addEventListener('resize', handleResize);
-
-        // Cleanup event listener on component unmount
-        return () => window.removeEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', drawCanvas);
     }, [props.image]);
 
     /** Vykreslení plochy **/
@@ -115,18 +124,49 @@ function Zabery(props) {
         // Načtení obrázku
         image.onload = () => {
 
-            // Nastavení parametrů plochy na parametry obrázku
-            canvas.width = window.innerWidth * 0.75;
-            canvas.height = image.height;
+            // Vlastní responzivita obrázku
+            if (image.height > 1000) {
+
+                const prev = image.height;
+
+                image.height = 800;
+                image.width *= (800 / prev);
+            }
+
+            if (image.width > 1000) {
+
+                const prev = image.width;
+
+                image.width = 800;
+                image.height *= (800 / prev);
+            }
+
+            // Velikost obrazovky uživatele
+            if (window.innerWidth > 1200) {
+
+                canvas.width = image.width;
+                canvas.height = image.height;
+
+            } else if (window.innerWidth > 1000 && window.innerWidth < 1200) {
+
+                canvas.width = image.width * 0.75;
+                canvas.height = image.height * 0.75;
+
+            } else if (window.innerWidth > 800 && window.innerWidth < 1000) {
+
+                canvas.width = image.width * 0.5;
+                canvas.height = image.height * 0.5;
+            }
+
 
             // Vykreslení obrázku do plochy
-            ctx.drawImage(image, 0, 0,canvas.width, canvas.height);
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
             // Barva linie
             ctx.strokeStyle = 'red';
 
             // Tloušťka linie
-            ctx.lineWidth = 10;
+            ctx.lineWidth = 5;
 
             // Vykreslení vertikálních linií
             lines.vertical.forEach(x => {
@@ -147,53 +187,55 @@ function Zabery(props) {
 
     };
 
+    /** Tah je detekován **/
     const handleMouseDown = (e) => {
+
         const canvas = canvasRef.current;
+
+        // Rozměry plochy
         const rect = canvas.getBoundingClientRect();
+
+        // Výpočet souřadnice tahu
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
         let closestLine = null;
 
-        let minDistance = Infinity;
-
         lines.vertical.forEach((x, index) => {
 
+            // Výpočet vzdálenosti od vertikální linie
             const distance = Math.abs(mouseX - x);
 
-            if (distance < minDistance) {
+            if (distance < 5) {
 
-                minDistance = distance;
                 closestLine = {type: 'vertical', index, x};
             }
         });
 
         lines.horizontal.forEach((y, index) => {
 
+            // Výpočet vzdálenosti od horizontální linie
             const distance = Math.abs(mouseY - y);
 
-            if (distance < minDistance) {
-                minDistance = distance;
+            if (distance < 5) {
+
                 closestLine = {type: 'horizontal', index, y};
             }
         });
 
+        // Přetahování linie
         if (closestLine) {
 
             setDragging(closestLine);
 
-            if (closestLine.type === 'vertical') {
-
-                setStartOffset({x: mouseX - closestLine.x, y: mouseY});
-
-            } else {
-
-                setStartOffset({x: mouseX, y: mouseY - closestLine.y});
-            }
+            // Uložení souřadnic linií
+            setStartOffset({x: mouseX - closestLine.x, y: mouseY - closestLine.y});
         }
     };
 
+    /** Tah je v pohybu nad plochou **/
     const handleMouseMove = (e) => {
+
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
@@ -203,23 +245,35 @@ function Zabery(props) {
 
         if (dragging) {
 
-            console.log(`Vertical lines: ${lines.vertical.join(', ')}`);
-            console.log(`Horizontal lines: ${lines.horizontal.join(', ')}`);
+            console.log(`Vertical: ${lines.vertical.join(', ')}`);
+            console.log(`Horizontal: ${lines.horizontal.join(', ')}`);
 
+            // Určení typu pohybu tahu
             if (dragging.type === 'vertical') {
 
                 lines.vertical[dragging.index] = mouseX - startOffset.x;
+
+                addItem({id: dragging.index, type: 'vertical', number: mouseX - startOffset.x});
+
                 cursor = 'ew-resize';
 
             } else if (dragging.type === 'horizontal') {
 
                 lines.horizontal[dragging.index] = mouseY - startOffset.y;
+
+                addItem({id: dragging.index, type: 'horizontal', number: mouseY - startOffset.y});
+
                 cursor = 'ns-resize';
             }
 
+            console.log(items);
+
+            // Aktualizace stavu linií
             setLines({...lines});
+
             drawCanvas();
 
+            // Pokud uživatel nepřetahuje, ale pohybuje myší
         } else {
 
             lines.vertical.forEach(x => {
@@ -234,20 +288,21 @@ function Zabery(props) {
         canvas.style.cursor = cursor;
     };
 
+    /** Tah je ukončen **/
     const handleMouseUp = () => {
 
         setDragging(null);
         setStartOffset(null);
     };
 
-    // Set up event listeners for mouse actions on the canvas
+    /** Přidání a odstranění posluchačů událostí myši na canvas **/
     useEffect(() => {
+
         const canvas = canvasRef.current;
         canvas.addEventListener('mousedown', handleMouseDown);
         canvas.addEventListener('mousemove', handleMouseMove);
         canvas.addEventListener('mouseup', handleMouseUp);
 
-        // Clean up event listeners on component unmount
         return () => {
             canvas.removeEventListener('mousedown', handleMouseDown);
             canvas.removeEventListener('mousemove', handleMouseMove);
@@ -255,10 +310,24 @@ function Zabery(props) {
         };
     }, [lines, dragging]);
 
-    // Vykreslení obrázku a plochy
+    /** Vykreslení obrázku a plochy **/
     useEffect(() => {
         drawCanvas();
     }, [props.image]);
+
+    const getPieces = () => {
+
+        const canvas = canvasRef.current;
+
+        let context = canvas.getContext("2d");
+        const image = new Image();
+
+        // Obsah obrázku
+        image.src = props.image;
+
+        context.drawImage(image, 10, 10,
+            300, 175, 0, 0, 100, 175);
+    }
 
     return (
         <ZaberyPage>
@@ -273,15 +342,17 @@ function Zabery(props) {
                     marginBottom: "10px",
                     letterSpacing: "1px",
                     padding: "15px"
+
                 }}>NÁVOD NA KLIP</h3>
 
-                <ZaberySidebarItem isClicked={isVisible} onClick={() => setIsVisible(!isVisible)}>
+                <ZaberySidebarItem isClicked={activeItem === 'item1'}
+                                   onClick={() => handleVisibility('item1')}>
 
                     <PiNumberCircleOne style={{height: "35px", width: "35px"}}/> Rozdělení na části
 
                 </ZaberySidebarItem>
 
-                {isVisible && (
+                {activeItem === 'item1' && (
 
                     <PiecesContainer>
 
@@ -325,6 +396,22 @@ function Zabery(props) {
 
                 </ZaberySidebarItem>
 
+                {/* Vybrané částice */}
+                {/*{activeItem === 'item2' && (getPieces())}*/}
+
+                <ZaberySidebarItem isClicked={activeItem === 'item2'}
+                                   onClick={() => handleVisibility('item2')}>
+
+                    <PiNumberCircleThree style={{height: "35px", width: "35px"}}/> Rozdělit na obrázky
+
+                </ZaberySidebarItem>
+
+                <ZaberySidebarItem>
+
+                    <PiNumberCircleFour style={{height: "35px", width: "35px"}}/> Vytvořit klipy
+
+                </ZaberySidebarItem>
+
             </ZaberySidebarContainer>
 
             <Foto id={"Foto"}>
@@ -337,195 +424,3 @@ function Zabery(props) {
 
 export default Zabery;
 
-
-/* make on added lines  horizontal/vertical draggable effect: import React, {useEffect, useRef, useState} from 'react';
-import {
-AddBtn,
-Foto,
-PiecesContainer,
-ShowNum,
-TextZ, HorizontalLine,
-ZaberyPage,
-ZaberySidebarContainer,
-ZaberySidebarItem
-} from "./ZaberyComponents";
-import {PiNumberCircleOne, PiNumberCircleTwo} from "react-icons/pi";
-import {DefaultBtn, PlusIcon} from "../Home/HomeElements";
-import {MinusCircleIcon, PlusCircleIcon} from "@heroicons/react/16/solid";
-
-function Zabery(props) {
-
-const [isVisible, setIsVisible] = useState(false);
-
-// Počet řádků
-const [row, setAsRows] = useState(1);
-
-// Počet sloupců
-const [column, setAsColumns] = useState(1);
-
-
-// Přidat/Odebrat sloupce/řádky
-const operationHandler = (operation, type, setType, word) => {
-
-const canvas = canvasRef.current;
-const ctx = canvas.getContext('2d');
-
-if (operation === "+") {
-
-setType(type + 1);
-
-if (word === "columnAdd") {
-
-// Přidání vertikální linie
-drawLine(canvas, ctx, (canvas.width / 2), 0, (canvas.width / 2), canvas.height);
-
-} else {
-
-// Přidání horizontální linie
-drawLine(canvas, ctx, 0, (canvas.height / 2), canvas.width, (canvas.height / 2));
-}
-
-} else {
-
-if (type !== 1) {
-
-setType(type - 1);
-
-if (word === "columnDel" || word === "rowDel") {
-
-ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-}
-
-const image = new Image();
-
-drawImage(image, canvas, ctx);
-}
-}
-};
-
-const drawImage = (image, canvas, ctx) => {
-
-// Nastavení obsahu obrázku
-image.src = props.image;
-
-image.onload = () => {
-
-// Nastavení velikosti plochy na velikost obrázku
-canvas.width = image.width;
-canvas.height = image.height;
-
-// Vykreslení fotografie uživatele
-ctx.drawImage(image, 0, 0);
-
-ctx.beginPath();
-
-// drawLine(canvas, ctx);
-};
-}
-
-/** Funkce pro přidání linie **/
-
-/*
-const drawLine = (canvas, ctx, startX, startY, endX, endY) => {
-
-    // Počáteční bod
-    ctx.moveTo(startX, startY);
-
-    // Konečný bod
-    ctx.lineTo(endX, endY);
-
-    // Barva
-    ctx.strokeStyle = 'red';
-
-    // Šířka
-    ctx.lineWidth = 5;
-
-    ctx.stroke();
-}
-
-/** Inicializace plochy **/
-/*
-const canvasRef = useRef(null);
-
-useEffect(() => {
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    const image = new Image();
-
-    drawImage(image, canvas, ctx);
-
-
-}, [props.image]);
-
-return (
-
-    <ZaberyPage>
-
-        <ZaberySidebarContainer>
-
-            <h3 style={{
-                textAlign: "center",
-                color: "white",
-                fontSize: "20px",
-                background: "var(--color-blue-4)",
-                borderRadius: "15px",
-                marginBottom: "10px",
-                letterSpacing: "1px",
-                padding: "15px"
-            }}>NÁVOD NA KLIP</h3>
-
-            <ZaberySidebarItem isClicked={isVisible} onClick={() => setIsVisible(!isVisible)}><PiNumberCircleOne
-                style={{height: "35px", width: "35px"}}/>Rozdělení na části</ZaberySidebarItem>
-
-            {isVisible && (
-                <PiecesContainer>
-                    <p>Sloupce:</p>
-
-                    <div style={{display: "inline-flex", margin: "12px 0 18px 0", width: "100%"}}>
-                        <ShowNum>{column}</ShowNum>
-                        <AddBtn
-                            onClick={() => operationHandler("+", column, setAsColumns, "columnAdd")}><PlusCircleIcon
-                            style={{color: "var(--color-shadow-7)"}}/></AddBtn>
-                        <AddBtn
-                            onClick={() => operationHandler("-", column, setAsColumns, "columnDel")}><MinusCircleIcon
-                            style={{color: "var(--color-shadow-7)"}}/></AddBtn>
-                    </div>
-
-                    <p>Řádky:</p>
-
-                    <div style={{display: "inline-flex", margin: "12px 0 18px 0", width: "100%"}}>
-                        <ShowNum>{row}</ShowNum>
-                        <AddBtn onClick={() => operationHandler("+", row, setAsRows, "rowAdd")}><PlusCircleIcon
-                            style={{color: "var(--color-shadow-7)"}}/></AddBtn>
-                        <AddBtn onClick={() => operationHandler("-", row, setAsRows, "rowDel")}><MinusCircleIcon
-                            style={{color: "var(--color-shadow-7)"}}/></AddBtn>
-                    </div>
-
-                </PiecesContainer>
-            )}
-
-            <ZaberySidebarItem><PiNumberCircleTwo style={{height: "35px", width: "35px"}}/> Upravit
-                obrázek</ZaberySidebarItem>
-
-        </ZaberySidebarContainer>
-
-        <Foto>
-
-            {/*<img src={props.image} alt={"Vaše fotografie"} />*/
-/*
-            <canvas
-                ref={canvasRef}
-            >
-
-            </canvas>
-
-        </Foto>
-
-    </ZaberyPage>
-);
-}
-
-export default Zabery; */
