@@ -58,26 +58,27 @@ export const ZaberySidebarItem = styled.div`
 
 export const Foto = styled.div`
     position: relative;
-    flex: 1;  
-    height: 100%;
-    // 250px + margin-left 50px Container
-    margin-left: 300px;  
+    flex: 1;
+    max-height: 1250px;
+    max-width: 1250px;
+    margin-left: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 1250px;
+    width: 100%;
+    height: 100%;
+    
 
-    canvas {
-        max-width: 75%;  
-        max-height: 75%; 
-        width: calc(100vw * 0.75);
-        height: calc(100vw * 0.75);
-        object-fit: contain;  
-    }
-
-    // 520px
     @media screen and (max-width: 768px) {
         margin-left: 0;
+    }
+
+    canvas {
+        //max-width: 75%;
+        //max-height: 75%;
+        //width: calc(100vw * 0.75);
+        //height: calc(100vw * 0.75);
+        object-fit: contain;
     }
 `;
 
