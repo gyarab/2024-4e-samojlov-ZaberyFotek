@@ -4,8 +4,6 @@ import {
     Foto,
     PiecesContainer,
     ShowNum,
-    TextZ,
-    HorizontalLine,
     ZaberyPage,
     ZaberySidebarContainer,
     ZaberySidebarItem
@@ -30,6 +28,13 @@ function Zabery(props) {
         console.log('Updated Items:', updatedItems);
 
         setItems(updatedItems);
+    };
+
+    /** Vypsání prvků **/
+    const logItems = () => {
+
+        console.log('Current Items:', items);
+
     };
 
     /** Funkce pro odstranění linie **/
@@ -84,20 +89,18 @@ function Zabery(props) {
                 // Přidání vertikální čáry uprostřed plátna
                 newLines.vertical.push(canvasRef.current.width / (type + 2));
 
-                addItem({id: vertIndex, type: 'vertical', x: canvasRef.current.width / (type + 2)});
+                addItem({ id: vertIndex, type: 'vertical', x: canvasRef.current.width / (type + 2) });
 
-                setVertIndex(vertIndex);
-
-                console.log(vertIndex);
+                setVertIndex(vertIndex + 1);
 
             } else {
 
                 // Přidání horizontální čáry uprostřed plátna
                 newLines.horizontal.push(canvasRef.current.height / (type + 2));
 
-                addItem({id: horIndex, type: 'horizontal', x: canvasRef.current.height / (type + 2)});
+                addItem({ id: horIndex, type: 'horizontal', x: canvasRef.current.height / (type + 2) });
 
-                setHorIndex(horIndex);
+                setHorIndex(horIndex + 1);
             }
 
             setLines(newLines);
@@ -116,21 +119,23 @@ function Zabery(props) {
 
                     newLines.vertical.pop();
 
-                    deleteItemById(vertIndex, 'vertical');
+                    deleteItemById(vertIndex - 1, 'vertical');
+                    setVertIndex(vertIndex - 1);
 
                 // Odstranění horizontální linie
                 } else {
 
                     newLines.horizontal.pop();
 
-                    deleteItemById(horIndex, 'horizontal');
+                    deleteItemById(horIndex - 1, 'horizontal');
+                    setHorIndex(horIndex - 1);
                 }
 
                 setLines(newLines);
             }
         }
 
-        console.log(items);
+        // console.log(items);
 
         // Překreslení plochy
         drawCanvas();
@@ -233,18 +238,13 @@ function Zabery(props) {
 
         let itemExists = false;
 
-        let idLine = 0;
-
-        let typeLine = '';
-
         hook.forEach((x) => {
 
-            if (x.id === dragging.index && x.type === dragging.type) {
-
-                idLine = x.id;
-                typeLine = x.type;
-                itemExists = true;
-            }
+            hook.forEach((x) => {
+                if (x.id === index && x.type === type) {
+                    itemExists = true;
+                }
+            });
         });
 
         // Pokud linie nebyla přidána
@@ -259,20 +259,12 @@ function Zabery(props) {
             // Funkce pro obnovení proměnné items
             setItems((prevItems) => {
 
-                const index = prevItems.findIndex((item) => item.id === idLine && item.type === typeLine);
+                return prevItems.map((item) =>
+                    item.id === index && item.type === type
+                        ? {...item, ...newData}
+                        : item
+                );
 
-                // Prvek je nalezen
-                if (index !== -1) {
-
-                    const updatedItems = [...prevItems];
-
-                    // Obnovení hodnoty
-                    updatedItems[index] = { ...updatedItems[index], ...newData };
-
-                    return updatedItems;
-                }
-
-                return prevItems;
             });
         }
     }
@@ -341,26 +333,18 @@ function Zabery(props) {
             // Určení typu pohybu tahu
             if (dragging.type === 'vertical') {
 
-                lines.vertical[dragging.index] = mouseX - startOffset.x;
-
-                lineCheck(items, dragging.index, 'vertical', mouseX - startOffset.x, {id: dragging.index, type: 'vertical', x: mouseX - startOffset.x});
-
+                const newX = mouseX - startOffset.x;
+                lines.vertical[dragging.index] = newX;
+                lineCheck(items, dragging.index, 'vertical', newX, { id: dragging.index, type: 'vertical', x: newX });
                 cursor = 'ew-resize';
-
-                setVertIndex(dragging.index);
 
             } else if (dragging.type === 'horizontal') {
 
-                lines.horizontal[dragging.index] = mouseY - startOffset.y;
-
-                lineCheck(items, dragging.index, 'horizontal', mouseY - startOffset.y, {id: dragging.index, type: 'horizontal', x: mouseY - startOffset.y});
-
+                const newY = mouseY - startOffset.y;
+                lines.horizontal[dragging.index] = newY;
+                lineCheck(items, dragging.index, 'horizontal', newY, { id: dragging.index, type: 'horizontal', x: newY });
                 cursor = 'ns-resize';
-
-                setHorIndex(dragging.index);
             }
-
-            console.log(items);
 
             // Aktualizace stavu linií
             setLines({...lines});
@@ -491,7 +475,7 @@ function Zabery(props) {
                 </ZaberySidebarItem>
 
                 {/* Vybrané částice */}
-                {/*{activeItem === 'item2' && (getPieces())}*/}
+                {activeItem === 'item2' && logItems()}
 
                 <ZaberySidebarItem isClicked={activeItem === 'item2'}
                                    onClick={() => handleVisibility('item2')}>
