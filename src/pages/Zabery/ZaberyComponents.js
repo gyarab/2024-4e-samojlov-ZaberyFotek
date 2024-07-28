@@ -68,10 +68,10 @@ export const Foto = styled.div`
     max-width: 1250px;
 
     canvas {
-        max-width: 75%;  
-        max-height: 75%; 
-        width: calc(100vw * 0.75);
-        height: calc(100vw * 0.75);
+        //max-width: 75%;  
+        //max-height: 75%; 
+        //width: calc(100vw * 0.75);
+        //height: calc(100vw * 0.75);
         object-fit: contain;  
     }
 

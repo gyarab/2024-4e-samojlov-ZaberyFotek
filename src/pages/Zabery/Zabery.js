@@ -15,13 +15,32 @@ import {MinusCircleIcon, PlusCircleIcon} from "@heroicons/react/16/solid";
 
 function Zabery(props) {
 
-    const [items, setItems] = useState([{}]);
+    let [vertIndex, setVertIndex] = useState(0);
 
+    let [horIndex, setHorIndex] = useState(0);
+
+    // Přidávání jednotlivých linií
+    const [items, setItems] = useState([]);
+
+    /** Funkce pro přidání nové linie **/
     const addItem = (newItem) => {
 
         const updatedItems = [...items, newItem];
 
-        setItems(updatedItems)
+        console.log('Updated Items:', updatedItems);
+
+        setItems(updatedItems);
+    };
+
+    /** Funkce pro odstranění linie **/
+    const deleteItemById = (id, type) => {
+
+        setItems((prevItems) => {
+
+            console.log('Deleted Items:' , prevItems.filter(item => item.id !== id && item.type !== type));
+
+            return prevItems.filter(item => item.id !== id && item.type !== type);
+        });
     };
 
     // Aktivní prvek v seznamu
@@ -65,10 +84,20 @@ function Zabery(props) {
                 // Přidání vertikální čáry uprostřed plátna
                 newLines.vertical.push(canvasRef.current.width / (type + 2));
 
+                addItem({id: vertIndex, type: 'vertical', x: canvasRef.current.width / (type + 2)});
+
+                setVertIndex(vertIndex);
+
+                console.log(vertIndex);
+
             } else {
 
                 // Přidání horizontální čáry uprostřed plátna
                 newLines.horizontal.push(canvasRef.current.height / (type + 2));
+
+                addItem({id: horIndex, type: 'horizontal', x: canvasRef.current.height / (type + 2)});
+
+                setHorIndex(horIndex);
             }
 
             setLines(newLines);
@@ -87,14 +116,21 @@ function Zabery(props) {
 
                     newLines.vertical.pop();
 
-                    // Odstranění horizontální linie
+                    deleteItemById(vertIndex, 'vertical');
+
+                // Odstranění horizontální linie
                 } else {
+
                     newLines.horizontal.pop();
+
+                    deleteItemById(horIndex, 'horizontal');
                 }
 
                 setLines(newLines);
             }
         }
+
+        console.log(items);
 
         // Překreslení plochy
         drawCanvas();
@@ -156,6 +192,11 @@ function Zabery(props) {
 
                 canvas.width = image.width * 0.5;
                 canvas.height = image.height * 0.5;
+
+            } else {
+
+                canvas.width = image.width * 0.35;
+                canvas.height = image.height * 0.35;
             }
 
 
@@ -186,6 +227,55 @@ function Zabery(props) {
         };
 
     };
+
+    /** Funkce pro kontrolu, zda se linie existuje  **/
+    const lineCheck = (hook, index, type, coordinates, newData) => {
+
+        let itemExists = false;
+
+        let idLine = 0;
+
+        let typeLine = '';
+
+        hook.forEach((x) => {
+
+            if (x.id === dragging.index && x.type === dragging.type) {
+
+                idLine = x.id;
+                typeLine = x.type;
+                itemExists = true;
+            }
+        });
+
+        // Pokud linie nebyla přidána
+        if (!itemExists) {
+
+            // Přidání linie
+            addItem({id: index, type: type, x: coordinates});
+
+        // Obnovení hodnoty linie
+        } else {
+
+            // Funkce pro obnovení proměnné items
+            setItems((prevItems) => {
+
+                const index = prevItems.findIndex((item) => item.id === idLine && item.type === typeLine);
+
+                // Prvek je nalezen
+                if (index !== -1) {
+
+                    const updatedItems = [...prevItems];
+
+                    // Obnovení hodnoty
+                    updatedItems[index] = { ...updatedItems[index], ...newData };
+
+                    return updatedItems;
+                }
+
+                return prevItems;
+            });
+        }
+    }
 
     /** Tah je detekován **/
     const handleMouseDown = (e) => {
@@ -253,17 +343,21 @@ function Zabery(props) {
 
                 lines.vertical[dragging.index] = mouseX - startOffset.x;
 
-                addItem({id: dragging.index, type: 'vertical', number: mouseX - startOffset.x});
+                lineCheck(items, dragging.index, 'vertical', mouseX - startOffset.x, {id: dragging.index, type: 'vertical', x: mouseX - startOffset.x});
 
                 cursor = 'ew-resize';
+
+                setVertIndex(dragging.index);
 
             } else if (dragging.type === 'horizontal') {
 
                 lines.horizontal[dragging.index] = mouseY - startOffset.y;
 
-                addItem({id: dragging.index, type: 'horizontal', number: mouseY - startOffset.y});
+                lineCheck(items, dragging.index, 'horizontal', mouseY - startOffset.y, {id: dragging.index, type: 'horizontal', x: mouseY - startOffset.y});
 
                 cursor = 'ns-resize';
+
+                setHorIndex(dragging.index);
             }
 
             console.log(items);
