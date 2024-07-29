@@ -42,7 +42,7 @@ function Zabery(props) {
 
         setItems((prevItems) => {
 
-            console.log('Deleted Items:' , prevItems.filter(item => item.id !== id && item.type !== type));
+            console.log('Deleted Items:', prevItems.filter(item => item.id !== id && item.type !== type));
 
             return prevItems.filter(item => item.id !== id && item.type !== type);
         });
@@ -89,7 +89,7 @@ function Zabery(props) {
                 // Přidání vertikální čáry uprostřed plátna
                 newLines.vertical.push(canvasRef.current.width / (type + 2));
 
-                addItem({ id: vertIndex, type: 'vertical', x: canvasRef.current.width / (type + 2) });
+                addItem({id: vertIndex, type: 'vertical', position: canvasRef.current.width / (type + 2)});
 
                 setVertIndex(vertIndex + 1);
 
@@ -98,14 +98,14 @@ function Zabery(props) {
                 // Přidání horizontální čáry uprostřed plátna
                 newLines.horizontal.push(canvasRef.current.height / (type + 2));
 
-                addItem({ id: horIndex, type: 'horizontal', x: canvasRef.current.height / (type + 2) });
+                addItem({id: horIndex, type: 'horizontal', position: canvasRef.current.height / (type + 2)});
 
                 setHorIndex(horIndex + 1);
             }
 
             setLines(newLines);
 
-        // Odebírání linií
+            // Odebírání linií
         } else {
 
             if (type !== 0) {
@@ -122,7 +122,7 @@ function Zabery(props) {
                     deleteItemById(vertIndex - 1, 'vertical');
                     setVertIndex(vertIndex - 1);
 
-                // Odstranění horizontální linie
+                    // Odstranění horizontální linie
                 } else {
 
                     newLines.horizontal.pop();
@@ -240,18 +240,17 @@ function Zabery(props) {
 
         hook.forEach((x) => {
 
-            hook.forEach((x) => {
-                if (x.id === index && x.type === type) {
-                    itemExists = true;
-                }
-            });
+            if (x.id === index && x.type === type) {
+                itemExists = true;
+            }
+
         });
 
         // Pokud linie nebyla přidána
         if (!itemExists) {
 
             // Přidání linie
-            addItem({id: index, type: type, x: coordinates});
+            addItem({id: index, type: type, position: coordinates});
 
         // Obnovení hodnoty linie
         } else {
@@ -264,7 +263,6 @@ function Zabery(props) {
                         ? {...item, ...newData}
                         : item
                 );
-
             });
         }
     }
@@ -335,14 +333,14 @@ function Zabery(props) {
 
                 const newX = mouseX - startOffset.x;
                 lines.vertical[dragging.index] = newX;
-                lineCheck(items, dragging.index, 'vertical', newX, { id: dragging.index, type: 'vertical', x: newX });
+                lineCheck(items, dragging.index, 'vertical', newX, {id: dragging.index, type: 'vertical', position: newX});
                 cursor = 'ew-resize';
 
             } else if (dragging.type === 'horizontal') {
 
                 const newY = mouseY - startOffset.y;
                 lines.horizontal[dragging.index] = newY;
-                lineCheck(items, dragging.index, 'horizontal', newY, { id: dragging.index, type: 'horizontal', x: newY });
+                lineCheck(items, dragging.index, 'horizontal', newY, {id: dragging.index, type: 'horizontal', position: newY});
                 cursor = 'ns-resize';
             }
 
@@ -393,9 +391,31 @@ function Zabery(props) {
         drawCanvas();
     }, [props.image]);
 
+    const sortLines = (position) => {
+
+        let temp = 0;
+
+        for (let i = 0; i < position.length; i++) {
+
+            for (let j = i + 1; j < position.length; j++) {
+
+                if (position[i] > position[j]) {
+
+                    temp = position[i];
+
+                    position[i] = position[j];
+
+                    position[j] = temp;
+                }
+            }
+        }
+    }
+
     const getPieces = () => {
 
         const canvas = canvasRef.current;
+
+        canvas.style = "pointer-events: none;"
 
         let context = canvas.getContext("2d");
         const image = new Image();
@@ -403,8 +423,81 @@ function Zabery(props) {
         // Obsah obrázku
         image.src = props.image;
 
-        context.drawImage(image, 10, 10,
-            300, 175, 0, 0, 100, 175);
+        let positionX = [];
+
+        let positionY = [];
+
+        // const itemsVer = items.map(line =>
+        //     line.type === 'vertical'
+        // );
+        //
+        // console.log(itemsVer);
+
+        items.forEach(x => {
+
+            if (x.type === 'vertical') {
+
+                positionX.push(x.position);
+
+            } else {
+
+                positionY.push(x.position);
+            }
+        });
+
+        sortLines(positionX);
+        sortLines(positionY);
+
+        console.log(positionX, positionY);
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        let height = 0;
+
+        let width = 0;
+
+        console.log("Imammamam" + image.height / 2);
+
+        // positionX.forEach(x => {
+        //
+        //     positionY.forEach(y => {
+        //
+        //         console.log(x, y);
+        //
+        //         //
+        //
+        //         context.drawImage(image, x, y,
+        //             image.width - x, y, image.width - x, y, image.width - x, y);
+        //
+        //         height += image.height;
+        //         width += image.width;
+        //     })
+        // });
+
+        for (let i = 0; i < positionX.length; i++) {
+
+            for (let j = 0; j < positionY.length; j++) {
+
+                // Začátek
+                context.drawImage(image, 0, 0,
+                    positionX[i], positionY[j], 0, 0, positionX[i], positionY[j]);
+
+                // Střední
+                context.drawImage(image, positionX[i + 1] - positionX[i], 0,
+                    positionX[i], positionY[j], positionX[i + 1] - positionX[i], 0, positionX[i], positionY[j]);
+
+                // Konec
+                context.drawImage(image, image.width - positionX[i], 0,
+                    positionX[i], positionY[j], image.width - positionX[i], 0, positionX[i], positionY[j]);
+            }
+        }
+
+
+
+        // const itemsHor = items.map(line =>
+        //     line.type === 'horizontal'
+        // );
+        //
     }
 
     return (
@@ -475,7 +568,7 @@ function Zabery(props) {
                 </ZaberySidebarItem>
 
                 {/* Vybrané částice */}
-                {activeItem === 'item2' && logItems()}
+                {activeItem === 'item2' && getPieces()}
 
                 <ZaberySidebarItem isClicked={activeItem === 'item2'}
                                    onClick={() => handleVisibility('item2')}>
