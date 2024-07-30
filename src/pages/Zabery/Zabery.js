@@ -478,22 +478,48 @@ function Zabery(props) {
 
             for (let j = 0; j < positionY.length; j++) {
 
-                // Začátek
-                context.drawImage(image, 0, 0,
-                    positionX[i], positionY[j], 0, 0, positionX[i], positionY[j]);
+                if (i === 0) {
 
-                // Střední
-                context.drawImage(image, positionX[i + 1] - positionX[i], 0,
-                    positionX[i], positionY[j], positionX[i + 1] - positionX[i], 0, positionX[i], positionY[j]);
+                    // Začátek - XY
+                    context.drawImage(image, 0, 0,
+                        positionX[i], positionY[j], 0, 0, positionX[i], positionY[j]);
 
-                // Konec
-                context.drawImage(image, image.width - positionX[i], 0,
-                    positionX[i], positionY[j], image.width - positionX[i], 0, positionX[i], positionY[j]);
+                    // Začátek - Y
+                    context.drawImage(image, 0, image.height - positionY[j],
+                        positionX[i], positionY[j], 0, image.height - positionY[j], positionX[i], positionY[j]);
+
+                    // Konec - X
+                    context.drawImage(image, image.width - positionX[i], 0,
+                        positionX[i], positionY[j], image.width - positionX[i], 0, positionX[i], positionY[j]);
+
+                    // Konec - XY
+                    context.drawImage(image, image.width - positionX[i], image.height - positionY[j],
+                        positionX[i], positionY[j], image.width - positionX[i], image.height - positionY[j], positionX[i], positionY[j]);
+
+                }
+
+                if (i > 0 && i < positionX.length) {
+
+                    // Střední - X
+                    context.drawImage(image, positionX[i + 1] - positionX[i], 0,
+                        positionX[i], positionY[j], positionX[i + 1] - positionX[i], 0, positionX[i], positionY[j]);
+
+                }
+
+                if (j > 0 && j < positionY.length) {
+
+                    // Střední - Y
+                    context.drawImage(image, 0, positionY[j + 1] - positionY[j],
+                        positionX[i], positionY[j], 0, positionY[j + 1] - positionY[j], positionX[i], positionY[j]);
+
+                } else {
+
+                    // Střední - XY
+                    context.drawImage(image, image.width - positionX[i], image.height - positionY[j],
+                        positionX[i], positionY[j], image.width - positionX[i], image.height - positionY[j], positionX[i], positionY[j]);
+                }
             }
         }
-
-
-
         // const itemsHor = items.map(line =>
         //     line.type === 'horizontal'
         // );
