@@ -13,6 +13,10 @@ import {MinusCircleIcon, PlusCircleIcon} from "@heroicons/react/16/solid";
 
 function Zabery(props) {
 
+    const pieces = [];
+
+    const [imagePieces, setImagePieces] = useState([]);
+
     let [vertIndex, setVertIndex] = useState(0);
 
     let [horIndex, setHorIndex] = useState(0);
@@ -252,7 +256,7 @@ function Zabery(props) {
             // Přidání linie
             addItem({id: index, type: type, position: coordinates});
 
-        // Obnovení hodnoty linie
+            // Obnovení hodnoty linie
         } else {
 
             // Funkce pro obnovení proměnné items
@@ -333,14 +337,22 @@ function Zabery(props) {
 
                 const newX = mouseX - startOffset.x;
                 lines.vertical[dragging.index] = newX;
-                lineCheck(items, dragging.index, 'vertical', newX, {id: dragging.index, type: 'vertical', position: newX});
+                lineCheck(items, dragging.index, 'vertical', newX, {
+                    id: dragging.index,
+                    type: 'vertical',
+                    position: newX
+                });
                 cursor = 'ew-resize';
 
             } else if (dragging.type === 'horizontal') {
 
                 const newY = mouseY - startOffset.y;
                 lines.horizontal[dragging.index] = newY;
-                lineCheck(items, dragging.index, 'horizontal', newY, {id: dragging.index, type: 'horizontal', position: newY});
+                lineCheck(items, dragging.index, 'horizontal', newY, {
+                    id: dragging.index,
+                    type: 'horizontal',
+                    position: newY
+                });
                 cursor = 'ns-resize';
             }
 
@@ -413,16 +425,6 @@ function Zabery(props) {
 
     const getPieces = () => {
 
-        const canvas = canvasRef.current;
-
-        canvas.style = "pointer-events: none;"
-
-        let context = canvas.getContext("2d");
-        const image = new Image();
-
-        // Obsah obrázku
-        image.src = props.image;
-
         let positionX = [];
 
         let positionY = [];
@@ -450,13 +452,7 @@ function Zabery(props) {
 
         console.log(positionX, positionY);
 
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        let height = 0;
-
-        let width = 0;
-
-        console.log("Imammamam" + image.height / 2);
+        // context.clearRect(0, 0, canvas.width, canvas.height);
 
         // positionX.forEach(x => {
         //
@@ -474,56 +470,73 @@ function Zabery(props) {
         //     })
         // });
 
+        const pieces = [];
+
         for (let i = 0; i < positionX.length; i++) {
 
             for (let j = 0; j < positionY.length; j++) {
 
+                const canvas = canvasRef.current;
+
+                const context = canvas.getContext('2d');
+
+                const image = new Image();
+                image.src = props.image;
+
+
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                // context.drawImage(image, positionX[i] * i, positionY[j] * j,
+                //          positionX[i], positionY[j], positionX[i] * i, positionY[j] * j, positionX[i], positionY[j]);
+
+                // pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
+                //
+                // context.reset();
+
                 if (i === 0) {
 
                     // Začátek - XY
-                    context.drawImage(image, 0, 0,
-                        positionX[i], positionY[j], 0, 0, positionX[i], positionY[j]);
+                    context.drawImage(image, 0, 0, positionX[i], positionY[j], 0, 0, positionX[i], positionY[j]);
+
+                    pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
+
+                    context.clearRect(0, 0, canvas.width, canvas.height);
 
                     // Začátek - Y
                     context.drawImage(image, 0, image.height - positionY[j],
                         positionX[i], positionY[j], 0, image.height - positionY[j], positionX[i], positionY[j]);
 
+                    pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
+
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+
                     // Konec - X
                     context.drawImage(image, image.width - positionX[i], 0,
                         positionX[i], positionY[j], image.width - positionX[i], 0, positionX[i], positionY[j]);
+
+                    pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
+
+                    context.clearRect(0, 0, canvas.width, canvas.height);
 
                     // Konec - XY
                     context.drawImage(image, image.width - positionX[i], image.height - positionY[j],
                         positionX[i], positionY[j], image.width - positionX[i], image.height - positionY[j], positionX[i], positionY[j]);
 
-                }
-
-                if (i > 0 && i < positionX.length) {
-
-                    // Střední - X
-                    context.drawImage(image, positionX[i + 1] - positionX[i], 0,
-                        positionX[i], positionY[j], positionX[i + 1] - positionX[i], 0, positionX[i], positionY[j]);
+                    pieces.push(<img src={canvas.toDataURL()} alt={"Piece"}/>);
 
                 }
 
-                if (j > 0 && j < positionY.length) {
-
-                    // Střední - Y
-                    context.drawImage(image, 0, positionY[j + 1] - positionY[j],
-                        positionX[i], positionY[j], 0, positionY[j + 1] - positionY[j], positionX[i], positionY[j]);
-
-                } else {
-
-                    // Střední - XY
-                    context.drawImage(image, image.width - positionX[i], image.height - positionY[j],
-                        positionX[i], positionY[j], image.width - positionX[i], image.height - positionY[j], positionX[i], positionY[j]);
-                }
+                // pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
             }
         }
-        // const itemsHor = items.map(line =>
-        //     line.type === 'horizontal'
-        // );
-        //
+
+        canvasRef.current.remove();
+
+        return (
+            <div>
+                {pieces}
+            </div>
+        );
     }
 
     return (
@@ -593,9 +606,6 @@ function Zabery(props) {
 
                 </ZaberySidebarItem>
 
-                {/* Vybrané částice */}
-                {activeItem === 'item2' && getPieces()}
-
                 <ZaberySidebarItem isClicked={activeItem === 'item2'}
                                    onClick={() => handleVisibility('item2')}>
 
@@ -613,6 +623,9 @@ function Zabery(props) {
 
             <Foto id={"Foto"}>
                 <canvas ref={canvasRef}></canvas>
+
+                {/* Vybrané částice */}
+                {activeItem === 'item2' && getPieces()}
             </Foto>
 
         </ZaberyPage>
