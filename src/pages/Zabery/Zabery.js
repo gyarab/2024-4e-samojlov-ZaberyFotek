@@ -423,6 +423,7 @@ function Zabery(props) {
         }
     }
 
+    /** Funkce pro zobrazení jednotlivých částic z fotografie **/
     const getPieces = () => {
 
         let positionX = [];
@@ -435,101 +436,62 @@ function Zabery(props) {
         //
         // console.log(itemsVer);
 
-        items.forEach(x => {
+        items.forEach(line => {
 
-            if (x.type === 'vertical') {
+            if (line.type === 'vertical') {
 
-                positionX.push(x.position);
+                positionX.push(line.position);
 
             } else {
 
-                positionY.push(x.position);
+                positionY.push(line.position);
             }
         });
 
-        sortLines(positionX);
-        sortLines(positionY);
+        // sortLines(positionX);
+        // sortLines(positionY);
 
         console.log(positionX, positionY);
 
-        // context.clearRect(0, 0, canvas.width, canvas.height);
-
-        // positionX.forEach(x => {
-        //
-        //     positionY.forEach(y => {
-        //
-        //         console.log(x, y);
-        //
-        //         //
-        //
-        //         context.drawImage(image, x, y,
-        //             image.width - x, y, image.width - x, y, image.width - x, y);
-        //
-        //         height += image.height;
-        //         width += image.width;
-        //     })
-        // });
-
+        // Pole pro částice
         const pieces = [];
 
-        for (let i = 0; i < positionX.length; i++) {
+        const image = new Image();
+        image.src = props.image;
 
-            for (let j = 0; j < positionY.length; j++) {
+        // Souřadnicová pole
+        const finalPositionX = [0, ...positionX, image.width];
+        const finalPositionY = [0, ...positionY, image.height];
 
-                const canvas = canvasRef.current;
+        // Řádky
+        for (let i = 0; i < finalPositionY.length - 1; i++) {
 
-                const context = canvas.getContext('2d');
+            // Sloupce
+            for (let j = 0; j < finalPositionX.length - 1; j++) {
 
-                const image = new Image();
-                image.src = props.image;
+                // Pozice x, y na ploše
+                const x = finalPositionX[j];
+                const y = finalPositionY[i];
 
+                // Šířka a výška částice
+                const width = finalPositionX[j + 1] - x;
+                const height = finalPositionY[i + 1] - y;
 
-                context.clearRect(0, 0, canvas.width, canvas.height);
+                // Nová plocha
+                const pieceCanvas = document.createElement('canvas');
+                pieceCanvas.width = width;
+                pieceCanvas.height = height;
 
-                // context.drawImage(image, positionX[i] * i, positionY[j] * j,
-                //          positionX[i], positionY[j], positionX[i] * i, positionY[j] * j, positionX[i], positionY[j]);
+                // Nová částice
+                const pieceContext = pieceCanvas.getContext('2d');
+                pieceContext.drawImage(image, x, y, width, height, 0, 0, width, height);
 
-                // pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
-                //
-                // context.reset();
-
-                if (i === 0) {
-
-                    // Začátek - XY
-                    context.drawImage(image, 0, 0, positionX[i], positionY[j], 0, 0, positionX[i], positionY[j]);
-
-                    pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
-
-                    context.clearRect(0, 0, canvas.width, canvas.height);
-
-                    // Začátek - Y
-                    context.drawImage(image, 0, image.height - positionY[j],
-                        positionX[i], positionY[j], 0, image.height - positionY[j], positionX[i], positionY[j]);
-
-                    pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
-
-                    context.clearRect(0, 0, canvas.width, canvas.height);
-
-                    // Konec - X
-                    context.drawImage(image, image.width - positionX[i], 0,
-                        positionX[i], positionY[j], image.width - positionX[i], 0, positionX[i], positionY[j]);
-
-                    pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
-
-                    context.clearRect(0, 0, canvas.width, canvas.height);
-
-                    // Konec - XY
-                    context.drawImage(image, image.width - positionX[i], image.height - positionY[j],
-                        positionX[i], positionY[j], image.width - positionX[i], image.height - positionY[j], positionX[i], positionY[j]);
-
-                    pieces.push(<img src={canvas.toDataURL()} alt={"Piece"}/>);
-
-                }
-
-                // pieces.push(<img key={`${i},${j}`} src={canvas.toDataURL()} alt={"Piece"}/>);
+                // Přidání elementu Image do pole
+                pieces.push(<img key={`${i},${j}`} src={pieceCanvas.toDataURL()} alt={"Piece"}/>);
             }
         }
 
+        // Smazání původní plochy
         canvasRef.current.remove();
 
         return (
