@@ -81,7 +81,7 @@ export const Foto = styled.div`
     }
 `;
 
-export const PiecesContainer = styled.p`
+export const PiecesContainer = styled.div`
     color: white;
     font-size: 16px;
     font-weight: 500;
@@ -114,9 +114,23 @@ export const ShowNum = styled.div`
     margin-right: 15px;
 `;
 
-// export const HorizontalLine = styled.div`
-//     position: absolute;
-//     height: 3px;
-//     background-color: red;
-//     width: 75%;
-// `;
+export const PieceImages = styled.div`
+    display: grid;
+    gap: 50px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-rows: repeat(auto-fit, minmax(200px, 1fr));
+    padding: 25px;
+    box-sizing: border-box;
+    max-width: 100%;
+    width: 100%;
+    position: relative;
+    
+    img {
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        max-width: 250px;
+        max-height: 250px;
+        display: block;
+    }
+`;

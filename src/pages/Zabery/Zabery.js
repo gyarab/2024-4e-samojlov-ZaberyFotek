@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
     AddBtn,
-    Foto,
+    Foto, PieceImages,
     PiecesContainer,
     ShowNum,
     ZaberyPage,
@@ -13,9 +13,9 @@ import {MinusCircleIcon, PlusCircleIcon} from "@heroicons/react/16/solid";
 
 function Zabery(props) {
 
-    const pieces = [];
+    let positionX = [];
 
-    const [imagePieces, setImagePieces] = useState([]);
+    let positionY = [];
 
     let [vertIndex, setVertIndex] = useState(0);
 
@@ -41,15 +41,21 @@ function Zabery(props) {
 
     };
 
-    /** Funkce pro odstranění linie **/
-    const deleteItemById = (id, type) => {
+    /** Funkce pro odstranění poslední linie **/
+    const deleteLastItem = (type) => {
 
-        setItems((prevItems) => {
+        console.log('Deleted Items:', items);
 
-            console.log('Deleted Items:', prevItems.filter(item => item.id !== id && item.type !== type));
+        const indexToRemove = items
+            .map((item, index) => item.type === type ? index : -1)
+            .filter(index => index !== -1)
+            .pop();
 
-            return prevItems.filter(item => item.id !== id && item.type !== type);
-        });
+        const result = indexToRemove !== undefined
+            ? items.filter((_, index) => index !== indexToRemove)
+            : items;
+
+        setItems(result);
     };
 
     // Aktivní prvek v seznamu
@@ -87,29 +93,35 @@ function Zabery(props) {
             // Akutální počet linií
             const newLines = {...lines};
 
+            let position = 0;
+
             // Přidání sloupce
             if (word === "columnAdd") {
 
-                // Přidání vertikální čáry uprostřed plátna
-                newLines.vertical.push(canvasRef.current.width / (type + 2));
+                position = canvasRef.current.width / (type + 2);
 
-                addItem({id: vertIndex, type: 'vertical', position: canvasRef.current.width / (type + 2)});
+                // Přidání vertikální čáry uprostřed plátna
+                newLines.vertical.push(position);
+
+                addItem({id: vertIndex, type: 'vertical', position: position});
 
                 setVertIndex(vertIndex + 1);
 
             } else {
 
-                // Přidání horizontální čáry uprostřed plátna
-                newLines.horizontal.push(canvasRef.current.height / (type + 2));
+                position = canvasRef.current.height / (type + 2);
 
-                addItem({id: horIndex, type: 'horizontal', position: canvasRef.current.height / (type + 2)});
+                // Přidání horizontální čáry uprostřed plátna
+                newLines.horizontal.push(position);
+
+                addItem({id: horIndex, type: 'horizontal', position: position});
 
                 setHorIndex(horIndex + 1);
             }
 
             setLines(newLines);
 
-            // Odebírání linií
+        // Odebírání linií
         } else {
 
             if (type !== 0) {
@@ -123,15 +135,17 @@ function Zabery(props) {
 
                     newLines.vertical.pop();
 
-                    deleteItemById(vertIndex - 1, 'vertical');
+                    deleteLastItem('vertical');
+
                     setVertIndex(vertIndex - 1);
 
-                    // Odstranění horizontální linie
+                // Odstranění horizontální linie
                 } else {
 
                     newLines.horizontal.pop();
 
-                    deleteItemById(horIndex - 1, 'horizontal');
+                    deleteLastItem('horizontal');
+
                     setHorIndex(horIndex - 1);
                 }
 
@@ -170,44 +184,7 @@ function Zabery(props) {
         image.onload = () => {
 
             // Vlastní responzivita obrázku
-            if (image.height > 1000) {
-
-                const prev = image.height;
-
-                image.height = 800;
-                image.width *= (800 / prev);
-            }
-
-            if (image.width > 1000) {
-
-                const prev = image.width;
-
-                image.width = 800;
-                image.height *= (800 / prev);
-            }
-
-            // Velikost obrazovky uživatele
-            if (window.innerWidth > 1200) {
-
-                canvas.width = image.width;
-                canvas.height = image.height;
-
-            } else if (window.innerWidth > 1000 && window.innerWidth < 1200) {
-
-                canvas.width = image.width * 0.75;
-                canvas.height = image.height * 0.75;
-
-            } else if (window.innerWidth > 800 && window.innerWidth < 1000) {
-
-                canvas.width = image.width * 0.5;
-                canvas.height = image.height * 0.5;
-
-            } else {
-
-                canvas.width = image.width * 0.35;
-                canvas.height = image.height * 0.35;
-            }
-
+            responsivityCheck(canvas, image);
 
             // Vykreslení obrázku do plochy
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
@@ -236,6 +213,47 @@ function Zabery(props) {
         };
 
     };
+
+    const responsivityCheck = (canvas, image) => {
+
+        if (image.height > 1000) {
+
+            const prev = image.height;
+
+            image.height = 800;
+            image.width *= (800 / prev);
+        }
+
+        if (image.width > 1000) {
+
+            const prev = image.width;
+
+            image.width = 800;
+            image.height *= (800 / prev);
+        }
+
+        // Velikost obrazovky uživatele
+        if (window.innerWidth > 1200) {
+
+            canvas.width = image.width;
+            canvas.height = image.height;
+
+        } else if (window.innerWidth > 1000 && window.innerWidth < 1200) {
+
+            canvas.width = image.width * 0.75;
+            canvas.height = image.height * 0.75;
+
+        } else if (window.innerWidth > 800 && window.innerWidth < 1000) {
+
+            canvas.width = image.width * 0.5;
+            canvas.height = image.height * 0.5;
+
+        } else {
+
+            canvas.width = image.width * 0.35;
+            canvas.height = image.height * 0.35;
+        }
+    }
 
     /** Funkce pro kontrolu, zda se linie existuje  **/
     const lineCheck = (hook, index, type, coordinates, newData) => {
@@ -335,7 +353,8 @@ function Zabery(props) {
             // Určení typu pohybu tahu
             if (dragging.type === 'vertical') {
 
-                const newX = mouseX - startOffset.x;
+                const newX = (mouseX - startOffset.x);
+
                 lines.vertical[dragging.index] = newX;
                 lineCheck(items, dragging.index, 'vertical', newX, {
                     id: dragging.index,
@@ -346,7 +365,8 @@ function Zabery(props) {
 
             } else if (dragging.type === 'horizontal') {
 
-                const newY = mouseY - startOffset.y;
+                const newY = (mouseY - startOffset.y);
+
                 lines.horizontal[dragging.index] = newY;
                 lineCheck(items, dragging.index, 'horizontal', newY, {
                     id: dragging.index,
@@ -426,38 +446,41 @@ function Zabery(props) {
     /** Funkce pro zobrazení jednotlivých částic z fotografie **/
     const getPieces = () => {
 
-        let positionX = [];
-
-        let positionY = [];
-
         // const itemsVer = items.map(line =>
         //     line.type === 'vertical'
         // );
         //
         // console.log(itemsVer);
 
+        // Nahraná fotografie
+        const image = new Image();
+        image.src = props.image;
+
         items.forEach(line => {
 
             if (line.type === 'vertical') {
 
-                positionX.push(line.position);
+                const w = (line.position * image.width) / canvasRef.current.width;
+
+                positionX.push(w);
 
             } else {
 
-                positionY.push(line.position);
+                const h = (line.position * image.height) / canvasRef.current.height;
+
+                positionY.push(h);
             }
         });
 
-        // sortLines(positionX);
-        // sortLines(positionY);
+        sortLines(positionX);
+        sortLines(positionY);
 
         console.log(positionX, positionY);
 
         // Pole pro částice
         const pieces = [];
 
-        const image = new Image();
-        image.src = props.image;
+        console.log("REAL", image.width, image.height)
 
         // Souřadnicová pole
         const finalPositionX = [0, ...positionX, image.width];
@@ -495,9 +518,9 @@ function Zabery(props) {
         canvasRef.current.remove();
 
         return (
-            <div>
+            <PieceImages>
                 {pieces}
-            </div>
+            </PieceImages>
         );
     }
 
@@ -588,6 +611,7 @@ function Zabery(props) {
 
                 {/* Vybrané částice */}
                 {activeItem === 'item2' && getPieces()}
+
             </Foto>
 
         </ZaberyPage>
