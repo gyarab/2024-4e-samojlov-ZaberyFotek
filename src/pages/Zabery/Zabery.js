@@ -63,6 +63,10 @@ function Zabery(props) {
 
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item) => {
+
+        // Zobrazení původní plochy
+        canvasRef.current.style.display = 'inline';
+
         setActiveItem(prevActiveItem => (prevActiveItem === item ? null : item));
     };
 
@@ -515,7 +519,7 @@ function Zabery(props) {
         }
 
         // Smazání původní plochy
-        canvasRef.current.remove();
+        canvasRef.current.style.display = 'none';
 
         return (
             <PieceImages>
@@ -543,11 +547,18 @@ function Zabery(props) {
                 <ZaberySidebarItem isClicked={activeItem === 'item1'}
                                    onClick={() => handleVisibility('item1')}>
 
-                    <PiNumberCircleOne style={{height: "35px", width: "35px"}}/> Rozdělení na části
+                    <PiNumberCircleOne style={{height: "35px", width: "35px"}}/> Upravit obrázek
 
                 </ZaberySidebarItem>
 
-                {activeItem === 'item1' && (
+                <ZaberySidebarItem isClicked={activeItem === 'item2'}
+                                   onClick={() => handleVisibility('item2')}>
+
+                    <PiNumberCircleTwo style={{height: "35px", width: "35px"}}/> Rozdělení na části
+
+                </ZaberySidebarItem>
+
+                {activeItem === 'item2' && (
 
                     <PiecesContainer>
 
@@ -585,20 +596,15 @@ function Zabery(props) {
                     </PiecesContainer>
                 )}
 
-                <ZaberySidebarItem>
-
-                    <PiNumberCircleTwo style={{height: "35px", width: "35px"}}/> Upravit obrázek
-
-                </ZaberySidebarItem>
-
-                <ZaberySidebarItem isClicked={activeItem === 'item2'}
-                                   onClick={() => handleVisibility('item2')}>
+                <ZaberySidebarItem isClicked={activeItem === 'item3'}
+                                   onClick={() => handleVisibility('item3')}>
 
                     <PiNumberCircleThree style={{height: "35px", width: "35px"}}/> Rozdělit na obrázky
 
                 </ZaberySidebarItem>
 
-                <ZaberySidebarItem>
+                <ZaberySidebarItem isClicked={activeItem === 'item4'}
+                                   onClick={() => handleVisibility('item4')}>
 
                     <PiNumberCircleFour style={{height: "35px", width: "35px"}}/> Vytvořit klipy
 
@@ -610,7 +616,7 @@ function Zabery(props) {
                 <canvas ref={canvasRef}></canvas>
 
                 {/* Vybrané částice */}
-                {activeItem === 'item2' && getPieces()}
+                {activeItem === 'item3' && getPieces()}
 
             </Foto>
 

@@ -34,8 +34,8 @@ export const ZaberySidebarContainer = styled.nav`
 export const ZaberySidebarItem = styled.div`
     padding: 15px;
     border-radius: 25px;
-    color: ${({ isClicked }) => (isClicked ? '#00cc66' : 'white')};
-    background: ${({ isClicked }) => (isClicked ? 'var(--color-shadow-8)' : 'transparent')};;
+    color: ${({isClicked}) => (isClicked ? '#00cc66' : 'white')};
+    background: ${({isClicked}) => (isClicked ? 'var(--color-shadow-8)' : 'transparent')};;
     font-size: 18px;
     display: flex;
     align-items: center;
@@ -43,10 +43,11 @@ export const ZaberySidebarItem = styled.div`
     text-decoration: none;
     width: 100%;
     cursor: pointer;
-    opacity: ${({ isClicked }) => (isClicked ? '1' : '0.5')};
+    opacity: ${({isClicked}) => (isClicked ? '1' : '0.5')};
     transition: opacity 0.25s ease-in-out;
     box-sizing: border-box;
     gap: 10px;
+    margin: 1px;
     text-align: left;
 
     &:hover {
@@ -116,21 +117,31 @@ export const ShowNum = styled.div`
 
 export const PieceImages = styled.div`
     display: grid;
+    margin-left: 50px;
     gap: 50px;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     grid-template-rows: repeat(auto-fit, minmax(200px, 1fr));
-    padding: 25px;
     box-sizing: border-box;
     max-width: 100%;
     width: 100%;
     position: relative;
-    
+
     img {
         object-fit: contain;
         width: 100%;
         height: 100%;
         max-width: 250px;
         max-height: 250px;
-        display: block;
+        padding: 25px;
+        background: linear-gradient(45deg, var(--color-shadow-8), 1) 0, var(--color-shadow-4) 100%;
+        box-shadow: 0 5px 20px var(--color-shadow-4, 0.3);
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    @media screen and (max-width: 768px) {
+        margin-left: 0;
+        justify-items: center;
+        align-items: center;
     }
 `;
