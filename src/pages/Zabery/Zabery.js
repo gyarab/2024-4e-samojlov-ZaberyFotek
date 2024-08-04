@@ -9,9 +9,28 @@ import {
     ZaberySidebarItem
 } from "./ZaberyComponents";
 import {PiNumberCircleFour, PiNumberCircleOne, PiNumberCircleThree, PiNumberCircleTwo} from "react-icons/pi";
+import {BiRightArrowCircle} from "react-icons/bi";
+import {
+    BsArrowBarRight,
+    BsArrowDown,
+    BsArrowDownRight,
+    BsArrowDownRightCircleFill,
+    BsArrowLeftCircle, BsArrowRight, BsArrowRightCircleFill
+} from "react-icons/bs";
 import {MinusCircleIcon, PlusCircleIcon} from "@heroicons/react/16/solid";
+import {
+    GoArrowDown,
+    GoArrowDownLeft,
+    GoArrowDownRight,
+    GoArrowLeft,
+    GoArrowRight,
+    GoArrowUp, GoArrowUpLeft,
+    GoArrowUpRight
+} from "react-icons/go";
 
 function Zabery(props) {
+
+    const [currentImage, setCurrentImage] = useState('');
 
     let positionX = [];
 
@@ -171,6 +190,7 @@ function Zabery(props) {
         return () => window.removeEventListener('resize', drawCanvas);
     }, [props.image]);
 
+
     /** Vykreslení plochy **/
     const drawCanvas = () => {
 
@@ -181,8 +201,26 @@ function Zabery(props) {
         // Obrázek
         const image = new Image();
 
-        // Obsah obrázku
-        image.src = props.image;
+        const savedImage = localStorage.getItem('savedImage');
+
+        console.log(savedImage);
+
+        let isSaved = false;
+
+        // Pokud fotografie není uložená
+        if (!savedImage) {
+
+            image.src = props.image;
+            setCurrentImage(props.image);
+            isSaved = false;
+
+        // Pokud fotografie je uložená
+        } else {
+
+            image.src = savedImage;
+            setCurrentImage(savedImage);
+            isSaved = true;
+        }
 
         // Načtení obrázku
         image.onload = () => {
@@ -214,8 +252,14 @@ function Zabery(props) {
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
             });
-        };
 
+
+            if (!isSaved) {
+
+                // Přidání nové fotky
+                localStorage.setItem('savedImage', canvas.toDataURL());
+            }
+        }
     };
 
     const responsivityCheck = (canvas, image) => {
@@ -458,7 +502,7 @@ function Zabery(props) {
 
         // Nahraná fotografie
         const image = new Image();
-        image.src = props.image;
+        image.src = currentImage;
 
         items.forEach(line => {
 
@@ -610,10 +654,54 @@ function Zabery(props) {
 
                 </ZaberySidebarItem>
 
+                {activeItem === 'item4' &&
+
+                    <PiecesContainer>
+
+                        <p>Zvolit směr:</p>
+
+                        <div style={{display: "inline-flex", margin: "12px 0 18px 0", width: "100%"}}>
+
+                            <AddBtn>
+                                <GoArrowUp style={{color: "var(--color-shadow-7)"}}/>
+                            </AddBtn>
+
+                            <AddBtn>
+                                <GoArrowRight style={{color: "var(--color-shadow-7)"}}/>
+                            </AddBtn>
+
+                            <AddBtn>
+                                <GoArrowLeft style={{color: "var(--color-shadow-7)"}}/>
+                            </AddBtn>
+
+                            <AddBtn>
+                                <GoArrowDown style={{color: "var(--color-shadow-7)"}}/>
+                            </AddBtn>
+
+                            <AddBtn>
+                                <GoArrowDownLeft style={{color: "var(--color-shadow-7)"}}/>
+                            </AddBtn>
+
+                            <AddBtn>
+                                <GoArrowDownRight style={{color: "var(--color-shadow-7)"}}/>
+                            </AddBtn>
+
+                            <AddBtn>
+                                <GoArrowUpRight style={{color: "var(--color-shadow-7)"}}/>
+                            </AddBtn>
+
+                            <AddBtn>
+                                <GoArrowUpLeft style={{color: "var(--color-shadow-7)"}}/>
+                            </AddBtn>
+
+                        </div>
+
+                    </PiecesContainer>}
+
             </ZaberySidebarContainer>
 
             <Foto id={"Foto"}>
-                <canvas ref={canvasRef}></canvas>
+            <canvas ref={canvasRef}></canvas>
 
                 {/* Vybrané částice */}
                 {activeItem === 'item3' && getPieces()}
