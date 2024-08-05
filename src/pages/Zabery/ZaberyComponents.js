@@ -169,3 +169,56 @@ export const ArrowBtn = styled.button`
         opacity: 1;
     }
 `;
+
+/** Citace, tento kód byl z většiny převzán z níže uvedeného zdroje:
+ *
+ * https://blog.logrocket.com/creating-custom-css-range-slider-javascript-upgrades/
+ *
+ * **/
+export const TimeInput = styled.input`
+    
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+    overflow: hidden;
+    border-radius: 16px;
+
+    /* Webkit prohlížeče */
+    &::-webkit-slider-runnable-track {
+        height: 15px;
+        background: #ccc;
+        border-radius: 16px;
+    }
+
+    /* Mozilla Firefox */
+    &::-moz-range-track {
+        height: 15px;
+        background: #ccc;
+        border-radius: 16px;
+    }
+
+    /* Webkit prohlížeče */
+    &::-webkit-slider-thumb {
+        
+        -webkit-appearance: none;
+        appearance: none;
+        height: 15px;
+        width: 15px;
+        background-color: #fff;
+        border-radius: 50%;
+        border: 2px solid #00cc66;
+        box-shadow: -407px 0 0 400px #00cc66;
+    }
+
+    /* Mozilla Firefox */
+    &::-moz-range-thumb {
+        height: 15px;
+        width: 15px;
+        background-color: #fff;
+        border-radius: 50%;
+        border: 1px solid #00cc66;
+        box-shadow: -407px 0 0 400px #00cc66;
+    }
+`;

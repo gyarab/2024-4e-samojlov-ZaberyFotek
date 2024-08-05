@@ -3,20 +3,12 @@ import {
     AddBtn, ArrowBtn,
     Foto, PieceImages,
     PiecesContainer,
-    ShowNum,
+    ShowNum, TimeInput,
     ZaberyPage,
     ZaberySidebarContainer,
     ZaberySidebarItem
 } from "./ZaberyComponents";
 import {PiNumberCircleFour, PiNumberCircleOne, PiNumberCircleThree, PiNumberCircleTwo} from "react-icons/pi";
-import {BiRightArrowCircle} from "react-icons/bi";
-import {
-    BsArrowBarRight,
-    BsArrowDown,
-    BsArrowDownRight,
-    BsArrowDownRightCircleFill,
-    BsArrowLeftCircle, BsArrowRight, BsArrowRightCircleFill
-} from "react-icons/bs";
 import {MinusCircleIcon, PlusCircleIcon} from "@heroicons/react/16/solid";
 import {
     GoArrowDown,
@@ -29,6 +21,8 @@ import {
 } from "react-icons/go";
 
 function Zabery(props) {
+
+    const [rangeValue, setRangeValue] = useState(50)
 
     const [currentImage, setCurrentImage] = useState('');
 
@@ -713,7 +707,16 @@ function Zabery(props) {
 
                         </div>
 
-                        <p>Doba přehrávání:</p>
+                        <p style={{margin: "5px 0 5px 0"}}>Doba přehrávání:</p>
+
+                        <div style={{display: "block", width: "100%", margin: "auto", textAlign: "center"}}>
+
+                            <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue} onChange={(e) => {
+                                setRangeValue(+e.target.value)
+                            }} />
+
+                            <label>{rangeValue} s</label>
+                        </div>
 
                     </PiecesContainer>}
 
@@ -726,6 +729,11 @@ function Zabery(props) {
                 {activeItem === 'item3' && getPieces()}
 
             </Foto>
+
+            {/*<ClipTimeline>*/}
+
+
+            {/*</ClipTimeline>*/}
 
         </ZaberyPage>
     );
