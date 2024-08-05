@@ -20,6 +20,7 @@ export const ZaberySidebarContainer = styled.nav`
     position: fixed;
     display: flex;
     border-radius: 25px;
+    box-shadow: 0 5px 10px var(--color-shadow-6, 0.3);
 
     // 520px
     @media screen and (max-width: 768px) {
@@ -35,7 +36,7 @@ export const ZaberySidebarItem = styled.div`
     padding: 15px;
     border-radius: 25px;
     color: ${({isClicked}) => (isClicked ? '#00cc66' : 'white')};
-    background: ${({isClicked}) => (isClicked ? 'var(--color-shadow-8)' : 'transparent')};;
+    background: ${({isClicked}) => (isClicked ? 'var(--color-shadow-8)' : 'transparent')};
     font-size: 18px;
     display: flex;
     align-items: center;
@@ -143,5 +144,28 @@ export const PieceImages = styled.div`
         margin-left: 0;
         justify-items: center;
         align-items: center;
+    }
+`;
+
+export const ArrowBtn = styled.button`
+    cursor: pointer;
+    color: ${({isClicked}) => (isClicked ? '#00cc66' : 'white')};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    font-size: 20px;
+    margin: 2px;
+    opacity: ${({isClicked}) => (isClicked ? '1' : '0.5')};
+    transition: opacity 0.25s ease-in-out;
+    border: ${({isClicked}) => (isClicked ? '1px solid #00cc66' : 'none')};
+    box-shadow: ${({isClicked}) => (isClicked ? '0 5px 5px #00cc66' : '0 5px 5px var(--color-shadow-8)')};
+    
+    &:hover {
+        opacity: 1;
     }
 `;

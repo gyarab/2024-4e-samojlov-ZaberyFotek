@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
-    AddBtn,
+    AddBtn, ArrowBtn,
     Foto, PieceImages,
     PiecesContainer,
     ShowNum,
@@ -77,16 +77,19 @@ function Zabery(props) {
         setItems(result);
     };
 
-    // Aktivní prvek v seznamu
+    // Aktivní prvek v seznamu SidebarContainer
     const [activeItem, setActiveItem] = useState(null);
 
+    // Aktivní směr pro obrázek
+    const [activeArrow, setActiveArrow] = useState(null);
+
     // Funkce pro zobrazení jednoho prvku
-    const handleVisibility = (item) => {
+    const handleVisibility = (item, setFunction) => {
 
         // Zobrazení původní plochy
         canvasRef.current.style.display = 'inline';
 
-        setActiveItem(prevActiveItem => (prevActiveItem === item ? null : item));
+        setFunction(prevActiveItem => (prevActiveItem === item ? null : item));
     };
 
     // Počet aktuálních sloupců a řádků v paneli nástrojů
@@ -144,7 +147,7 @@ function Zabery(props) {
 
             setLines(newLines);
 
-        // Odebírání linií
+            // Odebírání linií
         } else {
 
             if (type !== 0) {
@@ -162,7 +165,7 @@ function Zabery(props) {
 
                     setVertIndex(vertIndex - 1);
 
-                // Odstranění horizontální linie
+                    // Odstranění horizontální linie
                 } else {
 
                     newLines.horizontal.pop();
@@ -203,7 +206,7 @@ function Zabery(props) {
 
         const savedImage = localStorage.getItem('savedImage');
 
-        console.log(savedImage);
+        // console.log(savedImage);
 
         let isSaved = false;
 
@@ -214,7 +217,7 @@ function Zabery(props) {
             setCurrentImage(props.image);
             isSaved = false;
 
-        // Pokud fotografie je uložená
+            // Pokud fotografie je uložená
         } else {
 
             image.src = savedImage;
@@ -589,14 +592,14 @@ function Zabery(props) {
                 }}>NÁVOD NA KLIP</h3>
 
                 <ZaberySidebarItem isClicked={activeItem === 'item1'}
-                                   onClick={() => handleVisibility('item1')}>
+                                   onClick={() => handleVisibility('item1', setActiveItem)}>
 
                     <PiNumberCircleOne style={{height: "35px", width: "35px"}}/> Upravit obrázek
 
                 </ZaberySidebarItem>
 
                 <ZaberySidebarItem isClicked={activeItem === 'item2'}
-                                   onClick={() => handleVisibility('item2')}>
+                                   onClick={() => handleVisibility('item2', setActiveItem)}>
 
                     <PiNumberCircleTwo style={{height: "35px", width: "35px"}}/> Rozdělení na části
 
@@ -641,14 +644,14 @@ function Zabery(props) {
                 )}
 
                 <ZaberySidebarItem isClicked={activeItem === 'item3'}
-                                   onClick={() => handleVisibility('item3')}>
+                                   onClick={() => handleVisibility('item3', setActiveItem)}>
 
                     <PiNumberCircleThree style={{height: "35px", width: "35px"}}/> Rozdělit na obrázky
 
                 </ZaberySidebarItem>
 
                 <ZaberySidebarItem isClicked={activeItem === 'item4'}
-                                   onClick={() => handleVisibility('item4')}>
+                                   onClick={() => handleVisibility('item4', setActiveItem)}>
 
                     <PiNumberCircleFour style={{height: "35px", width: "35px"}}/> Vytvořit klipy
 
@@ -660,48 +663,64 @@ function Zabery(props) {
 
                         <p>Zvolit směr:</p>
 
-                        <div style={{display: "inline-flex", margin: "12px 0 18px 0", width: "100%"}}>
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(4, 1fr)",
+                                gap: "5px",
+                                padding: "15px"
+                            }}>
 
-                            <AddBtn>
-                                <GoArrowUp style={{color: "var(--color-shadow-7)"}}/>
-                            </AddBtn>
+                            <ArrowBtn isClicked={activeArrow === 'arrow1'}
+                                      onClick={() => handleVisibility('arrow1', setActiveArrow)}>
+                                <GoArrowUpRight/>
+                            </ArrowBtn>
 
-                            <AddBtn>
-                                <GoArrowRight style={{color: "var(--color-shadow-7)"}}/>
-                            </AddBtn>
+                            <ArrowBtn isClicked={activeArrow === 'arrow2'}
+                                      onClick={() => handleVisibility('arrow2', setActiveArrow)}>
+                                <GoArrowRight/>
+                            </ArrowBtn>
 
-                            <AddBtn>
-                                <GoArrowLeft style={{color: "var(--color-shadow-7)"}}/>
-                            </AddBtn>
+                            <ArrowBtn isClicked={activeArrow === 'arrow3'}
+                                      onClick={() => handleVisibility('arrow3', setActiveArrow)}>
+                                <GoArrowDownRight/>
+                            </ArrowBtn>
 
-                            <AddBtn>
-                                <GoArrowDown style={{color: "var(--color-shadow-7)"}}/>
-                            </AddBtn>
+                            <ArrowBtn isClicked={activeArrow === 'arrow4'}
+                                      onClick={() => handleVisibility('arrow4', setActiveArrow)}>
+                                <GoArrowDown/>
+                            </ArrowBtn>
 
-                            <AddBtn>
-                                <GoArrowDownLeft style={{color: "var(--color-shadow-7)"}}/>
-                            </AddBtn>
+                            <ArrowBtn isClicked={activeArrow === 'arrow5'}
+                                      onClick={() => handleVisibility('arrow5', setActiveArrow)}>
+                                <GoArrowDownLeft/>
+                            </ArrowBtn>
 
-                            <AddBtn>
-                                <GoArrowDownRight style={{color: "var(--color-shadow-7)"}}/>
-                            </AddBtn>
+                            <ArrowBtn isClicked={activeArrow === 'arrow6'}
+                                      onClick={() => handleVisibility('arrow6', setActiveArrow)}>
+                                <GoArrowLeft/>
+                            </ArrowBtn>
 
-                            <AddBtn>
-                                <GoArrowUpRight style={{color: "var(--color-shadow-7)"}}/>
-                            </AddBtn>
+                            <ArrowBtn isClicked={activeArrow === 'arrow7'}
+                                      onClick={() => handleVisibility('arrow7', setActiveArrow)}>
+                                <GoArrowUpLeft/>
+                            </ArrowBtn>
 
-                            <AddBtn>
-                                <GoArrowUpLeft style={{color: "var(--color-shadow-7)"}}/>
-                            </AddBtn>
+                            <ArrowBtn isClicked={activeArrow === 'arrow8'}
+                                      onClick={() => handleVisibility('arrow8', setActiveArrow)}>
+                                <GoArrowUp/>
+                            </ArrowBtn>
 
                         </div>
+
+                        <p>Doba přehrávání:</p>
 
                     </PiecesContainer>}
 
             </ZaberySidebarContainer>
 
             <Foto id={"Foto"}>
-            <canvas ref={canvasRef}></canvas>
+                <canvas ref={canvasRef}></canvas>
 
                 {/* Vybrané částice */}
                 {activeItem === 'item3' && getPieces()}
