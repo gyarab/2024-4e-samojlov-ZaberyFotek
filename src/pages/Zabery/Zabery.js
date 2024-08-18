@@ -19,6 +19,7 @@ import {
     GoArrowUp, GoArrowUpLeft,
     GoArrowUpRight
 } from "react-icons/go";
+import {SlControlPause, SlControlPlay} from "react-icons/sl";
 
 function Zabery(props) {
 
@@ -569,6 +570,165 @@ function Zabery(props) {
         );
     }
 
+    /** Prvek časové osy **/
+    const ShowTimeline = () => {
+
+        // Smazání původní plochy
+        canvasRef.current.style.display = 'none';
+
+        // Aktuální čas na Timeline
+        const [currentTime, setCurrentTime] = useState(0);
+
+        // Nastavení přehrávání
+        const [isPlaying, setIsPlaying] = useState(false);
+
+        // Celková délka
+        const [duration] = useState(60);
+
+        // Kontrola, zda tah je v pohybu
+        const [isDragging, setIsDragging] = useState(false);
+
+        // Efekt pro pravidelné obnovování času na Timeline
+        useEffect(() => {
+
+            let intervalId;
+
+            if (isPlaying && !isDragging) {
+
+                // Nastavení intervalu, který se spustí každých 100 ms
+                intervalId = setInterval(() => {
+
+                    // Aktualizace aktuálního času
+                    setCurrentTime(prevTime => {
+
+                        if (prevTime >= duration) {
+
+                            // Zastavení intervalu
+                            clearInterval(intervalId);
+
+                            setIsPlaying(false);
+
+                            return duration;
+                        }
+
+                        // Přičtení 0,1 sekundy k aktuálnímu času
+                        return prevTime + 0.1;
+                    });
+
+                }, 100);
+            }
+
+            return () => clearInterval(intervalId);
+
+        }, [isPlaying, isDragging, duration]);
+
+
+        /** Spuštění času **/
+        const handlePlay = () => setIsPlaying(true);
+
+        /** Zastavení času **/
+        const handlePause = () => setIsPlaying(false);
+
+        /** Přenastavení času dle kliknutí uživatele **/
+        const handleClick = (event) => {
+
+            const bar = event.target;
+            const mouseX = event.clientX - bar.getBoundingClientRect().left;
+
+            // Nový čas dle délky časového úseku
+            const newTime = (mouseX / bar.offsetWidth) * duration;
+
+            setCurrentTime(newTime);
+        };
+
+        /** Začátek tahu **/
+        const handleMouseDown = () => setIsDragging(true);
+
+        /** Tah je v pohybu **/
+        const handleMouseMove = (event) => {
+
+            if (isDragging) {
+
+                // Časová osa
+                const bar = event.currentTarget;
+
+                const mouseX = event.clientX - bar.getBoundingClientRect().left;
+
+                // Výpočet nového času
+                const newTime = (mouseX / bar.offsetWidth) * duration;
+                setCurrentTime(newTime);
+            }
+        };
+
+        /** Ukončení tahu **/
+        const handleMouseUp = () => setIsDragging(false);
+
+        // Pozice Timeline
+        const barPosition = (currentTime / duration) * 100;
+
+        return (
+            <div style={{ display: "flex", alignItems: "center", padding: "20px", background: "var(--color-shadow-1)", borderRadius: "15px", position: "fixed", bottom: 0, marginBottom: "15px"}}>
+
+                <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+
+                    <button onClick={isPlaying ? handlePause : handlePlay}>
+
+                        {isPlaying ? <SlControlPause /> : <SlControlPlay />}
+
+                    </button>
+
+                    <div style={{ display: "flex", alignItems: "center" }}>
+
+                        <div style={{ marginRight: "10px" }}>{formatTime(currentTime)}</div>
+
+                        <div
+                            style={{
+                                width: "800px",
+                                height: "5px",
+                                backgroundColor: "lightgray",
+                                position: "relative",
+                                cursor: "pointer",
+                            }}
+                            onClick={handleClick}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                        >
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    top: "-2.5px",
+                                    left: `${barPosition}%`,
+                                    width: "5px",
+                                    height: "10px",
+                                    backgroundColor: "blue",
+                                    transform: "translateX(-50%)",
+                                    cursor: "pointer",
+                                }}
+                                onMouseDown={handleMouseDown}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    /** Funkce pro přeformátování času **/
+    const formatTime = (seconds) => {
+
+        const min = Math.floor(seconds / 60);
+
+        const remainingSeconds = Math.floor(seconds % 60);
+
+        const ms = (seconds % 1).toFixed(1).substring(1);
+
+        const formattedSeconds = remainingSeconds.toString().padStart(2, '0');
+
+        return `${min}:${formattedSeconds}${ms}`;
+    };
+
+
     return (
         <ZaberyPage>
 
@@ -727,6 +887,8 @@ function Zabery(props) {
 
                 {/* Vybrané částice */}
                 {activeItem === 'item3' && getPieces()}
+
+                {activeItem === 'item4' && <ShowTimeline />}
 
             </Foto>
 
