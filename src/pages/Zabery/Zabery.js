@@ -23,12 +23,12 @@ import {SlControlPause, SlControlPlay} from "react-icons/sl";
 
 function Zabery(props) {
 
-    const [imgPiece, setImgPiece] = useState(false);
-
-    const [queueNum, setQueueNum] = useState(0);
+    // Vybrané částice obrázku uživatelem
+    const [selectedPieces, setSelectedPieces] = useState([]);
 
     const [rangeValue, setRangeValue] = useState(50)
 
+    // Aktuální obrázek
     const [currentImage, setCurrentImage] = useState('');
 
     let positionX = [];
@@ -43,9 +43,9 @@ function Zabery(props) {
     const [items, setItems] = useState([]);
 
     /** Funkce pro přidání nové linie **/
-    const addItem = (newItem) => {
+    const addItem = (array, newItem) => {
 
-        const updatedItems = [...items, newItem];
+        const updatedItems = [...array, newItem];
 
         console.log('Updated Items:', updatedItems);
 
@@ -60,18 +60,18 @@ function Zabery(props) {
     };
 
     /** Funkce pro odstranění poslední linie **/
-    const deleteLastItem = (type) => {
+    const deleteLastItem = (array, type) => {
 
-        console.log('Deleted Items:', items);
+        console.log('Deleted Items:', array);
 
-        const indexToRemove = items
+        const indexToRemove = array
             .map((item, index) => item.type === type ? index : -1)
             .filter(index => index !== -1)
             .pop();
 
         const result = indexToRemove !== undefined
-            ? items.filter((_, index) => index !== indexToRemove)
-            : items;
+            ? array.filter((_, index) => index !== indexToRemove)
+            : array;
 
         setItems(result);
     };
@@ -128,7 +128,7 @@ function Zabery(props) {
                 // Přidání vertikální čáry uprostřed plátna
                 newLines.vertical.push(position);
 
-                addItem({id: vertIndex, type: 'vertical', position: position});
+                addItem(items,{id: vertIndex, type: 'vertical', position: position});
 
                 setVertIndex(vertIndex + 1);
 
@@ -139,7 +139,7 @@ function Zabery(props) {
                 // Přidání horizontální čáry uprostřed plátna
                 newLines.horizontal.push(position);
 
-                addItem({id: horIndex, type: 'horizontal', position: position});
+                addItem(items,{id: horIndex, type: 'horizontal', position: position});
 
                 setHorIndex(horIndex + 1);
             }
@@ -160,7 +160,7 @@ function Zabery(props) {
 
                     newLines.vertical.pop();
 
-                    deleteLastItem('vertical');
+                    deleteLastItem(items,'vertical');
 
                     setVertIndex(vertIndex - 1);
 
@@ -169,7 +169,7 @@ function Zabery(props) {
 
                     newLines.horizontal.pop();
 
-                    deleteLastItem('horizontal');
+                    deleteLastItem(items,'horizontal');
 
                     setHorIndex(horIndex - 1);
                 }
@@ -322,12 +322,11 @@ function Zabery(props) {
         if (!itemExists) {
 
             // Přidání linie
-            addItem({id: index, type: type, position: coordinates});
+            addItem(items,{id: index, type: type, position: coordinates});
 
-            // Obnovení hodnoty linie
+        // Obnovení hodnoty linie
         } else {
 
-            // Funkce pro obnovení proměnné items
             setItems((prevItems) => {
 
                 return prevItems.map((item) =>
@@ -562,13 +561,11 @@ function Zabery(props) {
                 const pieceContext = pieceCanvas.getContext('2d');
                 pieceContext.drawImage(image, x, y, width, height, 0, 0, width, height);
 
-                console.log("NUUNUN", queueNum, idImg);
-
                 // Přidání údajů o částicích do pole
                 pieces.push({
                     id: idImg,
-                    src: pieceCanvas.toDataURL()}
-                );
+                    src: pieceCanvas.toDataURL()
+                });
 
                 idImg++;
             }
@@ -581,55 +578,89 @@ function Zabery(props) {
         return (
             <PieceImages>
 
-                {pieces.map(({ id, src }) => (
-                    <div
-                        key={id}
-                        id={id}
-                        isClicked={queueNum === id}
-                        onClick={() => handleClick(id)}
-                        style={{ position: 'relative' }}
-                    >
-                        <img
+                {pieces.map(({ id, src }) => {
+
+                    // Informace o částicích
+                    console.log("Piece info", selectedPieces);
+
+                    // Zvolený prvek uživatelem
+                    const selectedPiece = selectedPieces.find(item => item.id === id);
+
+                    return (
+                        <div
+                            key={id}
                             id={id}
-                            src={src}
-                            alt={`Piece ${id}`}
-                        />
+                            onClick={() => handleClick(id)}
+                            style={{ position: 'relative' }}
+                        >
+                            <img
+                                id={id}
+                                src={src}
+                                alt={`Piece ${id}`}
+                            />
 
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    top: '5px',
-                                    right: '5px',
-                                    backgroundColor: 'var(--color-blue-7)',
-                                    border: '1px solid white',
-                                    borderRadius: '50%',
-                                    width: '25px',
-                                    height: '25px',
-                                    padding: '5px',
-                                    fontSize: '12px',
-                                    fontWeight: 'bold',
-                                    color: 'white',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    display: queueNum === id ? 'flex' : 'none'
-                                }}
-                            >
-                                {id}
-                            </div>
+                            {selectedPiece && (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: '5px',
+                                        right: '5px',
+                                        backgroundColor: 'var(--color-blue-7)',
+                                        border: '1px solid white',
+                                        borderRadius: '50%',
+                                        width: '25px',
+                                        height: '25px',
+                                        padding: '5px',
+                                        fontSize: '12px',
+                                        fontWeight: 'bold',
+                                        color: 'white',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        display: 'flex'
+                                    }}
+                                >
+                                    {selectedPiece.value}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
 
-                    </div>
-                ))}
             </PieceImages>
         );
     }
 
+    /** Funkce se aktivuje v případě, když uživatel klikne na danou vygenerovanou částici **/
     const handleClick = (id) => {
 
-        // const id = e.target.id;
-        //
-        // console.log(id);
+        setSelectedPieces(prevItems => {
 
-        setQueueNum(id);
+            // Částice s číslem
+            const existingItem = prevItems.find(item => item.id === id);
+
+            // Uživatel klikne na částici s číslem
+            if (existingItem) {
+
+                // Smazání částice s číslem
+                const deletedItem = prevItems.filter(item => item.id !== id);
+
+                // Obnovení hodnot u ostatnich částic
+                return deletedItem.map((item, index) => ({
+
+                    id: item.id,
+                    value: index + 1
+                }));
+
+            // Částice nemá žádné číslo
+            } else {
+
+                // Přidání čísla pro částici
+                return [
+                    ...prevItems,
+                    { id, value: prevItems.length + 1 }
+                ];
+            }
+        });
     };
 
     /** Prvek časové osy **/
