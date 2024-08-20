@@ -23,6 +23,10 @@ import {SlControlPause, SlControlPlay} from "react-icons/sl";
 
 function Zabery(props) {
 
+    const [imgPiece, setImgPiece] = useState(false);
+
+    const [queueNum, setQueueNum] = useState(0);
+
     const [rangeValue, setRangeValue] = useState(50)
 
     const [currentImage, setCurrentImage] = useState('');
@@ -523,6 +527,7 @@ function Zabery(props) {
 
         console.log(positionX, positionY);
 
+
         // Pole pro částice
         const pieces = [];
 
@@ -531,6 +536,8 @@ function Zabery(props) {
         // Souřadnicová pole
         const finalPositionX = [0, ...positionX, image.width];
         const finalPositionY = [0, ...positionY, image.height];
+
+        let idImg = 0;
 
         // Řádky
         for (let i = 0; i < finalPositionY.length - 1; i++) {
@@ -555,20 +562,75 @@ function Zabery(props) {
                 const pieceContext = pieceCanvas.getContext('2d');
                 pieceContext.drawImage(image, x, y, width, height, 0, 0, width, height);
 
-                // Přidání elementu Image do pole
-                pieces.push(<img key={`${i},${j}`} src={pieceCanvas.toDataURL()} alt={"Piece"}/>);
+                console.log("NUUNUN", queueNum, idImg);
+
+                // Přidání údajů o částicích do pole
+                pieces.push({
+                    id: idImg,
+                    src: pieceCanvas.toDataURL()}
+                );
+
+                idImg++;
             }
         }
+
 
         // Smazání původní plochy
         canvasRef.current.style.display = 'none';
 
         return (
             <PieceImages>
-                {pieces}
+
+                {pieces.map(({ id, src }) => (
+                    <div
+                        key={id}
+                        id={id}
+                        isClicked={queueNum === id}
+                        onClick={() => handleClick(id)}
+                        style={{ position: 'relative' }}
+                    >
+                        <img
+                            id={id}
+                            src={src}
+                            alt={`Piece ${id}`}
+                        />
+
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: '5px',
+                                    right: '5px',
+                                    backgroundColor: 'var(--color-blue-7)',
+                                    border: '1px solid white',
+                                    borderRadius: '50%',
+                                    width: '25px',
+                                    height: '25px',
+                                    padding: '5px',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    color: 'white',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    display: queueNum === id ? 'flex' : 'none'
+                                }}
+                            >
+                                {id}
+                            </div>
+
+                    </div>
+                ))}
             </PieceImages>
         );
     }
+
+    const handleClick = (id) => {
+
+        // const id = e.target.id;
+        //
+        // console.log(id);
+
+        setQueueNum(id);
+    };
 
     /** Prvek časové osy **/
     const ShowTimeline = () => {
@@ -667,19 +729,28 @@ function Zabery(props) {
         const barPosition = (currentTime / duration) * 100;
 
         return (
-            <div style={{ display: "flex", alignItems: "center", padding: "20px", background: "var(--color-shadow-1)", borderRadius: "15px", position: "fixed", bottom: 0, marginBottom: "15px"}}>
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "20px",
+                background: "var(--color-shadow-1)",
+                borderRadius: "15px",
+                position: "fixed",
+                bottom: 0,
+                marginBottom: "15px"
+            }}>
 
-                <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                <div style={{display: "flex", gap: "10px", marginBottom: "10px"}}>
 
                     <button onClick={isPlaying ? handlePause : handlePlay}>
 
-                        {isPlaying ? <SlControlPause /> : <SlControlPlay />}
+                        {isPlaying ? <SlControlPause/> : <SlControlPlay/>}
 
                     </button>
 
-                    <div style={{ display: "flex", alignItems: "center" }}>
+                    <div style={{display: "flex", alignItems: "center"}}>
 
-                        <div style={{ marginRight: "10px" }}>{formatTime(currentTime)}</div>
+                        <div style={{marginRight: "10px"}}>{formatTime(currentTime)}</div>
 
                         <div
                             style={{
@@ -873,7 +944,7 @@ function Zabery(props) {
 
                             <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue} onChange={(e) => {
                                 setRangeValue(+e.target.value)
-                            }} />
+                            }}/>
 
                             <label>{rangeValue} s</label>
                         </div>
@@ -888,7 +959,7 @@ function Zabery(props) {
                 {/* Vybrané částice */}
                 {activeItem === 'item3' && getPieces()}
 
-                {activeItem === 'item4' && <ShowTimeline />}
+                {activeItem === 'item4' && <ShowTimeline/>}
 
             </Foto>
 
