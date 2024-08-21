@@ -19,7 +19,8 @@ import {
     GoArrowUp, GoArrowUpLeft,
     GoArrowUpRight
 } from "react-icons/go";
-import {SlControlPause, SlControlPlay} from "react-icons/sl";
+import {SlControlEnd, SlControlPause, SlControlPlay, SlControlStart} from "react-icons/sl";
+import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
 
 function Zabery(props) {
 
@@ -128,7 +129,7 @@ function Zabery(props) {
                 // Přidání vertikální čáry uprostřed plátna
                 newLines.vertical.push(position);
 
-                addItem(items,{id: vertIndex, type: 'vertical', position: position});
+                addItem(items, {id: vertIndex, type: 'vertical', position: position});
 
                 setVertIndex(vertIndex + 1);
 
@@ -139,7 +140,7 @@ function Zabery(props) {
                 // Přidání horizontální čáry uprostřed plátna
                 newLines.horizontal.push(position);
 
-                addItem(items,{id: horIndex, type: 'horizontal', position: position});
+                addItem(items, {id: horIndex, type: 'horizontal', position: position});
 
                 setHorIndex(horIndex + 1);
             }
@@ -160,7 +161,7 @@ function Zabery(props) {
 
                     newLines.vertical.pop();
 
-                    deleteLastItem(items,'vertical');
+                    deleteLastItem(items, 'vertical');
 
                     setVertIndex(vertIndex - 1);
 
@@ -169,7 +170,7 @@ function Zabery(props) {
 
                     newLines.horizontal.pop();
 
-                    deleteLastItem(items,'horizontal');
+                    deleteLastItem(items, 'horizontal');
 
                     setHorIndex(horIndex - 1);
                 }
@@ -322,9 +323,9 @@ function Zabery(props) {
         if (!itemExists) {
 
             // Přidání linie
-            addItem(items,{id: index, type: type, position: coordinates});
+            addItem(items, {id: index, type: type, position: coordinates});
 
-        // Obnovení hodnoty linie
+            // Obnovení hodnoty linie
         } else {
 
             setItems((prevItems) => {
@@ -578,7 +579,7 @@ function Zabery(props) {
         return (
             <PieceImages>
 
-                {pieces.map(({ id, src }) => {
+                {pieces.map(({id, src}) => {
 
                     // Informace o částicích
                     console.log("Piece info", selectedPieces);
@@ -591,7 +592,7 @@ function Zabery(props) {
                             key={id}
                             id={id}
                             onClick={() => handleClick(id)}
-                            style={{ position: 'relative' }}
+                            style={{position: 'relative'}}
                         >
                             <img
                                 id={id}
@@ -603,8 +604,8 @@ function Zabery(props) {
                                 <div
                                     style={{
                                         position: 'absolute',
-                                        top: '5px',
-                                        right: '5px',
+                                        top: '10px',
+                                        right: '15px',
                                         backgroundColor: 'var(--color-blue-7)',
                                         border: '1px solid white',
                                         borderRadius: '50%',
@@ -651,13 +652,13 @@ function Zabery(props) {
                     value: index + 1
                 }));
 
-            // Částice nemá žádné číslo
+                // Částice nemá žádné číslo
             } else {
 
                 // Přidání čísla pro částici
                 return [
                     ...prevItems,
-                    { id, value: prevItems.length + 1 }
+                    {id, value: prevItems.length + 1}
                 ];
             }
         });
@@ -675,46 +676,11 @@ function Zabery(props) {
         // Nastavení přehrávání
         const [isPlaying, setIsPlaying] = useState(false);
 
-        // Celková délka
-        const [duration] = useState(60);
+        // Celková délka videa
+        const videoLength = 60;
 
         // Kontrola, zda tah je v pohybu
         const [isDragging, setIsDragging] = useState(false);
-
-        // Efekt pro pravidelné obnovování času na Timeline
-        useEffect(() => {
-
-            let intervalId;
-
-            if (isPlaying && !isDragging) {
-
-                // Nastavení intervalu, který se spustí každých 100 ms
-                intervalId = setInterval(() => {
-
-                    // Aktualizace aktuálního času
-                    setCurrentTime(prevTime => {
-
-                        if (prevTime >= duration) {
-
-                            // Zastavení intervalu
-                            clearInterval(intervalId);
-
-                            setIsPlaying(false);
-
-                            return duration;
-                        }
-
-                        // Přičtení 0,1 sekundy k aktuálnímu času
-                        return prevTime + 0.1;
-                    });
-
-                }, 100);
-            }
-
-            return () => clearInterval(intervalId);
-
-        }, [isPlaying, isDragging, duration]);
-
 
         /** Spuštění času **/
         const handlePlay = () => setIsPlaying(true);
@@ -722,46 +688,102 @@ function Zabery(props) {
         /** Zastavení času **/
         const handlePause = () => setIsPlaying(false);
 
+        /** Posunutí času na začátek klipu **/
+        const handleBack = () => setCurrentTime(0);
+
+        /** Posunutí času na konec klipu **/
+        const handleForward = () => setCurrentTime(videoLength);
+
+        const [barPosition, setBarPosition] = useState(0);
+
+        /** Funkce pro pohyby - DragMove a Click **/
+        const handleFunction = (event) => {
+
+            // Časová osa
+            const bar = event.currentTarget;
+
+            const mouseX = event.clientX - bar.getBoundingClientRect().left;
+
+            // Výpočet nového času
+            const newTime = (mouseX / bar.offsetWidth) * videoLength;
+
+            const newPosition = (mouseX / bar.offsetWidth) * 100;
+
+            if (newTime >= 0 && newTime <= videoLength) {
+
+                setCurrentTime(newTime);
+                setBarPosition(newPosition);
+            }
+
+        }
+
         /** Přenastavení času dle kliknutí uživatele **/
         const handleClick = (event) => {
 
-            const bar = event.target;
-            const mouseX = event.clientX - bar.getBoundingClientRect().left;
-
-            // Nový čas dle délky časového úseku
-            const newTime = (mouseX / bar.offsetWidth) * duration;
-
-            setCurrentTime(newTime);
+            handleFunction(event);
         };
 
         /** Začátek tahu **/
         const handleMouseDown = () => setIsDragging(true);
+
+        /** Ukončení tahu **/
+        const handleMouseUp = () => {
+
+            setIsDragging(false);
+        }
 
         /** Tah je v pohybu **/
         const handleMouseMove = (event) => {
 
             if (isDragging) {
 
-                // Časová osa
-                const bar = event.currentTarget;
-
-                const mouseX = event.clientX - bar.getBoundingClientRect().left;
-
-                // Výpočet nového času
-                const newTime = (mouseX / bar.offsetWidth) * duration;
-                setCurrentTime(newTime);
+                handleFunction(event);
             }
         };
 
-        /** Ukončení tahu **/
-        const handleMouseUp = () => setIsDragging(false);
+        const playStyling = {
+            fontSize: "35px",
+            borderRadius: "50%",
+            background: "var(--color-shadow-3)",
+            padding: "8px"
+        };
 
-        // Pozice Timeline
-        const barPosition = (currentTime / duration) * 100;
+        const controlStyling = {
+            fontSize: "30px",
+            borderRadius: "50%",
+            background: "var(--color-shadow-3)",
+            padding: "7px"
+        };
+
+        const divStyles = {
+            display: "flex",
+            gap: "5px",
+            justifyContent: "center",
+            alignItems: "center",
+            marginLeft: "10px",
+            userSelect: "none"
+        };
+
+        // Body na časové ose
+        const checkPoints = [];
+
+        // Vzdálenost mezi body
+        const spacingPoints = 2;
+
+        // Délka časové osy
+        const barWidth = 800;
+
+        // Výpočet měřítka
+        const pixelsPerSecond = barWidth / videoLength;
+
+        for (let i = 0; i <= videoLength; i += spacingPoints) {
+
+            checkPoints.push(i);
+        }
 
         return (
             <div style={{
-                display: "flex",
+                display: "grid",
                 alignItems: "center",
                 padding: "20px",
                 background: "var(--color-shadow-1)",
@@ -771,63 +793,130 @@ function Zabery(props) {
                 marginBottom: "15px"
             }}>
 
-                <div style={{display: "flex", gap: "10px", marginBottom: "10px"}}>
+                <div style={{
+                    display: "flex",
+                    gap: "10px",
+                    marginBottom: "10px",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}>
 
-                    <button onClick={isPlaying ? handlePause : handlePlay}>
+                    <div style={divStyles}>
 
-                        {isPlaying ? <SlControlPause/> : <SlControlPlay/>}
+                        <button onClick={handleBack}>
 
-                    </button>
+                            <IoPlayBack style={controlStyling}/>
 
-                    <div style={{display: "flex", alignItems: "center"}}>
+                        </button>
 
-                        <div style={{marginRight: "10px"}}>{formatTime(currentTime)}</div>
+                        <button onClick={isPlaying ? handlePause : handlePlay}>
+
+                            {isPlaying ? <IoPause style={playStyling}/> : <IoPlay style={playStyling}/>}
+
+                        </button>
+
+                        <button onClick={handleForward}>
+
+                            <IoPlayForward style={controlStyling}/>
+
+                        </button>
+
+                    </div>
+
+                    <div style={divStyles}>
+
+                        <div>{formatTime(currentTime)}</div>
+
+                        <div>/</div>
+
+                        <div>{formatTime(videoLength)}</div>
+
+                    </div>
+
+                </div>
+
+                <div style={{display: 'flex', alignItems: 'center', padding: '20px'}}>
+
+                    <div
+                        style={{
+                            width: `${barWidth}px`,
+                            height: '100px',
+                            backgroundColor: 'lightgray',
+                            position: 'relative',
+                            cursor: 'pointer',
+                            borderRadius: '5px',
+                        }}
+                        onClick={handleClick}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                    >
+
+                        {/** Procházení mapy s indexem **/}
+                        {checkPoints.map((time, index) => (
+
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: '0',
+                                    left: `${time * pixelsPerSecond}px`,
+                                    width: '1px',
+                                    height: '10%',
+                                    backgroundColor: index % spacingPoints === 0 ? 'black' : 'gray',
+                                }}
+                            >
+                                {index % spacingPoints === 0 && (
+                                    <span
+                                        style={{
+                                            position: 'absolute',
+                                            top: '12px',
+                                            left: '-10px',
+                                            fontSize: '10px',
+                                            color: 'black',
+                                            userSelect: 'none'
+                                        }}
+                                    >
+                                    {time}s
+                                    </span>
+                                )}
+                            </div>
+                        ))}
 
                         <div
                             style={{
-                                width: "800px",
-                                height: "5px",
-                                backgroundColor: "lightgray",
-                                position: "relative",
-                                cursor: "pointer",
+                                position: 'absolute',
+                                top: '-2.5px',
+                                left: `${barPosition}%`,
+                                width: '2.5px',
+                                height: '100%',
+                                backgroundColor: 'blue',
+                                transform: 'translateX(-50%)',
+                                cursor: 'pointer',
+                                borderRadius: '2px'
                             }}
-                            onClick={handleClick}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseUp}
-                        >
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    top: "-2.5px",
-                                    left: `${barPosition}%`,
-                                    width: "5px",
-                                    height: "10px",
-                                    backgroundColor: "blue",
-                                    transform: "translateX(-50%)",
-                                    cursor: "pointer",
-                                }}
-                                onMouseDown={handleMouseDown}
-                            />
-                        </div>
+                            onMouseDown={handleMouseDown}
+                        />
+
                     </div>
                 </div>
             </div>
-        );
+        )
     };
 
     /** Funkce pro přeformátování času **/
     const formatTime = (seconds) => {
 
-        const min = Math.floor(seconds / 60);
-
-        const remainingSeconds = Math.floor(seconds % 60);
-
         const ms = (seconds % 1).toFixed(1).substring(1);
 
-        const formattedSeconds = remainingSeconds.toString().padStart(2, '0');
+        const s = Math.floor(seconds % 60);
 
-        return `${min}:${formattedSeconds}${ms}`;
+        const formattedSeconds = s.toString().padStart(2, '0');
+
+        const min = Math.floor(seconds / 60);
+
+        const formattedMinutes = min.toString().padStart(2, '0');
+
+        return `${formattedMinutes}:${formattedSeconds}${ms}`;
     };
 
 
@@ -871,11 +960,13 @@ function Zabery(props) {
 
                             <ShowNum>{column}</ShowNum>
 
-                            <AddBtn onClick={() => operationHandler("+", column, setAsColumns, "columnAdd")}>
+                            <AddBtn
+                                onClick={() => operationHandler("+", column, setAsColumns, "columnAdd")}>
                                 <PlusCircleIcon style={{color: "var(--color-shadow-7)"}}/>
                             </AddBtn>
 
-                            <AddBtn onClick={() => operationHandler("-", column, setAsColumns, "columnDel")}>
+                            <AddBtn
+                                onClick={() => operationHandler("-", column, setAsColumns, "columnDel")}>
                                 <MinusCircleIcon style={{color: "var(--color-shadow-7)"}}/>
                             </AddBtn>
 
@@ -971,11 +1062,17 @@ function Zabery(props) {
 
                         <p style={{margin: "5px 0 5px 0"}}>Doba přehrávání:</p>
 
-                        <div style={{display: "block", width: "100%", margin: "auto", textAlign: "center"}}>
+                        <div style={{
+                            display: "block",
+                            width: "100%",
+                            margin: "auto",
+                            textAlign: "center"
+                        }}>
 
-                            <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue} onChange={(e) => {
-                                setRangeValue(+e.target.value)
-                            }}/>
+                            <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue}
+                                       onChange={(e) => {
+                                           setRangeValue(+e.target.value)
+                                       }}/>
 
                             <label>{rangeValue} s</label>
                         </div>
