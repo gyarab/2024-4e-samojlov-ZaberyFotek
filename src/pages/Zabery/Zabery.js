@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     AddBtn, ArrowBtn,
     Foto, PieceImages,
@@ -21,6 +21,8 @@ import {
 } from "react-icons/go";
 import {SlControlEnd, SlControlPause, SlControlPlay, SlControlStart} from "react-icons/sl";
 import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
+import ResizableImage from "./TimelineImages";
+import {Resizable} from "re-resizable";
 
 function Zabery(props) {
 
@@ -591,8 +593,8 @@ function Zabery(props) {
                         <div
                             key={id}
                             id={id}
-                            onClick={() => handleClick(id)}
-                            style={{position: 'relative'}}
+                            onClick={() => handlePieces(id, src)}
+                            style={{position: "relative"}}
                         >
                             <img
                                 id={id}
@@ -603,21 +605,21 @@ function Zabery(props) {
                             {selectedPiece && (
                                 <div
                                     style={{
-                                        position: 'absolute',
-                                        top: '10px',
-                                        right: '15px',
-                                        backgroundColor: 'var(--color-blue-7)',
-                                        border: '1px solid white',
-                                        borderRadius: '50%',
-                                        width: '25px',
-                                        height: '25px',
-                                        padding: '5px',
-                                        fontSize: '12px',
-                                        fontWeight: 'bold',
-                                        color: 'white',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        display: 'flex'
+                                        position: "absolute",
+                                        top: "10px",
+                                        right: "15px",
+                                        backgroundColor: "var(--color-blue-7)",
+                                        border: "1px solid white",
+                                        borderRadius: "50%",
+                                        width: "25px",
+                                        height: "25px",
+                                        padding: "5px",
+                                        fontSize: "12px",
+                                        fontWeight: "bold",
+                                        color: "white",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        display: "flex"
                                     }}
                                 >
                                     {selectedPiece.value}
@@ -632,7 +634,7 @@ function Zabery(props) {
     }
 
     /** Funkce se aktivuje v případě, když uživatel klikne na danou vygenerovanou částici **/
-    const handleClick = (id) => {
+    const handlePieces = (id, src) => {
 
         setSelectedPieces(prevItems => {
 
@@ -649,7 +651,8 @@ function Zabery(props) {
                 return deletedItem.map((item, index) => ({
 
                     id: item.id,
-                    value: index + 1
+                    value: index + 1,
+                    src: item.src
                 }));
 
                 // Částice nemá žádné číslo
@@ -658,7 +661,7 @@ function Zabery(props) {
                 // Přidání čísla pro částici
                 return [
                     ...prevItems,
-                    {id, value: prevItems.length + 1}
+                    {id: id, value: prevItems.length + 1, src: src}
                 ];
             }
         });
@@ -835,16 +838,20 @@ function Zabery(props) {
 
                 </div>
 
-                <div style={{display: 'flex', alignItems: 'center', padding: '20px'}}>
+                <div style={{display: "flex", alignItems: "center", justifyContent: "center", padding: "20px"}}>
 
                     <div
                         style={{
                             width: `${barWidth}px`,
-                            height: '100px',
-                            backgroundColor: 'lightgray',
-                            position: 'relative',
-                            cursor: 'pointer',
-                            borderRadius: '5px',
+                            height: "100px",
+                            backgroundColor: "lightgray",
+                            position: "relative",
+                            cursor: "pointer",
+                            borderRadius: "5px",
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "flex-end",
+                            gap: "5px"
                         }}
                         onClick={handleClick}
                         onMouseMove={handleMouseMove}
@@ -852,28 +859,45 @@ function Zabery(props) {
                         onMouseLeave={handleMouseUp}
                     >
 
+                        {selectedPieces.map(((piece, index) => {
+
+                            const pieceWidth = 100;
+
+                            const gap = (barWidth - (selectedPieces.length * pieceWidth)) / (selectedPieces.length + 1);
+
+                            const left = gap + index * (pieceWidth + gap);
+
+                            return (
+                                <ResizableImage
+                                    key={piece.id}
+                                    piece={piece}
+                                    pieceLeft={left}
+                                    piecesArray={selectedPieces}
+                                />);
+                        }))}
+
                         {/** Procházení mapy s indexem **/}
                         {checkPoints.map((time, index) => (
 
                             <div
                                 style={{
-                                    position: 'absolute',
-                                    top: '0',
+                                    position: "absolute",
+                                    top: "0",
                                     left: `${time * pixelsPerSecond}px`,
-                                    width: '1px',
-                                    height: '10%',
-                                    backgroundColor: index % spacingPoints === 0 ? 'black' : 'gray',
+                                    width: "1px",
+                                    height: "10%",
+                                    backgroundColor: index % spacingPoints === 0 ? "black" : "gray",
                                 }}
                             >
                                 {index % spacingPoints === 0 && (
                                     <span
                                         style={{
-                                            position: 'absolute',
-                                            top: '12px',
-                                            left: '-10px',
-                                            fontSize: '10px',
-                                            color: 'black',
-                                            userSelect: 'none'
+                                            position: "absolute",
+                                            top: "12px",
+                                            left: "-10px",
+                                            fontSize: "10px",
+                                            color: "black",
+                                            userSelect: "none"
                                         }}
                                     >
                                     {time}s
