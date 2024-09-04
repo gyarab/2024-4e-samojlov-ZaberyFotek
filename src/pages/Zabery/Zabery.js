@@ -21,7 +21,7 @@ import {
 } from "react-icons/go";
 import {SlControlEnd, SlControlPause, SlControlPlay, SlControlStart} from "react-icons/sl";
 import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
-import ResizableImage from "./TimelineImages";
+import TimelineImages from "./TimelineImages";
 import {Resizable} from "re-resizable";
 
 function Zabery(props) {
@@ -633,37 +633,68 @@ function Zabery(props) {
         );
     }
 
-    /** Funkce se aktivuje v případě, když uživatel klikne na danou vygenerovanou částici **/
-    const handlePieces = (id, src) => {
+    /** Funkce se aktivuje v případě, když uživatel klikne/posune danou vygenerovanou částici **/
+    const handlePieces = (id, src = null, newWidth = null, newLeft = null) => {
 
+        // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
 
-            // Částice s číslem
             const existingItem = prevItems.find(item => item.id === id);
+            const barWidth = 800;
+            const pieceWidth = 100;
 
-            // Uživatel klikne na částici s číslem
-            if (existingItem) {
+            // Kontrola, zda částice existuje
+            if (existingItem && newWidth !== null && newLeft !== null) {
 
-                // Smazání částice s číslem
-                const deletedItem = prevItems.filter(item => item.id !== id);
-
-                // Obnovení hodnot u ostatnich částic
-                return deletedItem.map((item, index) => ({
-
-                    id: item.id,
-                    value: index + 1,
-                    src: item.src
-                }));
-
-                // Částice nemá žádné číslo
-            } else {
-
-                // Přidání čísla pro částici
-                return [
-                    ...prevItems,
-                    {id: id, value: prevItems.length + 1, src: src}
-                ];
+                // Aktualizace částice s novou šířkou a levou odchylkou
+                return prevItems.map(item =>
+                    item.id === id ? { ...item, width: newWidth, left: newLeft } : item
+                );
             }
+
+            // Šířka a levá odchylka není pro danou částici uvedena
+            if (existingItem && newWidth === null && newLeft === null) {
+
+                const updatedItems = prevItems.filter(item => item.id !== id);
+
+                // Výpočet pozice pro zbývající částice
+                return updatedItems.map((item, index) => {
+
+                    const gap = (barWidth - (updatedItems.length * pieceWidth)) / (updatedItems.length + 1);
+                    const left = gap + index * (pieceWidth + gap);
+
+                    return {
+                        ...item,
+                        value: index + 1,
+                        left: left,
+                    };
+                });
+            }
+
+            // Přidání částice
+            if (!existingItem && src) {
+
+                const updatedItems = [
+                    ...prevItems,
+                    { id: id, value: prevItems.length + 1, src: src, width: pieceWidth, left: 0 }
+                ];
+
+                // Přepočítání pozice pro všechny částice včetně nové
+                return updatedItems.map((item, index) => {
+
+                    const gap = (barWidth - (updatedItems.length * pieceWidth)) / (updatedItems.length + 1);
+                    const left = gap + index * (pieceWidth + gap);
+
+                    return {
+                        ...item,
+                        value: index + 1,
+                        left: left,
+                    };
+                });
+            }
+
+            // Pokud žádná podmínka není splněna
+            return prevItems;
         });
     };
 
@@ -784,8 +815,7 @@ function Zabery(props) {
             checkPoints.push(i);
         }
 
-        return (
-            <div style={{
+        return (<div style={{
                 display: "grid",
                 alignItems: "center",
                 padding: "20px",
@@ -859,22 +889,16 @@ function Zabery(props) {
                         onMouseLeave={handleMouseUp}
                     >
 
-                        {selectedPieces.map(((piece, index) => {
+                        {selectedPieces.map((piece) => (
+                            <TimelineImages
+                                key={piece.id}
+                                piece={piece}
+                                pieceLeft={piece.left}
+                                piecesArray={selectedPieces}
+                                onPieceUpdate={handlePieces}
+                            />
+                        ))}
 
-                            const pieceWidth = 100;
-
-                            const gap = (barWidth - (selectedPieces.length * pieceWidth)) / (selectedPieces.length + 1);
-
-                            const left = gap + index * (pieceWidth + gap);
-
-                            return (
-                                <ResizableImage
-                                    key={piece.id}
-                                    piece={piece}
-                                    pieceLeft={left}
-                                    piecesArray={selectedPieces}
-                                />);
-                        }))}
 
                         {/** Procházení mapy s indexem **/}
                         {checkPoints.map((time, index) => (
@@ -924,6 +948,7 @@ function Zabery(props) {
                     </div>
                 </div>
             </div>
+
         )
     };
 

@@ -1,6 +1,6 @@
 import React, {useState, useRef, useCallback, useEffect} from 'react';
 
-const ResizableImage = ({piece, pieceLeft, piecesArray}) => {
+const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
 
     const [isResizing, setIsResizing] = useState(null);
     const startX = useRef(0);
@@ -8,8 +8,6 @@ const ResizableImage = ({piece, pieceLeft, piecesArray}) => {
     const startLeft = useRef(0);
 
     const containerRef = useRef(null);
-
-    const gap = 10;
 
     const [width, setWidth] = useState(piece.width || 100);
     const [left, setLeft] = useState(piece.left || 0);
@@ -26,66 +24,62 @@ const ResizableImage = ({piece, pieceLeft, piecesArray}) => {
 
     const onMouseMove = useCallback((e) => {
 
+        const MIN_WIDTH = 100;
+
         if (isResizing) {
 
-            console.log(piecesArray);
+            const pieceID = piecesArray.findIndex(p => p.id === piece.id);
 
             const deltaX = e.clientX - startX.current;
-
-            const index = piece.id;
-
-            const rightSideItem = index < piecesArray.length - 1 ? piecesArray[index + 1].left : null;
-            const leftSideItem = index > 0 ? piecesArray[index - 1].left + piecesArray[index - 1].width : null;
+            
+            let newWidth = Math.max(startWidth.current + (isResizing === 'right' ? deltaX : -deltaX), MIN_WIDTH);
+            let newLeft = startLeft.current + (isResizing === 'left' ? deltaX : 0);
+            
+            const leftSidePiece = pieceID > 0 ? piecesArray[pieceID - 1] : null;
+            const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
 
             if (isResizing === 'left') {
 
-                let newWidth = Math.max(startWidth.current - deltaX, 50);
-                let newLeft = startLeft.current + deltaX;
+                if (leftSidePiece && newLeft < leftSidePiece.left + leftSidePiece.width) {
 
+                    newLeft = leftSidePiece.left + leftSidePiece.width;
 
-                if (leftSideItem !== null && newLeft < leftSideItem) {
-                    newLeft = leftSideItem;
-                    newWidth = startWidth.current - (newLeft - startLeft.current);
+                    if (deltaX > 0) {
+
+                        newWidth = startWidth.current;
+
+                    } else {
+
+                        newWidth = -startWidth.current;
+                    }
                 }
-
-                console.log(index, "item left", leftSideItem, "my item", newLeft);
-
-                piecesArray[index].left = newLeft;
-                piecesArray[index].width = newWidth;
-
-                setWidth(newWidth);
-                setLeft(newLeft);
-
-                containerRef.current.style.width = `${newWidth}px`;
-                containerRef.current.style.left = `${newLeft}px`;
 
             } else if (isResizing === 'right') {
 
-                let newWidth = Math.max(startWidth.current + deltaX, 50);
+                if (rightSidePiece && newLeft + newWidth > rightSidePiece.left) {
 
-                const rightSide = newWidth + piecesArray[index].left;
-
-                console.log(index, "item right", rightSideItem, "my item", rightSide);
-
-                if (rightSideItem !== null && rightSide > rightSideItem) {
-
-                    newWidth = rightSideItem - piecesArray[index].left;
+                    newWidth = rightSidePiece.left - newLeft;
                 }
-
-                // piecesArray[index].left = left;
-                piecesArray[index].width = newWidth;
-
-                setWidth(newWidth);
-
-                containerRef.current.style.width = `${newWidth}px`;
             }
+
+            setWidth(newWidth);
+            setLeft(newLeft);
+
+            containerRef.current.style.width = `${newWidth}px`;
+            containerRef.current.style.left = `${newLeft}px`;
         }
 
     }, [isResizing, piecesArray, piece.id]);
 
     const onMouseUp = useCallback(() => {
+
+        if (isResizing) {
+            onPieceUpdate(piece.id, null, width, left);
+        }
+
         setIsResizing(null);
-    }, []);
+
+    }, [isResizing, width, left, onPieceUpdate, piece.id]);
 
     useEffect(() => {
         document.addEventListener('mousemove', onMouseMove);
@@ -150,4 +144,4 @@ const ResizableImage = ({piece, pieceLeft, piecesArray}) => {
     );
 };
 
-export default ResizableImage;
+export default TimelineImages;
