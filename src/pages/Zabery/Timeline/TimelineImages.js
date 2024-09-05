@@ -1,6 +1,6 @@
 import React, {useState, useRef, useCallback, useEffect} from 'react';
 
-const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
+const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}) => {
 
     const [isResizing, setIsResizing] = useState(null);
     const startX = useRef(0);
@@ -40,6 +40,8 @@ const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
 
             if (isResizing === 'left') {
 
+                console.log(newLeft);
+
                 if (leftSidePiece && newLeft < leftSidePiece.left + leftSidePiece.width) {
 
                     newLeft = leftSidePiece.left + leftSidePiece.width;
@@ -52,6 +54,13 @@ const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
 
                         newWidth = -startWidth.current;
                     }
+
+                } 
+                
+                // Funkce drag-resize je zastavena tak, aby nepřesahovala počátek prvku Timeline
+                if (newLeft <= 0) {
+
+                    return;
                 }
 
             } else if (isResizing === 'right') {
@@ -59,6 +68,12 @@ const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
                 if (rightSidePiece && newLeft + newWidth > rightSidePiece.left) {
 
                     newWidth = rightSidePiece.left - newLeft;
+                }
+
+                // Funkce drag-resize je zastavena tak, aby nepřesahovala konec prvku Timeline
+                if ((newLeft + newWidth) >= barWidth) {
+
+                    return;
                 }
             }
 
