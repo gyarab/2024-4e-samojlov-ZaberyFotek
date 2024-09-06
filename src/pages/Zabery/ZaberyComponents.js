@@ -60,10 +60,10 @@ export const ZaberySidebarItem = styled.div`
 
 export const Foto = styled.div`
     position: relative;
-    flex: 1;  
+    flex: ${(props) => (props.item === 'item4' ? '0' : '1')};
     height: 100%;
     // 250px + margin-left 50px Container
-    margin-left: 300px;  
+    margin-left: 300px;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -1,17 +1,24 @@
 import React, {useState, useRef, useCallback, useEffect} from 'react';
 
-const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
+/** Funkce pro ovládání jednotlivých prvků časové osy **/
+const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}) => {
 
+    // Změna velikosti prvku
     const [isResizing, setIsResizing] = useState(null);
+
     const startX = useRef(0);
     const startWidth = useRef(0);
     const startLeft = useRef(0);
 
     const containerRef = useRef(null);
 
+    // Šířka prvku
     const [width, setWidth] = useState(piece.width || 100);
+
+    // Levá odchylka prvku
     const [left, setLeft] = useState(piece.left || 0);
 
+    /** Tah je detekován **/
     const onMouseDown = useCallback((e, direction) => {
 
         e.preventDefault();
@@ -22,23 +29,32 @@ const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
 
     }, [width, left]);
 
+    /** Tah je v pohybu **/
     const onMouseMove = useCallback((e) => {
 
         const MIN_WIDTH = 100;
 
         if (isResizing) {
 
+            // ID prvku
             const pieceID = piecesArray.findIndex(p => p.id === piece.id);
 
             const deltaX = e.clientX - startX.current;
-            
+
+            // Parametry pro novou šířku a levou odchylku
             let newWidth = Math.max(startWidth.current + (isResizing === 'right' ? deltaX : -deltaX), MIN_WIDTH);
             let newLeft = startLeft.current + (isResizing === 'left' ? deltaX : 0);
-            
+
+            // Nejbližší levý prvek
             const leftSidePiece = pieceID > 0 ? piecesArray[pieceID - 1] : null;
+
+            // Nejbližší pravý prvek
             const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
 
+            // Změna velikosti levé strany
             if (isResizing === 'left') {
+
+                // console.log(newLeft);
 
                 if (leftSidePiece && newLeft < leftSidePiece.left + leftSidePiece.width) {
 
@@ -52,27 +68,45 @@ const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
 
                         newWidth = -startWidth.current;
                     }
+
                 }
 
+                // Funkce drag-resize je zastavena tak, aby nepřesahovala počátek prvku Timeline
+                if (newLeft <= 0) {
+
+                    return;
+                }
+
+            // Změna velikosti pravé strany
             } else if (isResizing === 'right') {
 
                 if (rightSidePiece && newLeft + newWidth > rightSidePiece.left) {
 
                     newWidth = rightSidePiece.left - newLeft;
                 }
+
+                // Funkce drag-resize je zastavena tak, aby nepřesahovala konec prvku Timeline
+                if ((newLeft + newWidth) >= barWidth) {
+
+                    return;
+                }
             }
 
+            // Nastavení nové šířky a levé odchylky
             setWidth(newWidth);
             setLeft(newLeft);
 
+            // Nastavení aktuální šířky a levé odchylky prvku
             containerRef.current.style.width = `${newWidth}px`;
             containerRef.current.style.left = `${newLeft}px`;
         }
 
     }, [isResizing, piecesArray, piece.id]);
 
+    /** Tah je ukončen **/
     const onMouseUp = useCallback(() => {
 
+        // Aktualizace dat o prvku
         if (isResizing) {
             onPieceUpdate(piece.id, null, width, left);
         }
@@ -144,4 +178,4 @@ const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate}) => {
     );
 };
 
-export default TimelineImages;
+export default TimelinePieces;
