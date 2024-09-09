@@ -2,8 +2,10 @@ import styled from "styled-components";
 
 export const ClipContainer = styled.div`
     display: flex;
-    width: 100%;
-    height: 500px;
+    width: calc(100vw * 0.75);
+    height: 575px;
+    margin-bottom: 175px;
+    padding: 20px;
 `;
 
 export const VideoTools = styled.div`

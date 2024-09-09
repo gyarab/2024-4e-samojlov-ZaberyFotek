@@ -23,7 +23,31 @@ import Timeline from "../../components/Timeline/Timeline";
 
 function Zabery(props) {
 
-    const barWidth = 800;
+    const [barWidth, setBarWidth] = useState(window.innerWidth * 0.75);
+
+    const getActiveWidth = () => {
+
+        return window.innerWidth * 0.75;
+    };
+
+    useEffect(() => {
+
+        const handleResize = () => {
+            setBarWidth(getActiveWidth());
+        };
+
+        // Update the bar width when the component mounts
+        handleResize();
+
+        // Add resize event listener to track window resizing
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup the event listener when the component unmounts
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
 
     // Vybrané částice obrázku uživatelem
     const [selectedPieces, setSelectedPieces] = useState([]);
@@ -647,7 +671,7 @@ function Zabery(props) {
 
                 // Aktualizace částice s novou šířkou a levou odchylkou
                 return prevItems.map(item =>
-                    item.id === id ? { ...item, width: newWidth, left: newLeft } : item
+                    item.id === id ? {...item, width: newWidth, left: newLeft} : item
                 );
             }
 
@@ -675,7 +699,7 @@ function Zabery(props) {
 
                 const updatedItems = [
                     ...prevItems,
-                    { id: id, value: prevItems.length + 1, src: src, width: pieceWidth, left: 0 }
+                    {id: id, value: prevItems.length + 1, src: src, width: pieceWidth, left: 0}
                 ];
 
                 // Přepočítání pozice pro všechny částice včetně nové
@@ -865,7 +889,9 @@ function Zabery(props) {
                 {/* Vybrané částice */}
                 {activeItem === 'item3' && getPieces()}
 
-                {activeItem === 'item4' && <Timeline canvasRef={canvasRef} selectedPieces={selectedPieces} handlePieces={handlePieces} barWidth={barWidth} />}
+                {activeItem === 'item4' &&
+                    <Timeline canvasRef={canvasRef} selectedPieces={selectedPieces} handlePieces={handlePieces}
+                              barWidth={barWidth}/>}
 
             </Foto>
 

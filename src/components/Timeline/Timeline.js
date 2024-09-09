@@ -6,6 +6,8 @@ import {ClipContainer, TimelineContainer, VideoPreview, VideoTools} from "./Time
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, barWidth}) {
 
+    console.log(barWidth);
+
     // Smazání původní plochy
     canvasRef.current.style.display = 'none';
 

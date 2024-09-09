@@ -67,7 +67,7 @@ export const Foto = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 1250px;
+    max-width: ${(props) => (props.item === 'item4' ? 'none' : '1250px')};
 
     canvas {
         //max-width: 75%;  
