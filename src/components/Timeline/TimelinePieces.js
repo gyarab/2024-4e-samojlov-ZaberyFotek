@@ -1,7 +1,11 @@
 import React, {useState, useRef, useCallback, useEffect} from 'react';
 
+<<<<<<<< HEAD:src/components/Timeline/TimelinePieces.js
 /** Funkce pro ovládání jednotlivých prvků časové osy **/
 const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}) => {
+========
+const TimelineImages = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}) => {
+>>>>>>>> 004df71e45e864c421ecdfb249dd832f34e86c10:src/pages/Zabery/Timeline/TimelineImages.js
 
     // Změna velikosti prvku
     const [isResizing, setIsResizing] = useState(null);
@@ -54,7 +58,11 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}
             // Změna velikosti levé strany
             if (isResizing === 'left') {
 
+<<<<<<<< HEAD:src/components/Timeline/TimelinePieces.js
                 // console.log(newLeft);
+========
+                console.log(newLeft);
+>>>>>>>> 004df71e45e864c421ecdfb249dd832f34e86c10:src/pages/Zabery/Timeline/TimelineImages.js
 
                 if (leftSidePiece && newLeft < leftSidePiece.left + leftSidePiece.width) {
 
@@ -69,6 +77,15 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}
                         newWidth = -startWidth.current;
                     }
 
+<<<<<<<< HEAD:src/components/Timeline/TimelinePieces.js
+========
+                } 
+                
+                // Funkce drag-resize je zastavena tak, aby nepřesahovala počátek prvku Timeline
+                if (newLeft <= 0) {
+
+                    return;
+>>>>>>>> 004df71e45e864c421ecdfb249dd832f34e86c10:src/pages/Zabery/Timeline/TimelineImages.js
                 }
 
                 // Funkce drag-resize je zastavena tak, aby nepřesahovala počátek prvku Timeline
