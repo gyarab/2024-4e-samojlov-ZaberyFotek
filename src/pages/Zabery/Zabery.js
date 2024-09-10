@@ -19,43 +19,14 @@ import {
     GoArrowUp, GoArrowUpLeft,
     GoArrowUpRight
 } from "react-icons/go";
-<<<<<<< HEAD
+import {TimelineWidth} from "../../components/Timeline/TimelineWidth";
 import Timeline from "../../components/Timeline/Timeline";
 
 function Zabery(props) {
 
-    const [barWidth, setBarWidth] = useState(window.innerWidth * 0.75);
+    let { timelineRef, barWidth } = TimelineWidth();
 
-    const getActiveWidth = () => {
-
-        return window.innerWidth * 0.75;
-    };
-
-    useEffect(() => {
-
-        const handleResize = () => {
-            setBarWidth(getActiveWidth());
-        };
-
-        // Update the bar width when the component mounts
-        handleResize();
-
-        // Add resize event listener to track window resizing
-        window.addEventListener('resize', handleResize);
-
-        // Cleanup the event listener when the component unmounts
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
-
-=======
-import Timeline from "./Timeline/Timeline";
-
-function Zabery(props) {
-
-    const barWidth = 800;
->>>>>>> 004df71e45e864c421ecdfb249dd832f34e86c10
+    barWidth -= 75;
 
     // Vybrané částice obrázku uživatelem
     const [selectedPieces, setSelectedPieces] = useState([]);
@@ -667,15 +638,13 @@ function Zabery(props) {
     /** Funkce se aktivuje v případě, když uživatel klikne/posune danou vygenerovanou částici **/
     const handlePieces = (id, src = null, newWidth = null, newLeft = null) => {
 
+        console.log(barWidth);
+
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
 
             const existingItem = prevItems.find(item => item.id === id);
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 004df71e45e864c421ecdfb249dd832f34e86c10
             const pieceWidth = 100;
 
             // Kontrola, zda částice existuje
@@ -894,20 +863,19 @@ function Zabery(props) {
 
             </ZaberySidebarContainer>
 
-            <Foto id={"Foto"} item={activeItem}>
+            <Foto id={"Foto"} item={activeItem} ref={timelineRef}>
 
                 <canvas ref={canvasRef}></canvas>
 
                 {/* Vybrané částice */}
                 {activeItem === 'item3' && getPieces()}
 
-<<<<<<< HEAD
+
                 {activeItem === 'item4' &&
                     <Timeline canvasRef={canvasRef} selectedPieces={selectedPieces} handlePieces={handlePieces}
-                              barWidth={barWidth}/>}
-=======
-                {activeItem === 'item4' && <Timeline canvasRef={canvasRef} selectedPieces={selectedPieces} handlePieces={handlePieces} barWidth={barWidth} />}
->>>>>>> 004df71e45e864c421ecdfb249dd832f34e86c10
+                              barWidth={barWidth}/>
+
+                }
 
             </Foto>
 

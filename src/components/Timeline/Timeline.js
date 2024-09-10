@@ -1,12 +1,15 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
 import TimelinePieces from "./TimelinePieces";
 import {ClipContainer, TimelineContainer, VideoPreview, VideoTools} from "./TimelineComponents";
+import {TimelineWidth} from "./TimelineWidth";
 
 /** Prvek časové osy **/
-function Timeline({canvasRef, selectedPieces, handlePieces, barWidth}) {
+function Timeline({canvasRef, selectedPieces, handlePieces}) {
 
-    console.log(barWidth);
+    let { timelineRef, barWidth } = TimelineWidth();
+
+    barWidth -= 75;
 
     // Smazání původní plochy
     canvasRef.current.style.display = 'none';
@@ -179,7 +182,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, barWidth}) {
     }
 
     return (
-        <div style={{display: "grid"}}>
+        <div>
 
             <ClipContainer>
 
@@ -189,7 +192,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, barWidth}) {
 
             </ClipContainer>
 
-            <TimelineContainer>
+            <TimelineContainer ref={timelineRef}>
 
                 <div style={{
                     display: "flex",
@@ -233,7 +236,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, barWidth}) {
 
                 </div>
 
-                <div style={{display: "flex", alignItems: "center", justifyContent: "center", padding: "20px"}}>
+                <div style={{display: "flex", alignItems: "center", justifyContent: "flex-start", padding: "20px"}}>
 
                     <div
                         style={{

@@ -3,10 +3,10 @@ import React from "react";
 
 
 export const ZaberyPage = styled.div`
-    display: flex;  
+    display: grid;  
     height: 100vh;  
     overflow: hidden;
-    padding-top: 80px;
+    padding-top: 50px;
     align-items: center;
 `;
 
@@ -64,7 +64,7 @@ export const Foto = styled.div`
     height: 100%;
     // 250px + margin-left 50px Container
     margin-left: 300px;
-    display: flex;
+    display: ${(props) => (props.item === 'item4' ? 'inline-flex' : 'flex')};;
     align-items: center;
     justify-content: center;
     max-width: ${(props) => (props.item === 'item4' ? 'none' : '1250px')};

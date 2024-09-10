@@ -2,10 +2,9 @@ import styled from "styled-components";
 
 export const ClipContainer = styled.div`
     display: flex;
+    height: calc(100vh * 0.5);
     width: calc(100vw * 0.75);
-    height: 575px;
-    margin-bottom: 175px;
-    padding: 20px;
+    margin-left: 25px;
 `;
 
 export const VideoTools = styled.div`
@@ -20,12 +19,9 @@ export const VideoPreview = styled.div`
 
 export const TimelineContainer = styled.div`
     display: grid;
-    align-items: center;
     padding: 20px;
     background: var(--color-shadow-1);
     border-radius: 15px;
-    position: fixed;
-    bottom: 0;
-    margin-bottom: 15px;
-    margin-left: 25px;
+    margin: 25px 0 15px 25px;
+    width: calc(100vw * 0.75);
 `;
