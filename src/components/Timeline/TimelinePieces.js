@@ -108,7 +108,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}
 
         // Aktualizace dat o prvku
         if (isResizing) {
-            onPieceUpdate(piece.id, null, width, left);
+            onPieceUpdate(piece.id, piece.src, width, left);
         }
 
         setIsResizing(null);
@@ -126,6 +126,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}
     }, [onMouseMove, onMouseUp]);
 
     const boxStyles = {
+        display: 'flex',
         width: `${width}px`,
         height: '50px',
         border: '1px solid #ccc',

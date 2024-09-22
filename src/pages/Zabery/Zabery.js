@@ -638,14 +638,14 @@ function Zabery(props) {
     /** Funkce se aktivuje v případě, když uživatel klikne/posune danou vygenerovanou částici **/
     const handlePieces = (id, src = null, newWidth = null, newLeft = null) => {
 
-        console.log(barWidth);
+        console.log("GAp", barWidth);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
 
             const existingItem = prevItems.find(item => item.id === id);
 
-            const pieceWidth = 100;
+            const pieceWidth = newWidth || 100;
 
             // Kontrola, zda částice existuje
             if (existingItem && newWidth !== null && newLeft !== null) {
@@ -665,6 +665,7 @@ function Zabery(props) {
                 return updatedItems.map((item, index) => {
 
                     const gap = (barWidth - (updatedItems.length * pieceWidth)) / (updatedItems.length + 1);
+
                     const left = gap + index * (pieceWidth + gap);
 
                     return {
@@ -701,6 +702,22 @@ function Zabery(props) {
             return prevItems;
         });
     };
+
+    // Neustálý cyklus pro správnou funkčnost responzivity částic
+    useEffect(() => {
+
+        setSelectedPieces(prevPieces => {
+
+            const pieceWidth = 100;
+
+            return prevPieces.map((piece, index) => {
+                const gap = (barWidth - (prevPieces.length * pieceWidth)) / (prevPieces.length + 1);
+                const left = gap + index * (pieceWidth + gap);
+                return { ...piece, left };
+            });
+        });
+
+    }, [barWidth]);
 
     return (
         <ZaberyPage>

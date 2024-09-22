@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-// Custom hook to get the width of a referenced element
 export const TimelineWidth = () => {
 
     const timelineRef = useRef(null);

@@ -7,7 +7,7 @@ import {TimelineWidth} from "./TimelineWidth";
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces}) {
 
-    let { timelineRef, barWidth } = TimelineWidth();
+    let {timelineRef, barWidth} = TimelineWidth();
 
     barWidth -= 75;
 
@@ -34,6 +34,88 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
 
         setIsPlaying(true);
     }
+    // selectedPieces.map((piece) => {
+    //
+    //     console.log(piece.left);
+
+        // if (barPosition >= timePieceStart) {
+        //
+        //     const canvas = videoRef.current;
+        //
+        //     const ctx = canvas.getContext('2d');
+        //
+        //     // Create a new image object
+        //     const img = new Image();
+        //
+        //
+        //     img.onload = () => {
+        //         ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Draw image on canvas
+        //     };
+        //
+        //     img.src = piece.src;
+        //
+        //     canvas.width = img.width;
+        //     canvas.height = img.height;
+        //
+        // } else {
+        //
+        //
+        // }
+    //
+    // })
+
+    // Inicializace plochy pro vytváření klipu
+    const videoRef = useRef(null);
+    const [i, setI] = useState(0);
+
+    useEffect(() => {
+
+        const canvas = videoRef.current;
+
+        const ctx = canvas.getContext('2d');
+
+        console.log(selectedPieces[0].left);
+
+        while (i < selectedPieces.length) {
+
+            // chyba, promenna i nefunguje spravne
+            let startPiece = (selectedPieces[i].left * videoLength) / barWidth;
+            let endPiece = ((selectedPieces[i].left + selectedPieces[i].width) * videoLength) / barWidth;
+
+            console.log("barPos", currentTime, "start", startPiece, "end", endPiece, selectedPieces[i].left );
+
+
+            if (currentTime >= startPiece && currentTime <= endPiece) {
+
+                const img = new Image();
+
+
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                };
+
+                img.src = selectedPieces[i].src;
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                break;
+
+            } else if (barPosition > endPiece) {
+
+                setI(i + 1);
+                break;
+
+            } else {
+
+                setI(0);
+                break;
+            }
+        }
+
+    }, [barPosition, videoLength]);
+
+
 
     /** Průběžné přidávání času **/
     useEffect(() => {
@@ -76,6 +158,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
 
     }, [isPlaying, isDragging]);
 
+
     /** Zastavení času **/
     const handlePause = () => setIsPlaying(false);
 
@@ -101,14 +184,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
         // Časová osa
         const bar = event.currentTarget;
 
-        console.log("bar", bar.offsetWidth);
-
         const mouseX = event.clientX - bar.getBoundingClientRect().left;
 
         // Výpočet nového času
-        const newTime = (mouseX / bar.offsetWidth) * videoLength;
+        const newTime = (mouseX / barWidth) * videoLength;
 
-        const newPosition = (mouseX / bar.offsetWidth) * 100;
+        const newPosition = (mouseX / barWidth) * 100;
 
         if (newTime >= 0 && newTime <= videoLength) {
 
@@ -186,9 +267,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
 
             <ClipContainer>
 
-                <VideoTools />
+                <VideoTools/>
 
-                <VideoPreview />
+                <VideoPreview>
+
+                    <canvas ref={videoRef}/>
+
+                </VideoPreview>
 
             </ClipContainer>
 
@@ -248,8 +333,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
                             borderRadius: "5px",
                             display: "flex",
                             flexDirection: "row",
-                            alignItems: "flex-end",
-                            gap: "5px"
+                            alignItems: "flex-end"
                         }}
                         onClick={handleClick}
                         onMouseMove={handleMouseMove}
