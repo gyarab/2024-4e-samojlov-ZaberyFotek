@@ -1,9 +1,9 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-    AddBtn, ArrowBtn,
+    AddBtn, ArrowBtn, SubmitBtn,
     Foto, PieceImages,
     PiecesContainer,
-    ShowNum, TimeInput,
+    ShowNum, StyledSVG, CheckmarkIcon, TimeInput,
     ZaberyPage,
     ZaberySidebarContainer,
     ZaberySidebarItem
@@ -21,10 +21,11 @@ import {
 } from "react-icons/go";
 import {TimelineWidth} from "../../components/Timeline/TimelineWidth";
 import Timeline from "../../components/Timeline/Timeline";
+import {IoIosCheckmarkCircleOutline} from "react-icons/io";
 
 function Zabery(props) {
 
-    let { timelineRef, barWidth } = TimelineWidth();
+    let {timelineRef, barWidth} = TimelineWidth();
 
     barWidth -= 75;
 
@@ -638,7 +639,7 @@ function Zabery(props) {
     /** Funkce se aktivuje v případě, když uživatel klikne/posune danou vygenerovanou částici **/
     const handlePieces = (id, src = null, newWidth = null, newLeft = null) => {
 
-        console.log("GAp", barWidth);
+        // console.log("GAp", barWidth);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
@@ -713,11 +714,17 @@ function Zabery(props) {
             return prevPieces.map((piece, index) => {
                 const gap = (barWidth - (prevPieces.length * pieceWidth)) / (prevPieces.length + 1);
                 const left = gap + index * (pieceWidth + gap);
-                return { ...piece, left };
+                return {...piece, left};
             });
         });
 
     }, [barWidth]);
+
+    const [isMarked, setIsMarked] = useState(false);
+
+    const handleClickMark = () => {
+        setIsMarked(!isMarked);
+    };
 
     return (
         <ZaberyPage>
@@ -874,6 +881,28 @@ function Zabery(props) {
                                        }}/>
 
                             <label>{rangeValue} s</label>
+                        </div>
+
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            width: "100%"
+                        }}>
+
+                            <SubmitBtn isMarked={isMarked} onClick={handleClickMark}>
+
+                                <CheckmarkIcon>
+                                    {isMarked ? <IoIosCheckmarkCircleOutline style={{
+                                        transform: "rotate(180deg)",
+                                        transition: "all 0.5s",
+                                        fontSize: "50px"
+                                    }}/> : "Uložit"}
+
+
+                                </CheckmarkIcon>
+
+                            </SubmitBtn>
+
                         </div>
 
                     </PiecesContainer>}

@@ -1,7 +1,7 @@
 import React, {useState, useRef, useCallback, useEffect} from 'react';
 
 /** Funkce pro ovládání jednotlivých prvků časové osy **/
-const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}) => {
+const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth, handlePieceUpdate, activeIndex}) => {
 
     // Změna velikosti prvku
     const [isResizing, setIsResizing] = useState(null);
@@ -129,7 +129,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}
         display: 'flex',
         width: `${width}px`,
         height: '50px',
-        border: '1px solid #ccc',
+        border: activeIndex === piece.id ? '1px solid var(--color-blue-8)' : 'none',
         position: 'absolute',
         backgroundImage: `url(${piece.src})`,
         backgroundSize: 'contain',
@@ -160,9 +160,12 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth}
     };
 
     return (
+
         <div
+            key={piece.id}
             ref={containerRef}
             style={boxStyles}
+            onClick={() => handlePieceUpdate(piece.id)}
         >
             <div
                 style={leftHandleStyles}

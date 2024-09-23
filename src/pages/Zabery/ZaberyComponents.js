@@ -1,9 +1,10 @@
 import styled from "styled-components";
 import React from "react";
+import {css} from "@emotion/react";
 
 
 export const ZaberyPage = styled.div`
-    display: grid;  
+    display: flex;  
     height: 100vh;  
     overflow: hidden;
     padding-top: 50px;
@@ -17,10 +18,10 @@ export const ZaberySidebarContainer = styled.nav`
     margin-left: 50px;
     flex-direction: column;
     background: var(--color-shadow-9);
-    position: fixed;
     display: flex;
     border-radius: 25px;
     box-shadow: 0 5px 10px var(--color-shadow-6, 0.3);
+    min-width: 250px;
 
     // 520px
     @media screen and (max-width: 768px) {
@@ -63,7 +64,6 @@ export const Foto = styled.div`
     flex: ${(props) => (props.item === 'item4' ? '0' : '1')};
     height: 100%;
     // 250px + margin-left 50px Container
-    margin-left: 300px;
     display: ${(props) => (props.item === 'item4' ? 'inline-flex' : 'flex')};;
     align-items: center;
     justify-content: center;
@@ -83,12 +83,54 @@ export const Foto = styled.div`
     }
 `;
 
+export const SubmitBtn = styled.div`
+    height: 50px;
+    padding: 15px;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.67, 0.17, 0.40, 0.83);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid mediumseagreen;
+
+    &:hover {
+
+        background: radial-gradient(#bfff76, mediumseagreen);;
+    }
+    
+    ${(props) =>
+            props.isMarked &&
+            css`
+                width: 50px;
+                height: 50px;
+                background: mediumseagreen;
+                border-radius: 50%;
+                transform: rotate(-180deg);
+                padding: 0;
+            `}
+`;
+
+export const CheckmarkIcon = styled.div`
+    color: white;
+    transition: all 1s;
+    
+    &:hover {
+        color: var(--color-shadow-9);
+    }
+`;
+
 export const PiecesContainer = styled.div`
+    display: grid;
     color: white;
     font-size: 16px;
     font-weight: 500;
     padding: 15px;
     text-align: left;
+    gap: 5px;
 `;
 
 export const AddBtn = styled.button`

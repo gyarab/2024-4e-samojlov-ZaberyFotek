@@ -3,6 +3,15 @@ import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
 import TimelinePieces from "./TimelinePieces";
 import {ClipContainer, TimelineContainer, VideoPreview, VideoTools} from "./TimelineComponents";
 import {TimelineWidth} from "./TimelineWidth";
+import {ArrowBtn, PiecesContainer, TimeInput} from "../../pages/Zabery/ZaberyComponents";
+import {
+    GoArrowDown,
+    GoArrowDownLeft,
+    GoArrowDownRight,
+    GoArrowLeft,
+    GoArrowRight, GoArrowUp, GoArrowUpLeft,
+    GoArrowUpRight
+} from "react-icons/go";
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces}) {
@@ -34,87 +43,73 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
 
         setIsPlaying(true);
     }
-    // selectedPieces.map((piece) => {
-    //
-    //     console.log(piece.left);
-
-        // if (barPosition >= timePieceStart) {
-        //
-        //     const canvas = videoRef.current;
-        //
-        //     const ctx = canvas.getContext('2d');
-        //
-        //     // Create a new image object
-        //     const img = new Image();
-        //
-        //
-        //     img.onload = () => {
-        //         ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Draw image on canvas
-        //     };
-        //
-        //     img.src = piece.src;
-        //
-        //     canvas.width = img.width;
-        //     canvas.height = img.height;
-        //
-        // } else {
-        //
-        //
-        // }
-    //
-    // })
 
     // Inicializace plochy pro vytváření klipu
     const videoRef = useRef(null);
-    const [i, setI] = useState(0);
 
+    /** Zobrazení fotek do videa **/
     useEffect(() => {
 
+        if (!videoRef.current || selectedPieces.length === 0) return;
+
+        // Plocha videa
         const canvas = videoRef.current;
 
         const ctx = canvas.getContext('2d');
 
-        console.log(selectedPieces[0].left);
+        // Procházení pole částic
+        for (let i = 0; i < selectedPieces.length; i++) {
 
-        while (i < selectedPieces.length) {
+            // Začáteční bod částice
+            const startPiece = (selectedPieces[i].left * videoLength) / barWidth;
 
-            // chyba, promenna i nefunguje spravne
-            let startPiece = (selectedPieces[i].left * videoLength) / barWidth;
-            let endPiece = ((selectedPieces[i].left + selectedPieces[i].width) * videoLength) / barWidth;
+            // Konečný bod částice
+            const endPiece = ((selectedPieces[i].left + selectedPieces[i].width) * videoLength) / barWidth;
 
-            console.log("barPos", currentTime, "start", startPiece, "end", endPiece, selectedPieces[i].left );
+            // Proměnná pro zjištění zda další částice je na ploše
+            const nextPiece = selectedPieces[i + 1] ? (selectedPieces[i + 1].left * videoLength) / barWidth : null;
 
+            // console.log("barPos", currentTime, "start", startPiece, "end", endPiece, selectedPieces[i].left);
 
+            // 3 proměnné, které určují prostor mezi částicemi
+            const beforeFirstCheck = currentTime < startPiece;
+            const middleCheck = currentTime > endPiece && nextPiece && currentTime < nextPiece;
+            const lastEndCheck = currentTime > endPiece && !nextPiece;
+
+            // Nalezení částice v čase
             if (currentTime >= startPiece && currentTime <= endPiece) {
 
                 const img = new Image();
 
-
                 img.onload = () => {
+
+                    if (canvas.width !== img.width || canvas.height !== img.height) {
+
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                    }
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // Vykreslení částice
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 };
 
+                // Obsah částice
                 img.src = selectedPieces[i].src;
 
-                canvas.width = img.width;
-                canvas.height = img.height;
-
                 break;
 
-            } else if (barPosition > endPiece) {
+                // Částice se nachází v meziprostoru
+            } else if (beforeFirstCheck || middleCheck || lastEndCheck) {
 
-                setI(i + 1);
-                break;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            } else {
-
-                setI(0);
                 break;
             }
         }
 
-    }, [barPosition, videoLength]);
-
+    }, [currentTime, videoRef, selectedPieces, videoLength, barWidth]);
 
 
     /** Průběžné přidávání času **/
@@ -196,7 +191,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
             setCurrentTime(newTime);
             setBarPosition(newPosition);
 
-            console.log("position", barPosition)
+            console.log("time", currentTime)
         }
 
     }
@@ -262,12 +257,18 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
         checkPoints.push(i);
     }
 
+    const [activeIndex, setActiveIndex] = useState(null);
+
+    const handlePieceUpdate = (id) => {
+        setActiveIndex(id);
+    };
+
     return (
         <div>
 
             <ClipContainer>
 
-                <VideoTools/>
+                <VideoTools />
 
                 <VideoPreview>
 
@@ -349,6 +350,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
                                 piecesArray={selectedPieces}
                                 onPieceUpdate={handlePieces}
                                 barWidth={barWidth}
+                                handlePieceUpdate={handlePieceUpdate}
+                                activeIndex={activeIndex}
                             />
                         ))}
 
@@ -388,7 +391,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
                                 position: 'absolute',
                                 top: '-2.5px',
                                 left: `${barPosition}%`,
-                                width: '2.5px',
+                                width: '2px',
                                 height: '100%',
                                 backgroundColor: 'blue',
                                 transform: 'translateX(-50%)',
