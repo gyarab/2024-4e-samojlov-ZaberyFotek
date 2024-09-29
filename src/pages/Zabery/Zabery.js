@@ -88,13 +88,35 @@ function Zabery(props) {
     // Aktivní směr pro obrázek
     const [activeArrow, setActiveArrow] = useState(null);
 
+    // Směr částice
+    const [direction, setDirection] = useState(activeArrow);
+
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction) => {
 
         // Zobrazení původní plochy
         canvasRef.current.style.display = 'inline';
 
-        setFunction(prevActiveItem => (prevActiveItem === item ? null : item));
+        setFunction(prevActiveItem => {
+            const newActiveItem = (prevActiveItem === item ? null : item);
+
+            if (newActiveItem === 'item4' || (newActiveItem.includes('arrow'))) {
+
+                setPieceStatus(true);
+
+            } else {
+
+                setPieceStatus(false);
+            }
+
+            return newActiveItem; // Return the new active item
+        });
+
+        if (item.includes('arrow')) {
+
+            setDirection(item);
+            console.log("direction", direction);
+        }
     };
 
     // Počet aktuálních sloupců a řádků v paneli nástrojů
@@ -722,8 +744,28 @@ function Zabery(props) {
 
     const [isMarked, setIsMarked] = useState(false);
 
+    /** Funkce pro zobrazení efektů tlačítka **/
     const handleClickMark = () => {
-        setIsMarked(!isMarked);
+
+        setIsMarked(true);
+
+        // po jedné sekundě se tlačítko vrátí do původního stavu
+        setTimeout(() => {
+            setIsMarked(false);
+        }, 1000);
+
+    };
+
+    const [pieceStatus, setPieceStatus] = useState(false);
+
+    /** Kliknutí na prvek v Timeline **/
+    const handlePieceClick = (status) => {
+
+        if (activeItem === 'item4') {
+
+            setPieceStatus(status);
+
+        }
     };
 
     return (
@@ -804,13 +846,15 @@ function Zabery(props) {
                 </ZaberySidebarItem>
 
                 <ZaberySidebarItem isClicked={activeItem === 'item4'}
-                                   onClick={() => handleVisibility('item4', setActiveItem)}>
+                                   onClick={() => handleVisibility('item4', setActiveItem)}
+                                   pieceStatus={pieceStatus}>
 
                     <PiNumberCircleFour style={{height: "35px", width: "35px"}}/> Vytvořit klipy
 
                 </ZaberySidebarItem>
 
-                {activeItem === 'item4' &&
+                {/** Active item 4  **/}
+                {pieceStatus &&
 
                     <PiecesContainer>
 
@@ -919,7 +963,7 @@ function Zabery(props) {
 
                 {activeItem === 'item4' &&
                     <Timeline canvasRef={canvasRef} selectedPieces={selectedPieces} handlePieces={handlePieces}
-                              barWidth={barWidth}/>
+                              handlePieceClick={handlePieceClick}/>
 
                 }
 

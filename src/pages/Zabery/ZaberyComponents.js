@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from 'styled-components';
 import React from "react";
 import {css} from "@emotion/react";
 
@@ -95,19 +95,19 @@ export const SubmitBtn = styled.div`
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: 1px solid mediumseagreen;
+    border: 1px solid #00cc66;
 
     &:hover {
 
-        background: radial-gradient(#bfff76, mediumseagreen);;
+        background: radial-gradient(#018844, #00cc66);;
     }
-    
+
     ${(props) =>
             props.isMarked &&
             css`
                 width: 50px;
                 height: 50px;
-                background: mediumseagreen;
+                background: #018844;
                 border-radius: 50%;
                 transform: rotate(-180deg);
                 padding: 0;
@@ -117,10 +117,15 @@ export const SubmitBtn = styled.div`
 export const CheckmarkIcon = styled.div`
     color: white;
     transition: all 1s;
-    
-    &:hover {
-        color: var(--color-shadow-9);
-    }
+`;
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 `;
 
 export const PiecesContainer = styled.div`
@@ -131,6 +136,7 @@ export const PiecesContainer = styled.div`
     padding: 15px;
     text-align: left;
     gap: 5px;
+    animation: ${fadeIn} 2s ease;
 `;
 
 export const AddBtn = styled.button`

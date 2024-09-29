@@ -9,8 +9,31 @@ export const ClipContainer = styled.div`
 `;
 
 export const VideoTools = styled.div`
-    background: var(--color-shadow-8);
+    background: linear-gradient(to right, var(--color-blue-2), var(--color-blue-8));
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    color: var(--color-shadow-2);
+    
+    div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 150px;
+        text-align: center;
+        font-weight: 600;
+        padding: 15px;
+        background: var(--color-shadow-8);
+        border-radius: 16px;
+        box-shadow: 0 4px 10px var(--color-shadow-2);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.46);
+        cursor: pointer;
+    }
 `;
 
 export const VideoPreview = styled.div`
@@ -19,6 +42,7 @@ export const VideoPreview = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 1px solid var(--color-shadow-2);
     
     canvas {
         width: 100%;

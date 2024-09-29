@@ -3,18 +3,15 @@ import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
 import TimelinePieces from "./TimelinePieces";
 import {ClipContainer, TimelineContainer, VideoPreview, VideoTools} from "./TimelineComponents";
 import {TimelineWidth} from "./TimelineWidth";
-import {ArrowBtn, PiecesContainer, TimeInput} from "../../pages/Zabery/ZaberyComponents";
-import {
-    GoArrowDown,
-    GoArrowDownLeft,
-    GoArrowDownRight,
-    GoArrowLeft,
-    GoArrowRight, GoArrowUp, GoArrowUpLeft,
-    GoArrowUpRight
-} from "react-icons/go";
+import {RiUploadCloud2Line} from "react-icons/ri";
+import {VscScreenFull} from "react-icons/vsc";
+import {LuMusic4} from "react-icons/lu";
+import {RxText} from "react-icons/rx";
+import {TbTransitionRight} from "react-icons/tb";
+import {MdAnimation} from "react-icons/md";
 
 /** Prvek časové osy **/
-function Timeline({canvasRef, selectedPieces, handlePieces}) {
+function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     let {timelineRef, barWidth} = TimelineWidth();
 
@@ -43,6 +40,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
 
         setIsPlaying(true);
     }
+
+    const [pieceIsClicked, setPieceClicked] = useState(false);
 
     // Inicializace plochy pro vytváření klipu
     const videoRef = useRef(null);
@@ -98,12 +97,20 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
                 // Obsah částice
                 img.src = selectedPieces[i].src;
 
+                setPieceClicked(true);
+
+                handlePieceClick(true);
+
                 break;
 
                 // Částice se nachází v meziprostoru
             } else if (beforeFirstCheck || middleCheck || lastEndCheck) {
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                setPieceClicked(false);
+
+                handlePieceClick(false);
 
                 break;
             }
@@ -260,6 +267,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
     const [activeIndex, setActiveIndex] = useState(null);
 
     const handlePieceUpdate = (id) => {
+
         setActiveIndex(id);
     };
 
@@ -268,7 +276,16 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
 
             <ClipContainer>
 
-                <VideoTools />
+                <VideoTools>
+
+                    <div><RiUploadCloud2Line/> Média</div>
+                    <div><VscScreenFull/> Plátno</div>
+                    <div><LuMusic4/> Hudba</div>
+                    <div><RxText/>Text</div>
+                    <div><TbTransitionRight/> Přechody</div>
+                    <div><MdAnimation/> Animace</div>
+
+                </VideoTools>
 
                 <VideoPreview>
 
@@ -352,6 +369,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces}) {
                                 barWidth={barWidth}
                                 handlePieceUpdate={handlePieceUpdate}
                                 activeIndex={activeIndex}
+                                pieceIsClicked={pieceIsClicked}
                             />
                         ))}
 
