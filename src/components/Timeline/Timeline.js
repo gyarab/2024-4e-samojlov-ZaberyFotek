@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
 import TimelinePieces from "./TimelinePieces";
-import {ClipContainer, TimelineContainer, VideoPreview, VideoTools} from "./TimelineComponents";
+import {ClipContainer, ClipTool, ExitBtn, TimelineContainer, VideoPreview, VideoTools} from "./TimelineComponents";
 import {TimelineWidth} from "./TimelineWidth";
 import {RiUploadCloud2Line} from "react-icons/ri";
 import {VscScreenFull} from "react-icons/vsc";
@@ -9,6 +9,8 @@ import {LuMusic4} from "react-icons/lu";
 import {RxText} from "react-icons/rx";
 import {TbTransitionRight} from "react-icons/tb";
 import {MdAnimation} from "react-icons/md";
+import {GoArrowLeft} from "react-icons/go";
+import {ArrowBtn} from "../../pages/Zabery/ZaberyComponents";
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -266,24 +268,95 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     const [activeIndex, setActiveIndex] = useState(null);
 
+    /** Nastavení aktuálního indexu částice **/
     const handlePieceUpdate = (id) => {
 
         setActiveIndex(id);
     };
 
+    /** Nástroje určené pro klipy **/
+
+    const [isFlexStart, setIsFlexStart] = useState(false);
+
+    const clipTools = [
+        {icon: <RiUploadCloud2Line/>, label: 'Média'},
+        {icon: <VscScreenFull/>, label: 'Plátno'},
+        {icon: <LuMusic4/>, label: 'Hudba'},
+        {icon: <RxText/>, label: 'Text'},
+        {icon: <TbTransitionRight/>, label: 'Přechody'},
+        {icon: <MdAnimation/>, label: 'Animace'}
+    ];
+
+    const [activeTool, setActiveTool] = useState(null);
+
+    const [index, setIndex] = useState(0);
+    
+    const handleToolClick = (index) => {
+
+        setActiveTool(index);
+
+        setIsFlexStart(!isFlexStart);
+
+        setIndex(index);
+    };
+
     return (
         <div>
-
             <ClipContainer>
 
-                <VideoTools>
+                <VideoTools isFlexStart={isFlexStart}>
 
-                    <div><RiUploadCloud2Line/> Média</div>
-                    <div><VscScreenFull/> Plátno</div>
-                    <div><LuMusic4/> Hudba</div>
-                    <div><RxText/>Text</div>
-                    <div><TbTransitionRight/> Přechody</div>
-                    <div><MdAnimation/> Animace</div>
+                    {activeTool === null ? (
+
+                        clipTools.map((item, index) => (
+
+                            <ClipTool
+                                key={index}
+                                onClick={() => handleToolClick(index)}
+                            >
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                }}>
+                                    {item.icon} {item.label}
+                                </div>
+
+                            </ClipTool>
+                        ))
+                    ) : (
+
+                        <ClipTool
+                            key={activeTool}
+                            isActive={activeTool === index}
+                            fadeOut={activeTool !== index}
+                        >
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                fontWeight: 600,
+                                width: "100%",
+                            }}>
+
+                                <ArrowBtn onClick={() => handleToolClick(null)}>
+                                    <GoArrowLeft />
+                                </ArrowBtn>
+
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    margin: '0 auto'
+                                }}>
+                                    {clipTools[activeTool].icon} {clipTools[activeTool].label}
+                                </div>
+
+                            </div>
+
+                        </ClipTool>
+                    )}
 
                 </VideoTools>
 

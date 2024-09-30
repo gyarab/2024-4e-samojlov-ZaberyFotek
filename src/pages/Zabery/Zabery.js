@@ -98,9 +98,10 @@ function Zabery(props) {
         canvasRef.current.style.display = 'inline';
 
         setFunction(prevActiveItem => {
+
             const newActiveItem = (prevActiveItem === item ? null : item);
 
-            if (newActiveItem === 'item4' || (newActiveItem.includes('arrow'))) {
+            if (newActiveItem === 'item4' || (newActiveItem && newActiveItem.includes('arrow'))) {
 
                 setPieceStatus(true);
 
@@ -109,7 +110,7 @@ function Zabery(props) {
                 setPieceStatus(false);
             }
 
-            return newActiveItem; // Return the new active item
+            return newActiveItem;
         });
 
         if (item.includes('arrow')) {
