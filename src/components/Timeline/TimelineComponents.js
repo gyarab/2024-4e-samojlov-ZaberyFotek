@@ -59,6 +59,7 @@ export const ClipTool = styled.div`
     border: 1px solid rgba(255, 255, 255, 0.46);
     cursor: pointer;
     transition: all 1s ease-in-out;
+    flex-direction: column;
 
     ${({isActive}) =>
             isActive &&

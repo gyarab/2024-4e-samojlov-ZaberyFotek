@@ -5,12 +5,13 @@ import {ClipContainer, ClipTool, ExitBtn, TimelineContainer, VideoPreview, Video
 import {TimelineWidth} from "./TimelineWidth";
 import {RiUploadCloud2Line} from "react-icons/ri";
 import {VscScreenFull} from "react-icons/vsc";
-import {LuMusic4} from "react-icons/lu";
+import {LuLayoutGrid, LuMusic4, LuRectangleHorizontal, LuRectangleVertical, LuSquare} from "react-icons/lu";
 import {RxText} from "react-icons/rx";
 import {TbTransitionRight} from "react-icons/tb";
 import {MdAnimation} from "react-icons/md";
 import {GoArrowLeft} from "react-icons/go";
 import {ArrowBtn} from "../../pages/Zabery/ZaberyComponents";
+import {CgScreenWide} from "react-icons/cg";
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -278,9 +279,38 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     const [isFlexStart, setIsFlexStart] = useState(false);
 
+    const canvasTypes = [
+
+        {icon: <LuRectangleHorizontal/>, ratio: '4:3', name: 'Na šířku'},
+        {icon: <LuRectangleVertical/>, ratio: '4:5', name: 'Portrét'},
+        {icon: <LuLayoutGrid/>, ratio: '5:4', name: 'Na šířku (příspěvek)'},
+        {icon: <LuRectangleVertical/>, ratio: '2:3', name: 'Vertikální'},
+        {icon: <LuSquare/>, ratio: '1:1', name: 'Čtverec'},
+        {icon: <LuRectangleHorizontal/>, ratio: '16:9', name: 'Širokoúhlý'},
+        {icon: <LuRectangleVertical/>, ratio: '9:16', name: 'Na výšku'},
+        {icon: <CgScreenWide/>, ratio: '21:9', name: 'Ultra širokoúhlý'}
+    ]
+
+    const canvasContent =
+
+        canvasTypes.map((item, index) => (
+
+            <div
+                key={index}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '75%'
+                }}
+            >
+                {item.icon}{item.ratio}
+
+            </div>));
+
     const clipTools = [
         {icon: <RiUploadCloud2Line/>, label: 'Média'},
-        {icon: <VscScreenFull/>, label: 'Plátno'},
+        {icon: <VscScreenFull/>, label: 'Plátno', content: canvasContent},
         {icon: <LuMusic4/>, label: 'Hudba'},
         {icon: <RxText/>, label: 'Text'},
         {icon: <TbTransitionRight/>, label: 'Přechody'},
@@ -290,7 +320,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [activeTool, setActiveTool] = useState(null);
 
     const [index, setIndex] = useState(0);
-    
+
     const handleToolClick = (index) => {
 
         setActiveTool(index);
@@ -299,6 +329,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         setIndex(index);
     };
+
+    const [isHovered, setIsHovered] = useState(0);
 
     return (
         <div>
@@ -317,7 +349,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '10px',
+                                    gap: '10px'
                                 }}>
                                     {item.icon} {item.label}
                                 </div>
@@ -337,10 +369,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                 alignItems: 'center',
                                 fontWeight: 600,
                                 width: "100%",
+                                background: 'var(--color-shadow-8)',
+                                borderRadius: '25px',
+                                padding: '5px'
                             }}>
 
                                 <ArrowBtn onClick={() => handleToolClick(null)}>
-                                    <GoArrowLeft />
+                                    <GoArrowLeft/>
                                 </ArrowBtn>
 
                                 <div style={{
@@ -348,12 +383,39 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     gap: '10px',
-                                    margin: '0 auto'
+                                    margin: '0 auto',
                                 }}>
                                     {clipTools[activeTool].icon} {clipTools[activeTool].label}
                                 </div>
 
                             </div>
+
+                            {/** Vypsání obsahu nástroje **/}
+                            {clipTools[activeTool].content !== null ? (
+
+                                clipTools[activeTool].content.map((item, index) => (
+                                    <div key={index}
+                                         id={`${index}`}
+                                         onMouseEnter={() => setIsHovered(index)}
+                                         onMouseLeave={() => setIsHovered(null)}
+                                         style={{
+                                             backgroundColor: isHovered === index ? 'var(--color-shadow-6)' : 'transparent',
+                                             display: 'flex',
+                                             flexDirection: "column",
+                                             justifyContent: 'center',
+                                             alignItems: 'center',
+                                             gap: '10px',
+                                             textAlign: 'center',
+                                             width: '100%',
+                                             transition: 'background-color 0.3s ease-in-out',
+                                             borderRadius: "25px"
+                                         }}>
+                                        {item}
+                                    </div>
+                                ))
+                            ) : (
+                                <div>Někde nastala chyba</div>
+                            )}
 
                         </ClipTool>
                     )}
