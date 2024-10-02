@@ -1,7 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
 import TimelinePieces from "./TimelinePieces";
-import {ClipContainer, ClipTool, ExitBtn, TimelineContainer, VideoPreview, VideoTools} from "./TimelineComponents";
+import {
+    CanvasContent,
+    ClipContainer,
+    ClipTool,
+    TimelineContainer,
+    VideoPreview,
+    VideoTools
+} from "./TimelineComponents";
 import {TimelineWidth} from "./TimelineWidth";
 import {RiUploadCloud2Line} from "react-icons/ri";
 import {VscScreenFull} from "react-icons/vsc";
@@ -289,24 +296,59 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {icon: <LuRectangleHorizontal/>, ratio: '16:9', name: 'Širokoúhlý'},
         {icon: <LuRectangleVertical/>, ratio: '9:16', name: 'Na výšku'},
         {icon: <CgScreenWide/>, ratio: '21:9', name: 'Ultra širokoúhlý'}
-    ]
+    ];
 
-    const canvasContent =
+    // Ukládání výběru uživatele po kliknutí
+    const [canvasSelector, setCanvasSelector] = useState(0);
 
-        canvasTypes.map((item, index) => (
+    /** Funkce pro úpravu rozměrů plochy **/
+    const canvasContent = (type) => {
+    const canvas = videoRef.current;
 
-            <div
+        return type.map((item, index) => (
+
+            <CanvasContent
                 key={index}
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '75%'
-                }}
+                isClicked={canvasSelector === index}
+                onClick={() => setRatioCanvas(canvas, index, item)}
             >
-                {item.icon}{item.ratio}
+                {item.icon} {item.ratio}
 
-            </div>));
+            </CanvasContent>
+        ));
+    };
+
+    /** Výpočet poměru **/
+    const getRatioValues = (ratio) => {
+
+        const [width, height] = ratio.split(':').map(Number);
+
+        return {x: width, y: height};
+    };
+
+    /** Rozměry plochy (Canvas) **/
+    const setRatioCanvas = (canvas, index, item) => {
+
+        setCanvasSelector(index);
+
+        const ratioValues = getRatioValues(item.ratio);
+
+        const parentWidth = canvas.parentElement.clientWidth;
+        const parentHeight = canvas.parentElement.clientHeight;
+
+        const pieceX = 30;
+        const pieceY = 30;
+
+        const newWidth = pieceX * ratioValues.x;
+        const newHeight = pieceY * ratioValues.y;
+
+        canvas.width = Math.min(newWidth, parentWidth);
+        canvas.height = Math.min(newHeight, parentHeight);
+
+        console.log("Šířka", canvas.width);
+        console.log("Výška", canvas.height);
+    };
+
 
     const clipTools = [
         {icon: <RiUploadCloud2Line/>, label: 'Média'},
@@ -317,6 +359,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {icon: <MdAnimation/>, label: 'Animace'}
     ];
 
+    // Aktivní nástroj zvolený uživatelem
     const [activeTool, setActiveTool] = useState(null);
 
     const [index, setIndex] = useState(0);
@@ -329,8 +372,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         setIndex(index);
     };
-
-    const [isHovered, setIsHovered] = useState(0);
 
     return (
         <div>
@@ -393,26 +434,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                             {/** Vypsání obsahu nástroje **/}
                             {clipTools[activeTool].content !== null ? (
 
-                                clipTools[activeTool].content.map((item, index) => (
-                                    <div key={index}
-                                         id={`${index}`}
-                                         onMouseEnter={() => setIsHovered(index)}
-                                         onMouseLeave={() => setIsHovered(null)}
-                                         style={{
-                                             backgroundColor: isHovered === index ? 'var(--color-shadow-6)' : 'transparent',
-                                             display: 'flex',
-                                             flexDirection: "column",
-                                             justifyContent: 'center',
-                                             alignItems: 'center',
-                                             gap: '10px',
-                                             textAlign: 'center',
-                                             width: '100%',
-                                             transition: 'background-color 0.3s ease-in-out',
-                                             borderRadius: "25px"
-                                         }}>
-                                        {item}
-                                    </div>
-                                ))
+                                canvasContent(canvasTypes)
+
                             ) : (
                                 <div>Někde nastala chyba</div>
                             )}

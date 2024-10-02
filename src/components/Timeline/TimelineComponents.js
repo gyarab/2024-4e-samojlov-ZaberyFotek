@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import {GoArrowLeft} from "react-icons/go";
 
 export const ClipContainer = styled.div`
     display: flex;
@@ -28,8 +27,7 @@ export const VideoPreview = styled.div`
     border: 1px solid var(--color-shadow-2);
 
     canvas {
-        width: 100%;
-        height: 100%;
+        background: white;
     }
 `;
 
@@ -80,4 +78,21 @@ export const ClipTool = styled.div`
     transition: opacity 1s ease-out;
     display: none;
   `}
+`;
+
+export const CanvasContent = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    width: 75%;
+    transition: background-color 0.3s ease-in-out;
+    border-radius: 25px;
+    padding: 2px 10px 2px 10px;
+    background: ${({ isClicked }) => (isClicked ? '#00cc66' : 'var(--color-shadow-7)')};;
+    
+    &:hover {
+        background: var(--color-shadow-6);
+    }
 `;
