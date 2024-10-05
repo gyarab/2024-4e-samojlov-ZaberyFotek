@@ -3,7 +3,7 @@ import {
     AddBtn, ArrowBtn, SubmitBtn,
     Foto, PieceImages,
     PiecesContainer,
-    ShowNum, StyledSVG, CheckmarkIcon, TimeInput,
+    ShowNum, CheckmarkIcon, TimeInput,
     ZaberyPage,
     ZaberySidebarContainer,
     ZaberySidebarItem
@@ -86,10 +86,10 @@ function Zabery(props) {
     const [activeItem, setActiveItem] = useState(null);
 
     // Aktivní směr pro obrázek
-    const [activeArrow, setActiveArrow] = useState(null);
-
-    // Směr částice
-    const [direction, setDirection] = useState(activeArrow);
+    const [activeArrow, setActiveArrow] = useState('arrow1');
+    
+    // Tlačítko pro potvrzení
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction) => {
@@ -115,8 +115,8 @@ function Zabery(props) {
 
         if (item.includes('arrow')) {
 
-            setDirection(item);
-            console.log("direction", direction);
+            setActiveArrow(item);
+            console.log("direction", activeArrow);
         }
     };
 
@@ -752,9 +752,12 @@ function Zabery(props) {
 
         // po jedné sekundě se tlačítko vrátí do původního stavu
         setTimeout(() => {
+
             setIsMarked(false);
+
         }, 1000);
 
+        setIsSubmitted(true);
     };
 
     const [pieceStatus, setPieceStatus] = useState(false);
@@ -768,6 +771,21 @@ function Zabery(props) {
 
         }
     };
+
+    // useEffect(() => {
+    //     const canvas = canvasRef.current;
+    //     const img = new Image();
+    //     const arrow = new Image();
+    //
+    //     img.src = imgSrc;
+    //     arrow.src = arrowSrc;
+    //
+    //     img.onload = () => {
+    //         arrow.onload = () => {
+    //             createClip(canvas, img, arrow, duration);
+    //         };
+    //     };
+    // }, [imgSrc, arrowSrc, duration]);
 
     return (
         <ZaberyPage>
@@ -961,10 +979,10 @@ function Zabery(props) {
                 {/* Vybrané částice */}
                 {activeItem === 'item3' && getPieces()}
 
-
                 {activeItem === 'item4' &&
                     <Timeline canvasRef={canvasRef} selectedPieces={selectedPieces} handlePieces={handlePieces}
-                              handlePieceClick={handlePieceClick}/>
+                              handlePieceClick={handlePieceClick} isSubmitted={isSubmitted}
+                    />
 
                 }
 

@@ -19,9 +19,10 @@ import {MdAnimation} from "react-icons/md";
 import {GoArrowLeft} from "react-icons/go";
 import {ArrowBtn} from "../../pages/Zabery/ZaberyComponents";
 import {CgScreenWide} from "react-icons/cg";
+import ClipCreator from "../Clip/ClipCreator";
 
 /** Prvek časové osy **/
-function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
+function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, isSubmitted}) {
 
     let {timelineRef, barWidth} = TimelineWidth();
 
@@ -56,15 +57,37 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     // Inicializace plochy pro vytváření klipu
     const videoRef = useRef(null);
 
+    // Aktivní poměr plochy
+    const [activeRatio, setActiveRatio] = useState(() => {
+        return localStorage.getItem('activeRatio') || '1:1';
+    });
+
+    // Ukládání výběru uživatele po kliknutí
+    const [canvasSelector, setCanvasSelector] = useState(() => {
+
+        return parseInt(localStorage.getItem('canvasSelector'));
+    });
+
+    const [img, setImg] = useState(null);
+
     /** Zobrazení fotek do videa **/
     useEffect(() => {
-
-        if (!videoRef.current || selectedPieces.length === 0) return;
 
         // Plocha videa
         const canvas = videoRef.current;
 
         const ctx = canvas.getContext('2d');
+
+        if (activeRatio) {
+
+            // Uložení aktivního poměru do místního úložiště
+            localStorage.setItem('activeRatio', activeRatio.toString());
+        }
+
+        // Nastavení velikosti plochy dle poměru
+        setRatioCanvas(canvas, canvasSelector, activeRatio);
+
+        if (!videoRef.current || selectedPieces.length === 0) return;
 
         // Procházení pole částic
         for (let i = 0; i < selectedPieces.length; i++) {
@@ -92,17 +115,19 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 img.onload = () => {
 
-                    if (canvas.width !== img.width || canvas.height !== img.height) {
-
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                    }
+                    // if (canvas.width !== img.width || canvas.height !== img.height) {
+                    //
+                    //     canvas.width = img.width;
+                    //     canvas.height = img.height;
+                    // }
 
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                     // Vykreslení částice
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 };
+
+                setImg(img);
 
                 // Obsah částice
                 img.src = selectedPieces[i].src;
@@ -126,7 +151,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             }
         }
 
-    }, [currentTime, videoRef, selectedPieces, videoLength, barWidth]);
+    }, [currentTime, videoRef, selectedPieces, videoLength, barWidth, activeRatio, canvasSelector]);
 
 
     /** Průběžné přidávání času **/
@@ -298,18 +323,28 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {icon: <CgScreenWide/>, ratio: '21:9', name: 'Ultra širokoúhlý'}
     ];
 
-    // Ukládání výběru uživatele po kliknutí
-    const [canvasSelector, setCanvasSelector] = useState(0);
+    // useEffect(() => {
+    //
+    //     const interval = setInterval(() => {
+    //
+    //         setCanvasSelector(prev => prev === canvasSelector);
+    //
+    //     }, 1000);
+    //
+    //     return () => clearInterval(interval);
+    //
+    // }, [canvasTypes.length]);
 
     /** Funkce pro úpravu rozměrů plochy **/
     const canvasContent = (type) => {
-    const canvas = videoRef.current;
+
+        const canvas = videoRef.current;
 
         return type.map((item, index) => (
 
             <CanvasContent
                 key={index}
-                isClicked={canvasSelector === index}
+                isClicked={index === canvasSelector}
                 onClick={() => setRatioCanvas(canvas, index, item)}
             >
                 {item.icon} {item.ratio}
@@ -323,30 +358,58 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         const [width, height] = ratio.split(':').map(Number);
 
-        return {x: width, y: height};
+        return { x: width, y: height };
     };
+
 
     /** Rozměry plochy (Canvas) **/
     const setRatioCanvas = (canvas, index, item) => {
 
-        setCanvasSelector(index);
+        if (index !== null) {
 
-        const ratioValues = getRatioValues(item.ratio);
+            // Nastavení aktuálního indexu
+            setCanvasSelector(index);
+
+            localStorage.setItem('canvasSelector', index.toString());
+        }
+
+        if (item && item.ratio) {
+
+            // Nastavení vybraného poměru plochy uživatelem
+            setActiveRatio(item.ratio);
+
+        } else if (!item.ratio && !activeRatio) {
+
+            // Nastavení výchozího poměru plochy
+            setActiveRatio('1:1');
+        }
+
+        const ratioValues = getRatioValues(activeRatio);
 
         const parentWidth = canvas.parentElement.clientWidth;
         const parentHeight = canvas.parentElement.clientHeight;
 
-        const pieceX = 30;
-        const pieceY = 30;
+        // Poměr X:Y
+        const aspectRatioX = ratioValues.x;
+        const aspectRatioY = ratioValues.y;
 
-        const newWidth = pieceX * ratioValues.x;
-        const newHeight = pieceY * ratioValues.y;
+        // Výpočet poměru
+        const aspectRatio = aspectRatioX / aspectRatioY;
 
-        canvas.width = Math.min(newWidth, parentWidth);
-        canvas.height = Math.min(newHeight, parentHeight);
+        // Na základě výšky určujeme délku šířky
+        let newWidth = parentHeight * aspectRatio;
+        let newHeight = parentHeight;
 
-        console.log("Šířka", canvas.width);
-        console.log("Výška", canvas.height);
+        // Přenastavení šířky
+        if (newWidth > parentWidth) {
+
+            newWidth = parentWidth;
+            newHeight = parentWidth / aspectRatio;
+        }
+
+        // Nastavení rozměrů plochy
+        canvas.width = newWidth;
+        canvas.height = newHeight;
     };
 
 
@@ -448,6 +511,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 <VideoPreview>
 
                     <canvas ref={videoRef}/>
+
+                    {/*<ClipCreator canvas={videoRef.current} img={img} arrow={0} duration={10000} videoRef={videoRef}/>*/}
 
                 </VideoPreview>
 
