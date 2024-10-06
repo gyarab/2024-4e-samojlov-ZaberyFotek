@@ -108,7 +108,8 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
 
         // Aktualizace dat o prvku
         if (isResizing) {
-            onPieceUpdate(piece.id, piece.src, width, left);
+
+            onPieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted);
         }
 
         setIsResizing(null);
@@ -165,7 +166,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
             key={piece.id}
             ref={containerRef}
             style={boxStyles}
-            onClick={() => handlePieceUpdate(piece.id)}
+            onClick={() => handlePieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted)}
         >
             <div
                 style={leftHandleStyles}

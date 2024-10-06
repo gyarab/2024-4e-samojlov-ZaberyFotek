@@ -1,9 +1,14 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-    AddBtn, ArrowBtn, SubmitBtn,
-    Foto, PieceImages,
+    AddBtn,
+    ArrowBtn,
+    CheckmarkIcon,
+    Foto,
+    PieceImages,
     PiecesContainer,
-    ShowNum, CheckmarkIcon, TimeInput,
+    ShowNum,
+    SubmitBtn,
+    TimeInput,
     ZaberyPage,
     ZaberySidebarContainer,
     ZaberySidebarItem
@@ -16,7 +21,8 @@ import {
     GoArrowDownRight,
     GoArrowLeft,
     GoArrowRight,
-    GoArrowUp, GoArrowUpLeft,
+    GoArrowUp,
+    GoArrowUpLeft,
     GoArrowUpRight
 } from "react-icons/go";
 import {TimelineWidth} from "../../components/Timeline/TimelineWidth";
@@ -87,7 +93,7 @@ function Zabery(props) {
 
     // Aktivní směr pro obrázek
     const [activeArrow, setActiveArrow] = useState('arrow1');
-    
+
     // Tlačítko pro potvrzení
     const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -135,6 +141,9 @@ function Zabery(props) {
 
     // Souřadnice liní
     const [startOffset, setStartOffset] = useState(null);
+
+    // Aktivní prvek Timeline
+    const [timelineItem, setTimelineItem] = useState(null);
 
     /** Funkce pro přidání nebo odebrání řádků **/
     const operationHandler = (operation, type, setType, word) => {
@@ -660,23 +669,31 @@ function Zabery(props) {
     }
 
     /** Funkce se aktivuje v případě, když uživatel klikne/posune danou vygenerovanou částici **/
-    const handlePieces = (id, src = null, newWidth = null, newLeft = null) => {
+    const handlePieces = (id, src = null, newWidth = null, newLeft = null, isSubmitted = null) => {
 
-        // console.log("GAp", barWidth);
+        setTimelineItem(id);
+
+        console.log("ID", id);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
 
             const existingItem = prevItems.find(item => item.id === id);
-
             const pieceWidth = newWidth || 100;
 
             // Kontrola, zda částice existuje
             if (existingItem && newWidth !== null && newLeft !== null) {
 
-                // Aktualizace částice s novou šířkou a levou odchylkou
+                // Aktualizace částice s novou šířkou, levou odchylkou a isSubmitted
                 return prevItems.map(item =>
-                    item.id === id ? {...item, width: newWidth, left: newLeft} : item
+                    item.id === id
+                        ? {
+                            ...item,
+                            width: newWidth,
+                            left: newLeft,
+                            isSubmitted: isSubmitted !== null ? isSubmitted : item.isSubmitted
+                        }
+                        : item
                 );
             }
 
@@ -686,18 +703,7 @@ function Zabery(props) {
                 const updatedItems = prevItems.filter(item => item.id !== id);
 
                 // Výpočet pozice pro zbývající částice
-                return updatedItems.map((item, index) => {
-
-                    const gap = (barWidth - (updatedItems.length * pieceWidth)) / (updatedItems.length + 1);
-
-                    const left = gap + index * (pieceWidth + gap);
-
-                    return {
-                        ...item,
-                        value: index + 1,
-                        left: left,
-                    };
-                });
+                return updateItems(updatedItems, pieceWidth, isSubmitted);
             }
 
             // Přidání částice
@@ -705,27 +711,42 @@ function Zabery(props) {
 
                 const updatedItems = [
                     ...prevItems,
-                    {id: id, value: prevItems.length + 1, src: src, width: pieceWidth, left: 0}
+                    {
+                        id: id,
+                        value: prevItems.length + 1,
+                        src: src,
+                        width: pieceWidth,
+                        left: 0,
+                        isSubmitted: false
+                    }
                 ];
 
                 // Přepočítání pozice pro všechny částice včetně nové
-                return updatedItems.map((item, index) => {
-
-                    const gap = (barWidth - (updatedItems.length * pieceWidth)) / (updatedItems.length + 1);
-                    const left = gap + index * (pieceWidth + gap);
-
-                    return {
-                        ...item,
-                        value: index + 1,
-                        left: left,
-                    };
-                });
+                return updateItems(updatedItems, pieceWidth, isSubmitted);
             }
 
             // Pokud žádná podmínka není splněna
             return prevItems;
         });
     };
+
+    /** Funkce pro obnovu prvků v Timeline **/
+    const updateItems = (updatedItems, pieceWidth, isSubmitted) => {
+
+        return updatedItems.map((item, index) => {
+
+            const gap = (barWidth - (updatedItems.length * pieceWidth)) / (updatedItems.length + 1);
+            const left = gap + index * (pieceWidth + gap);
+
+            return {
+                ...item,
+                value: index + 1,
+                left: left,
+                isSubmitted: isSubmitted !== null ? isSubmitted : item.isSubmitted
+            };
+        });
+    };
+
 
     // Neustálý cyklus pro správnou funkčnost responzivity částic
     useEffect(() => {
@@ -757,7 +778,8 @@ function Zabery(props) {
 
         }, 1000);
 
-        setIsSubmitted(true);
+        console.log("id", timelineItem);
+        console.log("pieces", selectedPieces);
     };
 
     const [pieceStatus, setPieceStatus] = useState(false);
@@ -772,20 +794,20 @@ function Zabery(props) {
         }
     };
 
-    // useEffect(() => {
-    //     const canvas = canvasRef.current;
-    //     const img = new Image();
-    //     const arrow = new Image();
-    //
-    //     img.src = imgSrc;
-    //     arrow.src = arrowSrc;
-    //
-    //     img.onload = () => {
-    //         arrow.onload = () => {
-    //             createClip(canvas, img, arrow, duration);
-    //         };
-    //     };
-    // }, [imgSrc, arrowSrc, duration]);
+    const getActiveItemDetails = () => {
+
+        console.log(timelineItem);
+
+        return {
+            id: timelineItem.id,
+            value: timelineItem.value,
+            src: timelineItem.src,
+            width: timelineItem.width,
+            left: timelineItem.left,
+            isSubmitted: timelineItem.isSubmitted
+        };
+    };
+
 
     return (
         <ZaberyPage>
@@ -952,7 +974,8 @@ function Zabery(props) {
                             width: "100%"
                         }}>
 
-                            <SubmitBtn isMarked={isMarked} onClick={handleClickMark}>
+                            <SubmitBtn isMarked={isMarked}
+                                       onClick={handleClickMark}>
 
                                 <CheckmarkIcon>
                                     {isMarked ? <IoIosCheckmarkCircleOutline style={{
