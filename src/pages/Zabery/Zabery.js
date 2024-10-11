@@ -38,7 +38,7 @@ function Zabery(props) {
     // Vybrané částice obrázku uživatelem
     const [selectedPieces, setSelectedPieces] = useState([]);
 
-    const [rangeValue, setRangeValue] = useState(50)
+    const [rangeValue, setRangeValue] = useState(15)
 
     // Aktuální obrázek
     const [currentImage, setCurrentImage] = useState('');
@@ -93,9 +93,6 @@ function Zabery(props) {
 
     // Aktivní směr pro obrázek
     const [activeArrow, setActiveArrow] = useState('arrow1');
-
-    // Tlačítko pro potvrzení
-    const [isSubmitted, setIsSubmitted] = useState(false);
 
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction) => {
@@ -669,11 +666,23 @@ function Zabery(props) {
     }
 
     /** Funkce se aktivuje v případě, když uživatel klikne/posune danou vygenerovanou částici **/
-    const handlePieces = (id, src = null, newWidth = null, newLeft = null, isSubmitted = null) => {
+    const handlePieces = (id,
+                          src = null,
+                          newWidth = null,
+                          newLeft = null,
+                          isSubmitted = null,
+                          arrow = null,
+                          timeValue = null,
+                          frameRate = null,
+                          scanSpeed = null) => {
 
         setTimelineItem(id);
 
         console.log("ID", id);
+
+        // Přenastavení hodnot
+        setActiveArrow(arrow);
+        setRangeValue(timeValue);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
@@ -681,8 +690,25 @@ function Zabery(props) {
             const existingItem = prevItems.find(item => item.id === id);
             const pieceWidth = newWidth || 100;
 
-            // Kontrola, zda částice existuje
-            if (existingItem && newWidth !== null && newLeft !== null) {
+            const checkItems = [newWidth, newLeft, isSubmitted, arrow, timeValue, frameRate, scanSpeed].every(param => param !== null);
+
+            // Vyjíměčný případ pro změnu proměnných po klinutí na tlačítko "ULOŽIT"
+            if (id !== null && isSubmitted !== null && (newWidth == null || newLeft == null)) {
+
+                return prevItems.map(item =>
+                    item.id === id
+                        ? {
+                            ...item,
+                            isSubmitted: isSubmitted,
+                            direction: arrow,
+                            duration: timeValue
+                        }
+                        : item
+                );
+            }
+
+            // Kontrola, zda částice existuje (není null)
+            if (existingItem && checkItems) {
 
                 // Aktualizace částice s novou šířkou, levou odchylkou a isSubmitted
                 return prevItems.map(item =>
@@ -691,20 +717,24 @@ function Zabery(props) {
                             ...item,
                             width: newWidth,
                             left: newLeft,
-                            isSubmitted: isSubmitted !== null ? isSubmitted : item.isSubmitted
+                            isSubmitted: isSubmitted,
+                            direction: arrow,
+                            duration: timeValue,
+                            frameRate: 30,
+                            scanSpeed: 3
                         }
                         : item
                 );
             }
 
-            // Šířka a levá odchylka není pro danou částici uvedena
-            if (existingItem && newWidth === null && newLeft === null) {
-
-                const updatedItems = prevItems.filter(item => item.id !== id);
-
-                // Výpočet pozice pro zbývající částice
-                return updateItems(updatedItems, pieceWidth, isSubmitted);
-            }
+            // // Šířka a levá odchylka není pro danou částici uvedena
+            // if (existingItem && checkItems) {
+            //
+            //     const updatedItems = prevItems.filter(item => item.id !== id);
+            //
+            //     // Výpočet pozice pro zbývající částice
+            //     return updateItems(updatedItems, pieceWidth, isSubmitted);
+            // }
 
             // Přidání částice
             if (!existingItem && src) {
@@ -717,7 +747,11 @@ function Zabery(props) {
                         src: src,
                         width: pieceWidth,
                         left: 0,
-                        isSubmitted: false
+                        isSubmitted: false,
+                        direction: 'arrow1',
+                        duration: 15,
+                        frameRate: 30,
+                        scanSpeed: 3
                     }
                 ];
 
@@ -730,8 +764,8 @@ function Zabery(props) {
         });
     };
 
-    /** Funkce pro obnovu prvků v Timeline **/
-    const updateItems = (updatedItems, pieceWidth, isSubmitted) => {
+    /** Funkce pro responzivitu prvků v Timeline **/
+    const updateItems = (updatedItems, pieceWidth) => {
 
         return updatedItems.map((item, index) => {
 
@@ -741,8 +775,7 @@ function Zabery(props) {
             return {
                 ...item,
                 value: index + 1,
-                left: left,
-                isSubmitted: isSubmitted !== null ? isSubmitted : item.isSubmitted
+                left: left
             };
         });
     };
@@ -780,6 +813,7 @@ function Zabery(props) {
 
         console.log("id", timelineItem);
         console.log("pieces", selectedPieces);
+        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null);
     };
 
     const [pieceStatus, setPieceStatus] = useState(false);
@@ -792,20 +826,6 @@ function Zabery(props) {
             setPieceStatus(status);
 
         }
-    };
-
-    const getActiveItemDetails = () => {
-
-        console.log(timelineItem);
-
-        return {
-            id: timelineItem.id,
-            value: timelineItem.value,
-            src: timelineItem.src,
-            width: timelineItem.width,
-            left: timelineItem.left,
-            isSubmitted: timelineItem.isSubmitted
-        };
     };
 
 
@@ -1004,7 +1024,7 @@ function Zabery(props) {
 
                 {activeItem === 'item4' &&
                     <Timeline canvasRef={canvasRef} selectedPieces={selectedPieces} handlePieces={handlePieces}
-                              handlePieceClick={handlePieceClick} isSubmitted={isSubmitted}
+                              handlePieceClick={handlePieceClick}
                     />
 
                 }

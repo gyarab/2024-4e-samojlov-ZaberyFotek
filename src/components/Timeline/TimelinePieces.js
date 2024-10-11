@@ -109,12 +109,12 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
         // Aktualizace dat o prvku
         if (isResizing) {
 
-            onPieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted);
+            onPieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.direction, piece.duration, piece.frameRate, piece.scanSpeed);
         }
 
         setIsResizing(null);
 
-    }, [isResizing, width, left, onPieceUpdate, piece.id]);
+    }, [isResizing, width, left, onPieceUpdate, piece.id, piece.isSubmitted, piece.direction, piece.duration, piece.frameRate, piece.scanSpeed]);
 
     useEffect(() => {
         document.addEventListener('mousemove', onMouseMove);
@@ -166,7 +166,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
             key={piece.id}
             ref={containerRef}
             style={boxStyles}
-            onClick={() => handlePieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted)}
+            onClick={() => handlePieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.direction, piece.duration, piece.frameRate, piece.scanSpeed)}
         >
             <div
                 style={leftHandleStyles}
