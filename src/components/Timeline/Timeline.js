@@ -67,6 +67,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         return parseInt(localStorage.getItem('canvasSelector'));
     });
 
+    // Výpočet pozice X obrázku
+    const [coordinateX, setCoordinateX] = useState(0);
+
     /** Zobrazení fotek do videa **/
     useEffect(() => {
 
@@ -120,11 +123,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             // Délka klipu
             const duration = endPiece - startPiece;
 
+            const cameraWidth = canvas.width / 6;
+            const cameraHeight = canvas.height / 4;
+
+            const positionX = (startClip / duration) * currentPiece.scanSpeed * 10;
+
             // Částice obsahující klip
             if (currentPiece.isSubmitted && pieceTimeContional) {
-
-                // Výpočet pozice X obrázku
-                const coordinateX = (startClip / duration) * currentPiece.scanSpeed * 10;
 
                 /** Funkce pro vytvoření klipu **/
                 const createClip = () => {
@@ -140,29 +145,44 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     ctx.drawImage(
                         img,
                         coordinateX, 0,
-                        canvas.width, canvas.height,
+                        cameraWidth, cameraHeight,
+                        0, 0,
+                        canvas.width, canvas.height
                     );
+
+                    setCoordinateX(positionX);
                 };
 
                 // Přehrání klipu
                 if (isPlaying && pieceTimeContional) {
 
                     requestAnimationFrame(createClip);
+                }
+
+                // Předukončení klipu
+                if (Math.round(startClip) === Math.round((duration - 1))) {
+
+                    console.log("BUBUB", startClip, duration)
+                    return;
 
                 // Vykreslení aktuálního snímku klipu
                 } else {
 
+                    setCoordinateX(positionX);
+
                     ctx.drawImage(
                         img,
                         coordinateX, 0,
-                        canvas.width, canvas.height,
+                        cameraWidth, cameraHeight,
+                        0, 0,
+                        canvas.width, canvas.height
                     );
                 }
 
                 break;
 
 
-            // Častice neobsahující klip
+                // Častice neobsahující klip
             } else if (!currentPiece.isSubmitted && pieceTimeContional) {
 
                 // Vyčistění plochy
@@ -177,7 +197,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 break;
 
-            // Částice se nachází v meziprostoru
+                // Částice se nachází v meziprostoru
             } else if (beforeFirstCheck || middleCheck || lastEndCheck) {
 
                 setPieceClicked(false);
