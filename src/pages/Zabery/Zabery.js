@@ -736,8 +736,6 @@ function Zabery(props) {
             // Kontrola, zda částice existuje (není null)
             else if (existingItem) {
 
-                console.log("PENDREK")
-
                 // Aktualizace částice s novou šířkou, levou odchylkou a isSubmitted
                 return prevItems.map((item, index) =>
                     item.id === id
