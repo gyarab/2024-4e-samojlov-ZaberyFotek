@@ -19,10 +19,9 @@ import {MdAnimation} from "react-icons/md";
 import {GoArrowLeft} from "react-icons/go";
 import {ArrowBtn} from "../../pages/Zabery/ZaberyComponents";
 import {CgScreenWide} from "react-icons/cg";
-import ClipCreator from "../Clip/ClipCreator";
 
 /** Prvek časové osy **/
-function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, isSubmitted}) {
+function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     let {timelineRef, barWidth} = TimelineWidth();
 
@@ -46,9 +45,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, is
     // Akutální pozice časomíry
     const [barPosition, setBarPosition] = useState(0);
 
-    // Obnovení informací o daném klipu
-    const [updateClip, setUpdateClip] = useState({id: [], isSubmitted: []});
-
     /** Spuštění času **/
     const handlePlay = () => {
 
@@ -70,9 +66,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, is
 
         return parseInt(localStorage.getItem('canvasSelector'));
     });
-
-    // const [img, setImg] = useState(null);
-
 
     /** Zobrazení fotek do videa **/
     useEffect(() => {
@@ -105,62 +98,95 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, is
             // Proměnná pro zjištění zda další částice je na ploše
             const nextPiece = selectedPieces[i + 1] ? (selectedPieces[i + 1].left * videoLength) / barWidth : null;
 
-            // console.log("barPos", currentTime, "start", startPiece, "end", endPiece, selectedPieces[i].left);
-
             // 3 proměnné, které určují prostor mezi částicemi
             const beforeFirstCheck = currentTime < startPiece;
             const middleCheck = currentTime > endPiece && nextPiece && currentTime < nextPiece;
             const lastEndCheck = currentTime > endPiece && !nextPiece;
 
-            // if (!isSubmitted) {
+            // Aktuálně zvolená částice
+            const currentPiece = selectedPieces[i];
 
-                // Nalezení částice v čase
-                if (currentTime >= startPiece && currentTime <= endPiece) {
+            const img = new Image();
 
-                    // clipAddInfo(selectedPieces[i].id, isSubmitted);
+            // Obsah obrázku
+            img.src = currentPiece.src;
 
-                    // console.log("SHU", isSubmitted);
+            // Kontrola, zda je aktuální čas v rámci částice
+            const pieceTimeContional = currentTime >= startPiece && currentTime <= endPiece;
 
-                    const img = new Image();
+            // Čas od začátku klipu
+            const startClip = currentTime - startPiece;
 
-                    img.onload = () => {
+            // Délka klipu
+            const duration = endPiece - startPiece;
 
-                        // if (canvas.width !== img.width || canvas.height !== img.height) {
-                        //
-                        //     canvas.width = img.width;
-                        //     canvas.height = img.height;
-                        // }
+            // Částice obsahující klip
+            if (currentPiece.isSubmitted && pieceTimeContional) {
 
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Výpočet pozice X obrázku
+                const coordinateX = (startClip / duration) * currentPiece.scanSpeed * 10;
 
-                        // Vykreslení částice
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    };
+                /** Funkce pro vytvoření klipu **/
+                const createClip = () => {
 
-                    // setImg(img);
+                    // Ukončení klipu
+                    if (!isPlaying || currentTime < startPiece || currentTime > endPiece) {
+                        return;
+                    }
 
-                    // Obsah částice
-                    img.src = selectedPieces[i].src;
+                    console.log(`SourceX: ${coordinateX} ${currentPiece.scanSpeed}`);
 
-                    setPieceClicked(true);
+                    // Vykreslení obrázku s posunem (zleva doprava)
+                    ctx.drawImage(
+                        img,
+                        coordinateX, 0,
+                        canvas.width, canvas.height,
+                    );
+                };
 
-                    handlePieceClick(true);
+                // Přehrání klipu
+                if (isPlaying && pieceTimeContional) {
 
-                    break;
+                    requestAnimationFrame(createClip);
 
-                    // Částice se nachází v meziprostoru
-                } else if (beforeFirstCheck || middleCheck || lastEndCheck) {
+                // Vykreslení aktuálního snímku klipu
+                } else {
 
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                    setPieceClicked(false);
-
-                    handlePieceClick(false);
-
-                    break;
+                    ctx.drawImage(
+                        img,
+                        coordinateX, 0,
+                        canvas.width, canvas.height,
+                    );
                 }
+
+                break;
+
+
+            // Častice neobsahující klip
+            } else if (!currentPiece.isSubmitted && pieceTimeContional) {
+
+                // Vyčistění plochy
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Vykreslení částice
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                setPieceClicked(true);
+
+                handlePieceClick(true);
+
+                break;
+
+            // Částice se nachází v meziprostoru
+            } else if (beforeFirstCheck || middleCheck || lastEndCheck) {
+
+                setPieceClicked(false);
+
+                handlePieceClick(false);
+
+                break;
             }
-        //}
+        }
 
     }, [currentTime, videoRef, selectedPieces, videoLength, barWidth, activeRatio, canvasSelector]);
 
@@ -313,12 +339,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, is
     const [activeIndex, setActiveIndex] = useState(null);
 
     /** Nastavení aktuálního indexu částice **/
-    const handlePieceUpdate = (id, src, width, left) => {
+    const handlePieceUpdate = (id, src, width, left, isSubmitted, direction, duration, frameRate, scanSpeed) => {
 
         setActiveIndex(id);
 
         // Nastavení po stisknutí tlačítka parametru isSubmitted na true
-        handlePieces(id, src, width, left, true);
+        handlePieces(id, src, width, left, isSubmitted, direction, duration, frameRate, scanSpeed);
     };
 
     /** Nástroje určené pro klipy **/
@@ -372,7 +398,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, is
 
         const [width, height] = ratio.split(':').map(Number);
 
-        return { x: width, y: height };
+        return {x: width, y: height};
     };
 
 
@@ -607,7 +633,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, is
                                 handlePieceUpdate={handlePieceUpdate}
                                 activeIndex={activeIndex}
                                 pieceIsClicked={pieceIsClicked}
-                                isSubmitted={isSubmitted}
                             />
                         ))}
 

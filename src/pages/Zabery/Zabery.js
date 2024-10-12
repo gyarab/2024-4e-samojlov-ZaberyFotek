@@ -625,7 +625,18 @@ function Zabery(props) {
                         <div
                             key={id}
                             id={id}
-                            onClick={() => handlePieces(id, src)}
+                            onClick={() =>
+                                handlePieces(id,
+                                    src,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    1)}
+
                             style={{position: "relative"}}
                         >
                             <img
@@ -674,7 +685,8 @@ function Zabery(props) {
                           arrow = null,
                           timeValue = null,
                           frameRate = null,
-                          scanSpeed = null) => {
+                          scanSpeed = null,
+                          special = null) => {
 
         setTimelineItem(id);
 
@@ -705,39 +717,48 @@ function Zabery(props) {
                         }
                         : item
                 );
+
+            // Vyjíměčný případ pro
+            } else if (existingItem && special === 1) {
+
+                // Smazání částice s číslem
+                const deletedItem = prevItems.filter(item => item.id !== id);
+
+                // Obnovení hodnot u ostatnich částic
+                return deletedItem.map((item, index) => ({
+
+                    ...item,
+                    id: item.id,
+                    value: index + 1
+                }));
             }
 
             // Kontrola, zda částice existuje (není null)
-            if (existingItem && checkItems) {
+            else if (existingItem) {
+
+                console.log("PENDREK")
 
                 // Aktualizace částice s novou šířkou, levou odchylkou a isSubmitted
-                return prevItems.map(item =>
+                return prevItems.map((item, index) =>
                     item.id === id
                         ? {
                             ...item,
+                            id: item.id,
+                            value: index,
                             width: newWidth,
                             left: newLeft,
                             isSubmitted: isSubmitted,
                             direction: arrow,
                             duration: timeValue,
                             frameRate: 30,
-                            scanSpeed: 3
+                            scanSpeed: 30
                         }
                         : item
                 );
             }
 
-            // // Šířka a levá odchylka není pro danou částici uvedena
-            // if (existingItem && checkItems) {
-            //
-            //     const updatedItems = prevItems.filter(item => item.id !== id);
-            //
-            //     // Výpočet pozice pro zbývající částice
-            //     return updateItems(updatedItems, pieceWidth, isSubmitted);
-            // }
-
             // Přidání částice
-            if (!existingItem && src) {
+            else if (!existingItem && src) {
 
                 const updatedItems = [
                     ...prevItems,
@@ -751,7 +772,7 @@ function Zabery(props) {
                         direction: 'arrow1',
                         duration: 15,
                         frameRate: 30,
-                        scanSpeed: 3
+                        scanSpeed: 30
                     }
                 ];
 
@@ -980,12 +1001,12 @@ function Zabery(props) {
                             textAlign: "center"
                         }}>
 
-                            <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue}
+                            <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue > 0 ? rangeValue : 15}
                                        onChange={(e) => {
                                            setRangeValue(+e.target.value)
                                        }}/>
 
-                            <label>{rangeValue} s</label>
+                            <label>{rangeValue > 0 ? rangeValue : 15} s</label>
                         </div>
 
                         <div style={{
