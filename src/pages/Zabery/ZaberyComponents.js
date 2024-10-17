@@ -178,18 +178,18 @@ export const PieceImages = styled.div`
     div {
 
         display: flex;
+        background: linear-gradient(45deg, var(--color-shadow-8), 1) 0, var(--color-shadow-4) 100%;
+        width: 100%;
+        height: 100%;
+        max-width: 250px;
+        max-height: 250px;
+        padding: 25px;
+        box-shadow: 0 5px 20px var(--color-shadow-4, 0.3);
+        border-radius: 10px;
+        cursor: pointer;
 
         img {
             object-fit: contain;
-            width: 100%;
-            height: 100%;
-            max-width: 250px;
-            max-height: 250px;
-            padding: 25px;
-            background: linear-gradient(45deg, var(--color-shadow-8), 1) 0, var(--color-shadow-4) 100%;
-            box-shadow: 0 5px 20px var(--color-shadow-4, 0.3);
-            border-radius: 10px;
-            cursor: pointer;
         }
     }
     

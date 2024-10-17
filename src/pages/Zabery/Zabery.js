@@ -94,8 +94,11 @@ function Zabery(props) {
     // Aktivní směr pro obrázek
     const [activeArrow, setActiveArrow] = useState('arrow1');
 
+    // Směr pohybu v klipu
+    const [arrowDirection, setArrowDirection] = useState({x: "+", y: "0"});
+
     // Funkce pro zobrazení jednoho prvku
-    const handleVisibility = (item, setFunction) => {
+    const handleVisibility = (item, setFunction, directions) => {
 
         // Zobrazení původní plochy
         canvasRef.current.style.display = 'inline';
@@ -119,7 +122,9 @@ function Zabery(props) {
         if (item.includes('arrow')) {
 
             setActiveArrow(item);
-            console.log("direction", activeArrow);
+
+            setArrowDirection(directions);
+            console.log("direction", activeArrow, directions);
         }
     };
 
@@ -637,7 +642,9 @@ function Zabery(props) {
                                     null,
                                     1)}
 
-                            style={{position: "relative"}}
+                            style={{
+                                position: "relative"
+                            }}
                         >
                             <img
                                 id={id}
@@ -646,23 +653,23 @@ function Zabery(props) {
                             />
 
                             {selectedPiece && (
+
+
                                 <div
                                     style={{
-                                        position: "absolute",
-                                        top: "10px",
-                                        right: "15px",
                                         backgroundColor: "var(--color-blue-7)",
                                         border: "1px solid white",
                                         borderRadius: "50%",
                                         width: "25px",
                                         height: "25px",
-                                        padding: "5px",
+                                        padding: "8px",
                                         fontSize: "12px",
                                         fontWeight: "bold",
                                         color: "white",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        display: "flex"
+                                        display: "flex",
+                                        transform: "translateY(-25px)"
                                     }}
                                 >
                                     {selectedPiece.value}
@@ -686,15 +693,12 @@ function Zabery(props) {
                           timeValue = null,
                           frameRate = null,
                           scanSpeed = null,
-                          special = null) => {
+                          special = null,
+                          arrowDirection = null) => {
 
         setTimelineItem(id);
 
         console.log("ID", id);
-
-        // Přenastavení hodnot
-        setActiveArrow(arrow);
-        setRangeValue(timeValue);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
@@ -705,20 +709,21 @@ function Zabery(props) {
             const checkItems = [newWidth, newLeft, isSubmitted, arrow, timeValue, frameRate, scanSpeed].every(param => param !== null);
 
             // Vyjíměčný případ pro změnu proměnných po klinutí na tlačítko "ULOŽIT"
-            if (id !== null && isSubmitted !== null && (newWidth == null || newLeft == null)) {
+            if (id !== null && isSubmitted !== null && arrowDirection !== null && (newWidth == null || newLeft == null)) {
 
                 return prevItems.map(item =>
                     item.id === id
                         ? {
                             ...item,
                             isSubmitted: isSubmitted,
-                            direction: arrow,
-                            duration: timeValue
+                            arrow: arrow,
+                            duration: timeValue,
+                            arrowDirection: arrowDirection
                         }
                         : item
                 );
 
-            // Vyjíměčný případ pro
+                // Vyjíměčný případ pro
             } else if (existingItem && special === 1) {
 
                 // Smazání částice s číslem
@@ -746,10 +751,11 @@ function Zabery(props) {
                             width: newWidth,
                             left: newLeft,
                             isSubmitted: isSubmitted,
-                            direction: arrow,
+                            arrow: arrow,
                             duration: timeValue,
                             frameRate: 30,
-                            scanSpeed: 30
+                            scanSpeed: 30,
+                            arrowDirection: arrowDirection
                         }
                         : item
                 );
@@ -767,15 +773,16 @@ function Zabery(props) {
                         width: pieceWidth,
                         left: 0,
                         isSubmitted: false,
-                        direction: 'arrow1',
+                        arrow: 'arrow1',
                         duration: 15,
                         frameRate: 30,
-                        scanSpeed: 30
+                        scanSpeed: 30,
+                        arrowDirection: arrowDirection
                     }
                 ];
 
                 // Přepočítání pozice pro všechny částice včetně nové
-                return updateItems(updatedItems, pieceWidth, isSubmitted);
+                return updateItems(updatedItems, pieceWidth);
             }
 
             // Pokud žádná podmínka není splněna
@@ -832,7 +839,7 @@ function Zabery(props) {
 
         console.log("id", timelineItem);
         console.log("pieces", selectedPieces);
-        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null);
+        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
     };
 
     const [pieceStatus, setPieceStatus] = useState(false);
@@ -843,7 +850,6 @@ function Zabery(props) {
         if (activeItem === 'item4') {
 
             setPieceStatus(status);
-
         }
     };
 
@@ -949,42 +955,43 @@ function Zabery(props) {
                             }}>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow1'}
-                                      onClick={() => handleVisibility('arrow1', setActiveArrow)}>
+                                      onClick={() => handleVisibility('arrow1', setActiveArrow, {x: "+", y: "-"})}
+                            >
                                 <GoArrowUpRight/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow2'}
-                                      onClick={() => handleVisibility('arrow2', setActiveArrow)}>
+                                      onClick={() => handleVisibility('arrow2', setActiveArrow, {x: "-", y: "0"})}>
                                 <GoArrowRight/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow3'}
-                                      onClick={() => handleVisibility('arrow3', setActiveArrow)}>
+                                      onClick={() => handleVisibility('arrow3', setActiveArrow, {x: "-", y: "-"})}>
                                 <GoArrowDownRight/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow4'}
-                                      onClick={() => handleVisibility('arrow4', setActiveArrow)}>
+                                      onClick={() => handleVisibility('arrow4', setActiveArrow, {x: "0", y: "-"})}>
                                 <GoArrowDown/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow5'}
-                                      onClick={() => handleVisibility('arrow5', setActiveArrow)}>
+                                      onClick={() => handleVisibility('arrow5', setActiveArrow, {x: "+", y: "-"})}>
                                 <GoArrowDownLeft/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow6'}
-                                      onClick={() => handleVisibility('arrow6', setActiveArrow)}>
+                                      onClick={() => handleVisibility('arrow6', setActiveArrow, {x: "+", y: "0"})}>
                                 <GoArrowLeft/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow7'}
-                                      onClick={() => handleVisibility('arrow7', setActiveArrow)}>
+                                      onClick={() => handleVisibility('arrow7', setActiveArrow, {x: "+", y: "+"})}>
                                 <GoArrowUpLeft/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow8'}
-                                      onClick={() => handleVisibility('arrow8', setActiveArrow)}>
+                                      onClick={() => handleVisibility('arrow8', setActiveArrow, {x: "0", y: "+"})}>
                                 <GoArrowUp/>
                             </ArrowBtn>
 

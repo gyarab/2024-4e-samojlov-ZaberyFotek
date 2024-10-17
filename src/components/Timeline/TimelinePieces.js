@@ -166,7 +166,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
             key={piece.id}
             ref={containerRef}
             style={boxStyles}
-            onClick={() => handlePieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.direction, piece.duration, piece.frameRate, piece.scanSpeed)}
+            onClick={() => handlePieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.direction, piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection)}
         >
             <div
                 style={leftHandleStyles}

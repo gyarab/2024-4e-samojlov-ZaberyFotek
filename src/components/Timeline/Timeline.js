@@ -123,10 +123,35 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             // Délka klipu
             const duration = endPiece - startPiece;
 
-            const cameraWidth = canvas.width / 6;
-            const cameraHeight = canvas.height / 4;
+            // Velikost kamery
+            const cameraWidth = canvas.width / 3;
+            const cameraHeight = canvas.height / 3;
 
-            const positionX = (startClip / duration) * currentPiece.scanSpeed * 10;
+            // Výpočet pozice kamery
+            const position = (startClip / duration) * currentTime * currentPiece.scanSpeed;
+
+            const arrowPosition = currentPiece.arrowDirection !== null ? currentPiece.arrowDirection : 0;
+
+            console.log(arrowPosition)
+
+            const arrowSetUp = (arrow) => {
+
+                if (arrow === "+") {
+
+                    return position;
+
+                } else if (arrow === "-") {
+
+                    return -position;
+
+                } else {
+
+                    return 0;
+                }
+            }
+
+            const arrowX = arrowSetUp(arrowPosition.x);
+            const arrowY = arrowSetUp(arrowPosition.y);
 
             // Částice obsahující klip
             if (currentPiece.isSubmitted && pieceTimeContional) {
@@ -135,23 +160,23 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 const createClip = () => {
 
                     // Ukončení klipu
-                    if (!isPlaying || currentTime < startPiece || currentTime > endPiece) {
+                    if (!isPlaying || currentTime < startPiece || currentTime > endPiece /** || Math.round(startClip) >= Math.round((duration - 3)) **/) {
                         return;
                     }
 
-                    console.log(`SourceX: ${coordinateX} ${currentPiece.scanSpeed}`);
+                    console.log(`SourceX: ${coordinateX} ${currentPiece.scanSpeed} ${startClip}`);
 
                     // Vykreslení obrázku s posunem (zleva doprava)
                     ctx.drawImage(
                         img,
-                        coordinateX, 0,
+                        arrowX, arrowY,
                         cameraWidth, cameraHeight,
                         0, 0,
                         canvas.width, canvas.height
                     );
-
-                    setCoordinateX(positionX);
                 };
+
+                setCoordinateX(position);
 
                 // Přehrání klipu
                 if (isPlaying && pieceTimeContional) {
@@ -159,16 +184,10 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     requestAnimationFrame(createClip);
                 }
 
-                // Předukončení klipu
-                if (Math.round(startClip) === Math.round((duration - 1))) {
-
-                    console.log("BUBUB", startClip, duration)
-                    return;
-
                 // Vykreslení aktuálního snímku klipu
-                } else {
+                else {
 
-                    setCoordinateX(positionX);
+                    setCoordinateX(position);
 
                     ctx.drawImage(
                         img,
@@ -359,12 +378,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [activeIndex, setActiveIndex] = useState(null);
 
     /** Nastavení aktuálního indexu částice **/
-    const handlePieceUpdate = (id, src, width, left, isSubmitted, direction, duration, frameRate, scanSpeed) => {
+    const handlePieceUpdate = (id, src, width, left, isSubmitted, direction, duration, frameRate, scanSpeed, special, arrowDirection) => {
 
         setActiveIndex(id);
 
         // Nastavení po stisknutí tlačítka parametru isSubmitted na true
-        handlePieces(id, src, width, left, isSubmitted, direction, duration, frameRate, scanSpeed);
+        handlePieces(id, src, width, left, isSubmitted, direction, duration, frameRate, scanSpeed, special, arrowDirection);
     };
 
     /** Nástroje určené pro klipy **/
