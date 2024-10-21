@@ -132,7 +132,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
             const arrowPosition = currentPiece.arrowDirection !== null ? currentPiece.arrowDirection : 0;
 
-            console.log(arrowPosition)
+            // console.log(arrowPosition)
+
+            // handlePieceUpdate(currentPiece.id, currentPiece.src, currentPiece.width, currentPiece.left, currentPiece.isSubmitted, currentPiece.arrow, currentPiece.duration, currentPiece.frameRate, currentPiece.scanSpeed, 0, currentPiece.arrowDirection);
+            // //
+            // console.log(currentPiece)
 
             const arrowSetUp = (arrow) => {
 
@@ -378,12 +382,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [activeIndex, setActiveIndex] = useState(null);
 
     /** Nastavení aktuálního indexu částice **/
-    const handlePieceUpdate = (id, src, width, left, isSubmitted, direction, duration, frameRate, scanSpeed, special, arrowDirection) => {
+    const handlePieceUpdate = (id, src, width, left, isSubmitted, arrow, duration, frameRate, scanSpeed, special, arrowDirection) => {
 
         setActiveIndex(id);
 
         // Nastavení po stisknutí tlačítka parametru isSubmitted na true
-        handlePieces(id, src, width, left, isSubmitted, direction, duration, frameRate, scanSpeed, special, arrowDirection);
+        handlePieces(id, src, width, left, isSubmitted, arrow, duration, frameRate, scanSpeed, special, arrowDirection);
     };
 
     /** Nástroje určené pro klipy **/

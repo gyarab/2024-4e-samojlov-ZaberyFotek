@@ -166,7 +166,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
             key={piece.id}
             ref={containerRef}
             style={boxStyles}
-            onClick={() => handlePieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.direction, piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection)}
+            onClick={() => handlePieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow, piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection)}
         >
             <div
                 style={leftHandleStyles}
@@ -179,6 +179,8 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
                 onMouseDown={(e) => onMouseDown(e, 'right')}
             >|
             </div>
+
+            <div style={{position: "absolute", bottom: "0", transform: "translateY(30px)", }}> Upravit </div>
         </div>
     );
 };

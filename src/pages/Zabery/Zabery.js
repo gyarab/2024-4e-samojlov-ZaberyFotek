@@ -121,10 +121,12 @@ function Zabery(props) {
 
         if (item.includes('arrow')) {
 
+            handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue, null, null, null, arrowDirection);
+            console.log("direction", activeArrow, directions);
+
             setActiveArrow(item);
 
             setArrowDirection(directions);
-            console.log("direction", activeArrow, directions);
         }
     };
 
@@ -636,11 +638,12 @@ function Zabery(props) {
                                     null,
                                     null,
                                     null,
+                                    activeArrow,
+                                    rangeValue,
                                     null,
                                     null,
-                                    null,
-                                    null,
-                                    1)}
+                                    1,
+                                    arrowDirection)}
 
                             style={{
                                 position: "relative"
@@ -690,7 +693,7 @@ function Zabery(props) {
                           newLeft = null,
                           isSubmitted = null,
                           arrow = null,
-                          timeValue = null,
+                          duration = null,
                           frameRate = null,
                           scanSpeed = null,
                           special = null,
@@ -698,7 +701,11 @@ function Zabery(props) {
 
         setTimelineItem(id);
 
-        console.log("ID", id);
+        setActiveArrow(arrow);
+
+        setRangeValue(duration);
+
+        setArrowDirection(arrowDirection);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
@@ -706,7 +713,7 @@ function Zabery(props) {
             const existingItem = prevItems.find(item => item.id === id);
             const pieceWidth = newWidth || 100;
 
-            const checkItems = [newWidth, newLeft, isSubmitted, arrow, timeValue, frameRate, scanSpeed].every(param => param !== null);
+            const checkItems = [newWidth, newLeft, isSubmitted, arrow, duration, frameRate, scanSpeed].every(param => param !== null);
 
             // Vyjíměčný případ pro změnu proměnných po klinutí na tlačítko "ULOŽIT"
             if (id !== null && isSubmitted !== null && arrowDirection !== null && (newWidth == null || newLeft == null)) {
@@ -717,7 +724,7 @@ function Zabery(props) {
                             ...item,
                             isSubmitted: isSubmitted,
                             arrow: arrow,
-                            duration: timeValue,
+                            duration: duration,
                             arrowDirection: arrowDirection
                         }
                         : item
@@ -752,7 +759,7 @@ function Zabery(props) {
                             left: newLeft,
                             isSubmitted: isSubmitted,
                             arrow: arrow,
-                            duration: timeValue,
+                            duration: duration,
                             frameRate: 30,
                             scanSpeed: 30,
                             arrowDirection: arrowDirection
@@ -837,8 +844,6 @@ function Zabery(props) {
 
         }, 1000);
 
-        console.log("id", timelineItem);
-        console.log("pieces", selectedPieces);
         handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
     };
 
@@ -1006,8 +1011,9 @@ function Zabery(props) {
                             textAlign: "center"
                         }}>
 
-                            <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue > 0 ? rangeValue : 15}
+                            <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue}
                                        onChange={(e) => {
+                                           console.log(rangeValue);
                                            setRangeValue(+e.target.value)
                                        }}/>
 
