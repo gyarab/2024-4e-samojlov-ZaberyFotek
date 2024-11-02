@@ -119,7 +119,7 @@ function Zabery(props) {
             return newActiveItem;
         });
 
-        if (item.includes('arrow')) {
+        if (item.includes('arrow') && activeArrow != null) {
 
             handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue, null, null, null, arrowDirection);
             console.log("direction", activeArrow, directions);
@@ -699,6 +699,8 @@ function Zabery(props) {
                           special = null,
                           arrowDirection = null) => {
 
+        const checkNull = id !== null && isSubmitted !== null && arrowDirection !== null && (newWidth == null || newLeft == null);
+
         setTimelineItem(id);
 
         setActiveArrow(arrow);
@@ -706,6 +708,8 @@ function Zabery(props) {
         setRangeValue(duration);
 
         setArrowDirection(arrowDirection);
+
+        console.log("SUBMITTED", isSubmitted);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
@@ -716,7 +720,7 @@ function Zabery(props) {
             const checkItems = [newWidth, newLeft, isSubmitted, arrow, duration, frameRate, scanSpeed].every(param => param !== null);
 
             // Vyjíměčný případ pro změnu proměnných po klinutí na tlačítko "ULOŽIT"
-            if (id !== null && isSubmitted !== null && arrowDirection !== null && (newWidth == null || newLeft == null)) {
+            if (checkNull) {
 
                 return prevItems.map(item =>
                     item.id === id
@@ -835,6 +839,11 @@ function Zabery(props) {
     /** Funkce pro zobrazení efektů tlačítka **/
     const handleClickMark = () => {
 
+        if (activeArrow != null && rangeValue != null && arrowDirection != null) {
+
+            handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
+        }
+
         setIsMarked(true);
 
         // po jedné sekundě se tlačítko vrátí do původního stavu
@@ -843,8 +852,6 @@ function Zabery(props) {
             setIsMarked(false);
 
         }, 1000);
-
-        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
     };
 
     const [pieceStatus, setPieceStatus] = useState(false);

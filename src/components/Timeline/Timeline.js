@@ -70,6 +70,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     // Výpočet pozice X obrázku
     const [coordinateX, setCoordinateX] = useState(0);
 
+    // Výpočet pozice Y obrázku
+    const [coordinateY, setCoordinateY] = useState(0);
+
     /** Zobrazení fotek do videa **/
     useEffect(() => {
 
@@ -128,9 +131,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             const cameraHeight = canvas.height / 3;
 
             // Výpočet pozice kamery
-            const position = (startClip / duration) * currentTime * currentPiece.scanSpeed;
+            const position = (startClip / duration) * currentPiece.width;
 
-            const arrowPosition = currentPiece.arrowDirection !== null ? currentPiece.arrowDirection : 0;
+            const arrowPosition = currentPiece.arrowDirection !== null ? currentPiece.arrowDirection : {x: "+", y: "-"};
+
+            console.log(currentPiece);
 
             // console.log(arrowPosition)
 
@@ -168,12 +173,18 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         return;
                     }
 
-                    console.log(`SourceX: ${coordinateX} ${currentPiece.scanSpeed} ${startClip}`);
+                    // if (arrowX >= (canvas.width - img.width)) {
+                    //
+                    //     console.log("KONCCCCCCCCC")
+                    //     return;
+                    // }
+
+                    console.log(`SourceX: ${arrowX} ${(canvas.width - img.width)} `);
 
                     // Vykreslení obrázku s posunem (zleva doprava)
                     ctx.drawImage(
                         img,
-                        arrowX, arrowY,
+                        coordinateX, arrowY,
                         cameraWidth, cameraHeight,
                         0, 0,
                         canvas.width, canvas.height
@@ -181,6 +192,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 };
 
                 setCoordinateX(position);
+                setCoordinateY(position);
 
                 // Přehrání klipu
                 if (isPlaying && pieceTimeContional) {
@@ -192,10 +204,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 else {
 
                     setCoordinateX(position);
+                    setCoordinateY(position);
 
                     ctx.drawImage(
                         img,
-                        coordinateX, 0,
+                        coordinateX, coordinateY,
                         cameraWidth, cameraHeight,
                         0, 0,
                         canvas.width, canvas.height
@@ -385,6 +398,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const handlePieceUpdate = (id, src, width, left, isSubmitted, arrow, duration, frameRate, scanSpeed, special, arrowDirection) => {
 
         setActiveIndex(id);
+
+        console.log("SUBMITTED", isSubmitted);
 
         // Nastavení po stisknutí tlačítka parametru isSubmitted na true
         handlePieces(id, src, width, left, isSubmitted, arrow, duration, frameRate, scanSpeed, special, arrowDirection);

@@ -1,7 +1,17 @@
 import React, {useState, useRef, useCallback, useEffect} from 'react';
+import {MdCancel} from "react-icons/md";
 
 /** Funkce pro ovládání jednotlivých prvků časové osy **/
-const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth, handlePieceUpdate, activeIndex, pieceIsClicked}) => {
+const TimelinePieces = ({
+                            piece,
+                            pieceLeft,
+                            piecesArray,
+                            onPieceUpdate,
+                            barWidth,
+                            handlePieceUpdate,
+                            activeIndex,
+                            pieceIsClicked
+                        }) => {
 
     // Změna velikosti prvku
     const [isResizing, setIsResizing] = useState(null);
@@ -77,7 +87,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
                     return;
                 }
 
-            // Změna velikosti pravé strany
+                // Změna velikosti pravé strany
             } else if (isResizing === 'right') {
 
                 if (rightSidePiece && newLeft + newWidth > rightSidePiece.left) {
@@ -102,6 +112,41 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
         }
 
     }, [isResizing, piecesArray, piece.id]);
+
+    const [cancelClipBtn, setCancelBtn] = useState(true);
+
+    const checkCancel = piece.isSubmitted && !cancelClipBtn;
+
+    useEffect(() => {
+        if (piece.isSubmitted) {
+            setCancelBtn(false);
+        }
+    }, [piece.isSubmitted]);
+
+    /** Funkce spravující kliknutí na částici v Timeline **/
+    const handleClick = (type, event) => {
+
+        if (type === "piece" && cancelClipBtn) {
+
+            handlePieceUpdate(
+                piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
+                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
+            );
+
+        } else if (type === "cancel") {
+
+            // Zabraňuje spuštění kliknutí na prvek
+            event.stopPropagation();
+
+            handlePieceUpdate(
+                piece.id, piece.src, width, left, false, piece.arrow,
+                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
+            );
+
+            // Smazání tlačítka
+            setCancelBtn(true);
+        }
+    };
 
     /** Tah je ukončen **/
     const onMouseUp = useCallback(() => {
@@ -166,7 +211,7 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
             key={piece.id}
             ref={containerRef}
             style={boxStyles}
-            onClick={() => handlePieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow, piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection)}
+            onClick={(e) => handleClick("piece", e)}
         >
             <div
                 style={leftHandleStyles}
@@ -180,7 +225,30 @@ const TimelinePieces = ({piece, pieceLeft, piecesArray, onPieceUpdate, barWidth,
             >|
             </div>
 
-            <div style={{position: "absolute", bottom: "0", transform: "translateY(30px)", }}> Upravit </div>
+            {/** Nabídka klip zrušit **/}
+            {piece.isSubmitted && checkCancel && (
+                <div
+                    onClick={(e) => handleClick("cancel", e)}
+                    style={{
+                        display: checkCancel ? 'flex' : 'none',
+                        position: 'absolute',
+                        bottom: '0',
+                        transform: 'translateY(30px)',
+                        cursor: 'pointer',
+                        background: "#9e1a1f",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "5px",
+                        color: "white",
+                        width: "100%",
+                        gap: "5px"
+                    }}
+                >
+                    <MdCancel/> Zrušit
+
+                </div>
+            )}
+
         </div>
     );
 };
