@@ -127,40 +127,44 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             const duration = endPiece - startPiece;
 
             // Velikost kamery
-            const cameraWidth = canvas.width / 3;
-            const cameraHeight = canvas.height / 3;
+            const cameraWidth = canvas.width / 1.5// * Math.max(currentPiece.width / canvas.width, currentPiece.width / canvas.height);
+            const cameraHeight = canvas.height / 2
+
+            const speedX = (canvas.width - currentPiece.width) / duration;
+            const speedY = (canvas.height - img.height) / duration;
 
             // Výpočet pozice kamery
-            const position = (startClip / duration) * currentPiece.width;
+            let positionX = startPiece + (speedX * startClip);
+            let positionY = startPiece + (speedY * startClip);
 
-            const arrowPosition = currentPiece.arrowDirection !== null ? currentPiece.arrowDirection : {x: "+", y: "-"};
+            const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
 
-            console.log(currentPiece);
-
-            // console.log(arrowPosition)
-
-            // handlePieceUpdate(currentPiece.id, currentPiece.src, currentPiece.width, currentPiece.left, currentPiece.isSubmitted, currentPiece.arrow, currentPiece.duration, currentPiece.frameRate, currentPiece.scanSpeed, 0, currentPiece.arrowDirection);
-            // //
             // console.log(currentPiece)
 
-            const arrowSetUp = (arrow) => {
+            // Funkce pro určení správného směru pozice na základě směru pohybu
+            const arrowSetUp = (arrow, positionClip, maxDimension) => {
 
                 if (arrow === "+") {
 
-                    return position;
+                    return positionClip;
 
                 } else if (arrow === "-") {
 
-                    return -position;
+                    return maxDimension - positionClip;
 
                 } else {
 
-                    return 0;
+                    return 0.0;
                 }
-            }
+            };
 
-            const arrowX = arrowSetUp(arrowPosition.x);
-            const arrowY = arrowSetUp(arrowPosition.y);
+            // Vypočítání pozic kamery na základě směru šipek
+            positionX = arrowSetUp(arrowPosition.x, positionX, canvas.width - img.width);
+            positionY = arrowSetUp(arrowPosition.y, positionY, canvas.height - img.height);
+
+            // Nastavení vypočítaných pozic pro animaci
+            setCoordinateX(positionX);
+            setCoordinateY(positionY);
 
             // Částice obsahující klip
             if (currentPiece.isSubmitted && pieceTimeContional) {
@@ -173,26 +177,30 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         return;
                     }
 
-                    // if (arrowX >= (canvas.width - img.width)) {
+                    // const progress = currentTime / endPiece;
+                    // const imageX = progress * (canvas.width - img.width); // Horizontal movement across the canvas
+                    // const imageY = progress * (canvas.height - img.height);
                     //
-                    //     console.log("KONCCCCCCCCC")
+                    // const bottomEdge = imageY;
+
+                    console.log(coordinateY + " " + canvas.width + " " + img.width + " " + duration);
+
+                    // if (coordinateY <= 0) {
+                    //
                     //     return;
                     // }
 
-                    console.log(`SourceX: ${arrowX} ${(canvas.width - img.width)} `);
+                    // if (coordinateY < (currentPiece.width / 2) && coordinateX > (currentPiece.width / 2)) {
 
                     // Vykreslení obrázku s posunem (zleva doprava)
                     ctx.drawImage(
                         img,
-                        coordinateX, arrowY,
+                        coordinateX, coordinateY,
                         cameraWidth, cameraHeight,
                         0, 0,
                         canvas.width, canvas.height
                     );
                 };
-
-                setCoordinateX(position);
-                setCoordinateY(position);
 
                 // Přehrání klipu
                 if (isPlaying && pieceTimeContional) {
@@ -202,9 +210,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 // Vykreslení aktuálního snímku klipu
                 else {
-
-                    setCoordinateX(position);
-                    setCoordinateY(position);
 
                     ctx.drawImage(
                         img,

@@ -118,13 +118,19 @@ const TimelinePieces = ({
     const checkCancel = piece.isSubmitted && !cancelClipBtn;
 
     useEffect(() => {
+
         if (piece.isSubmitted) {
             setCancelBtn(false);
         }
+
     }, [piece.isSubmitted]);
 
     /** Funkce spravující kliknutí na částici v Timeline **/
     const handleClick = (type, event) => {
+
+        pieceIsClicked = true;
+
+        console.log("TYPE " + type)
 
         if (type === "piece" && cancelClipBtn) {
 
@@ -136,7 +142,7 @@ const TimelinePieces = ({
         } else if (type === "cancel") {
 
             // Zabraňuje spuštění kliknutí na prvek
-            event.stopPropagation();
+            // event.stopPropagation();
 
             handlePieceUpdate(
                 piece.id, piece.src, width, left, false, piece.arrow,
@@ -154,12 +160,13 @@ const TimelinePieces = ({
         // Aktualizace dat o prvku
         if (isResizing) {
 
-            onPieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.direction, piece.duration, piece.frameRate, piece.scanSpeed);
+            onPieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
+                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection);
         }
 
         setIsResizing(null);
 
-    }, [isResizing, width, left, onPieceUpdate, piece.id, piece.isSubmitted, piece.direction, piece.duration, piece.frameRate, piece.scanSpeed]);
+    }, [isResizing, width, left, onPieceUpdate, piece.id, piece.isSubmitted, piece.arrow, piece.duration, piece.frameRate, piece.scanSpeed, piece.arrowDirection]);
 
     useEffect(() => {
         document.addEventListener('mousemove', onMouseMove);
@@ -180,7 +187,8 @@ const TimelinePieces = ({
         backgroundImage: `url(${piece.src})`,
         backgroundSize: 'contain',
         backgroundRepeat: 'repeat-x',
-        left: `${pieceLeft}px`
+        left: `${pieceLeft}px`,
+        justifyContent: "center"
     };
 
     const handleStyles = {
@@ -241,7 +249,8 @@ const TimelinePieces = ({
                         borderRadius: "5px",
                         color: "white",
                         width: "100%",
-                        gap: "5px"
+                        gap: "5px",
+                        maxWidth: "100px"
                     }}
                 >
                     <MdCancel/> Zrušit

@@ -95,7 +95,7 @@ function Zabery(props) {
     const [activeArrow, setActiveArrow] = useState('arrow1');
 
     // Směr pohybu v klipu
-    const [arrowDirection, setArrowDirection] = useState({x: "+", y: "0"});
+    const [arrowDirection, setArrowDirection] = useState({x: "+", y: "-"});
 
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction, directions) => {
@@ -839,10 +839,9 @@ function Zabery(props) {
     /** Funkce pro zobrazení efektů tlačítka **/
     const handleClickMark = () => {
 
-        if (activeArrow != null && rangeValue != null && arrowDirection != null) {
+        console.log(arrowDirection);
 
-            handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
-        }
+        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
 
         setIsMarked(true);
 
@@ -973,12 +972,12 @@ function Zabery(props) {
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow2'}
-                                      onClick={() => handleVisibility('arrow2', setActiveArrow, {x: "-", y: "0"})}>
+                                      onClick={() => handleVisibility('arrow2', setActiveArrow, {x: "+", y: "0"})}>
                                 <GoArrowRight/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow3'}
-                                      onClick={() => handleVisibility('arrow3', setActiveArrow, {x: "-", y: "-"})}>
+                                      onClick={() => handleVisibility('arrow3', setActiveArrow, {x: "+", y: "+"})}>
                                 <GoArrowDownRight/>
                             </ArrowBtn>
 
@@ -988,17 +987,17 @@ function Zabery(props) {
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow5'}
-                                      onClick={() => handleVisibility('arrow5', setActiveArrow, {x: "+", y: "-"})}>
+                                      onClick={() => handleVisibility('arrow5', setActiveArrow, {x: "-", y: "+"})}>
                                 <GoArrowDownLeft/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow6'}
-                                      onClick={() => handleVisibility('arrow6', setActiveArrow, {x: "+", y: "0"})}>
+                                      onClick={() => handleVisibility('arrow6', setActiveArrow, {x: "-", y: "0"})}>
                                 <GoArrowLeft/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow7'}
-                                      onClick={() => handleVisibility('arrow7', setActiveArrow, {x: "+", y: "+"})}>
+                                      onClick={() => handleVisibility('arrow7', setActiveArrow, {x: "-", y: "-"})}>
                                 <GoArrowUpLeft/>
                             </ArrowBtn>
 
