@@ -982,7 +982,7 @@ function Zabery(props) {
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow4'}
-                                      onClick={() => handleVisibility('arrow4', setActiveArrow, {x: "0", y: "-"})}>
+                                      onClick={() => handleVisibility('arrow4', setActiveArrow, {x: "0", y: "+"})}>
                                 <GoArrowDown/>
                             </ArrowBtn>
 
@@ -1002,7 +1002,7 @@ function Zabery(props) {
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow8'}
-                                      onClick={() => handleVisibility('arrow8', setActiveArrow, {x: "0", y: "+"})}>
+                                      onClick={() => handleVisibility('arrow8', setActiveArrow, {x: "0", y: "-"})}>
                                 <GoArrowUp/>
                             </ArrowBtn>
 
