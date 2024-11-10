@@ -5,6 +5,7 @@ import {
     CanvasContent,
     ClipContainer,
     ClipTool,
+    DownloadBtn,
     TimelineContainer,
     VideoPreview,
     VideoTools
@@ -19,6 +20,10 @@ import {MdAnimation} from "react-icons/md";
 import {GoArrowLeft} from "react-icons/go";
 import {ArrowBtn} from "../../pages/Zabery/ZaberyComponents";
 import {CgScreenWide} from "react-icons/cg";
+import {FaDownload} from "react-icons/fa";
+import * as url from "url";
+
+// import { createFFmpeg } from 'ffmpeg.js';
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -51,6 +56,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         setIsPlaying(true);
     }
 
+    const [recording, setRecording] = useState(false);
+
     const [pieceIsClicked, setPieceClicked] = useState(false);
 
     // Inicializace plochy pro vytváření klipu
@@ -71,7 +78,69 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [coordinateX, setCoordinateX] = useState(0);
 
     // Výpočet pozice Y obrázku
-    const [coordinateY, setCoordinateY] = useState(0);
+    const [coordinateY, setCoordinateY] = useState(0)
+
+    const [downloadLink, setDownloadLink] = useState(null);
+    const [isRecording, setIsRecording] = useState(false);
+
+    const mediaRecorderRef = useRef(null);
+    const chunks = useRef([]);
+
+    /**
+     * Spustí nahrávání videa z canvasu (25 fps).
+     * Vytvoří `MediaRecorder`, který ukládá data do pole `chunks`.
+     * Po zastavení nahrávání vytvoří video `Blob` a odkaz pro stažení.
+     * Automaticky zastaví nahrávání po určité době.
+     */
+    const startRecording = (canvas) => {
+
+        if (canvas) {
+            const stream = canvas.captureStream(25);
+            const mediaRecorder = new MediaRecorder(stream, {mimeType: 'video/webm'});
+
+            mediaRecorder.ondataavailable = (event) => {
+                chunks.current.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks.current, {type: 'video/webm'});
+                const downloadUrl = URL.createObjectURL(blob);
+                setDownloadLink(downloadUrl);
+                chunks.current = [];
+            };
+
+            mediaRecorder.start();
+            mediaRecorderRef.current = mediaRecorder;
+            setIsRecording(true);
+
+            setTimeout(() => {
+                mediaRecorder.stop();
+                setIsRecording(false);
+            }, 10000);
+        }
+    };
+
+    /**
+     * Umožní stáhnout video. Vytvoří a klikne na odkaz pro stažení videa.
+     */
+    const handleDownload = () => {
+        if (downloadLink) {
+            const link = document.createElement('a');
+            link.href = downloadLink.toString();
+            link.download = 'canvas-video.webm';
+            link.click();
+        }
+    };
+
+    /**
+     * Zastaví nahrávání videa, pokud je aktivní.
+     */
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
 
     /** Zobrazení fotek do videa **/
     useEffect(() => {
@@ -80,6 +149,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         const canvas = videoRef.current;
 
         const ctx = canvas.getContext('2d');
+
+        console.log("RATIO: " + activeRatio)
 
         if (activeRatio) {
 
@@ -91,6 +162,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         setRatioCanvas(canvas, canvasSelector, activeRatio);
 
         if (!videoRef.current || selectedPieces.length === 0) return;
+
+        if (!isRecording) {
+
+            startRecording(canvas);
+        }
+
 
         // Procházení pole částic
         for (let i = 0; i < selectedPieces.length; i++) {
@@ -131,8 +208,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             const imgAspectRatio = img.width / img.height;
 
             // Velikost kamery
-            const cameraWidth = img.width / imgAspectRatio;
-            const cameraHeight = img.height / imgAspectRatio;
+            const cameraWidth = img.width / (ratioCanvas.x + ratioCanvas.y);
+            const cameraHeight = img.height / (ratioCanvas.x + ratioCanvas.y);
 
             const speedX = (img.width - cameraWidth) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
             const speedY = (img.height - cameraHeight) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
@@ -173,15 +250,21 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             // Částice obsahující klip
             if (currentPiece.isSubmitted && pieceTimeContional) {
 
+                // startRecording();
+
                 /** Funkce pro vytvoření klipu **/
                 const createClip = () => {
 
                     // Ukončení klipu
-                    if (!isPlaying || currentTime < startPiece || currentTime > endPiece /** || Math.round(startClip) >= Math.round((duration - 3)) **/) {
-                        return;
-                    }
+                    // if (!isPlaying || currentTime < startPiece || currentTime > endPiece) {
+                    //
+                    //     // stopRecording();
+                    //     return;
+                    // }
 
                     console.log(coordinateY + " " + canvas.width + " " + img.width + " " + coordinateX);
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                     // Vykreslení obrázku s posunem (zleva doprava)
                     ctx.drawImage(
@@ -201,6 +284,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 // Vykreslení aktuálního snímku klipu
                 else {
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                     ctx.drawImage(
                         img,
@@ -232,15 +317,42 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 // Částice se nachází v meziprostoru
             } else if (beforeFirstCheck || middleCheck || lastEndCheck) {
 
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
                 setPieceClicked(false);
 
                 handlePieceClick(false);
 
                 break;
             }
+
         }
 
-    }, [currentTime, videoRef, selectedPieces, videoLength, barWidth, activeRatio, canvasSelector]);
+    }, [currentTime, videoRef.current, selectedPieces, videoLength, barWidth, activeRatio, canvasSelector, isRecording, isPlaying, coordinateX, coordinateY]);
+
+
+    // const drawFrame = (canvas, ctx, img, cameraWidth, cameraHeight) => {
+    //
+    //     if (canvasTime < videoLength) {
+    //
+    //         // Draw the frame on the canvas
+    //         const createClip = () => {
+    //
+    //             ctx.drawImage(img, coordinateX, coordinateY, cameraWidth, cameraHeight, 0, 0, canvas.width, canvas.height);
+    //         };
+    //
+    //         // Update canvas time
+    //         setCanvasTime(prevTime => prevTime + 1 / 25); // Increment the time based on frame rate
+    //
+    //         // Start recording if it hasn't started
+    //         // startRecording();
+    //
+    //         requestAnimationFrame(createClip); // Call drawFrame recursively to continue the animation
+    //
+    //     } else {
+    //         stopRecording(); // Stop recording once the video reaches the desired length
+    //     }
+    // };
 
 
     /** Průběžné přidávání času **/
@@ -374,13 +486,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         userSelect: "none"
     };
 
-    // Body na časové ose
+// Body na časové ose
     const checkPoints = [];
 
-    // Vzdálenost mezi body
+// Vzdálenost mezi body
     const spacingPoints = 2;
 
-    // Výpočet měřítka
+// Výpočet měřítka
     const pixelsPerSecond = barWidth / videoLength;
 
     for (let i = 0; i <= videoLength; i += spacingPoints) {
@@ -417,34 +529,35 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {icon: <CgScreenWide/>, ratio: '21:9', name: 'Ultra širokoúhlý'}
     ];
 
-    // useEffect(() => {
-    //
-    //     const interval = setInterval(() => {
-    //
-    //         setCanvasSelector(prev => prev === canvasSelector);
-    //
-    //     }, 1000);
-    //
-    //     return () => clearInterval(interval);
-    //
-    // }, [canvasTypes.length]);
+// useEffect(() => {
+//
+//     const interval = setInterval(() => {
+//
+//         setCanvasSelector(prev => prev === canvasSelector);
+//
+//     }, 1000);
+//
+//     return () => clearInterval(interval);
+//
+// }, [canvasTypes.length]);
 
     /** Funkce pro úpravu rozměrů plochy **/
     const canvasContent = (type) => {
 
         const canvas = videoRef.current;
 
-        return type.map((item, index) => (
+        return type.map((item, index) => {
 
-            <CanvasContent
-                key={index}
-                isClicked={index === canvasSelector}
-                onClick={() => setRatioCanvas(canvas, index, item)}
-            >
-                {item.icon} {item.ratio}
-
-            </CanvasContent>
-        ));
+            return (
+                <CanvasContent
+                    key={index}
+                    isClicked={index === canvasSelector}
+                    onClick={() => setRatioCanvas(canvas, index, item)}
+                >
+                    {item.icon} {item.ratio}
+                </CanvasContent>
+            );
+        });
     };
 
     /** Výpočet poměru **/
@@ -459,12 +572,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     /** Rozměry plochy (Canvas) **/
     const setRatioCanvas = (canvas, index, item) => {
 
-        if (index !== null) {
+        if (index !== null && !isNaN(index)) {
 
             // Nastavení aktuálního indexu
             setCanvasSelector(index);
 
+            console.log("index :" + index);
+
             localStorage.setItem('canvasSelector', index.toString());
+
+        } else {
+
+            console.log("INDEX :" + index);
+
+            setCanvasSelector(4);
+
+            localStorage.setItem('canvasSelector', "4");
         }
 
         if (item && item.ratio) {
@@ -516,7 +639,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {icon: <MdAnimation/>, label: 'Animace'}
     ];
 
-    // Aktivní nástroj zvolený uživatelem
+// Aktivní nástroj zvolený uživatelem
     const [activeTool, setActiveTool] = useState(null);
 
     const [index, setIndex] = useState(0);
@@ -619,39 +742,58 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     gap: "10px",
                     marginBottom: "10px",
                     alignItems: "center",
-                    justifyContent: "center"
+                    justifyContent: "space-between"
                 }}>
 
-                    <div style={divStyles}>
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexGrow: 1
+                    }}>
 
-                        <button onClick={handleBack}>
+                        <div style={divStyles}>
 
-                            <IoPlayBack style={controlStyling}/>
+                            <button onClick={handleBack}>
 
-                        </button>
+                                <IoPlayBack style={controlStyling}/>
 
-                        <button onClick={isPlaying ? handlePause : handlePlay}>
+                            </button>
 
-                            {isPlaying ? <IoPause style={playStyling}/> : <IoPlay style={playStyling}/>}
+                            <button onClick={isPlaying ? handlePause : handlePlay}>
 
-                        </button>
+                                {isPlaying ? <IoPause style={playStyling}/> : <IoPlay style={playStyling}/>}
 
-                        <button onClick={handleForward}>
+                            </button>
 
-                            <IoPlayForward style={controlStyling}/>
+                            <button onClick={handleForward}>
 
-                        </button>
+                                <IoPlayForward style={controlStyling}/>
+
+                            </button>
+
+                        </div>
+
+                        <div style={divStyles}>
+
+                            <div>{formatTime(currentTime)}</div>
+
+                            <div>/</div>
+
+                            <div>{formatTime(videoLength)}</div>
+
+                        </div>
 
                     </div>
 
-                    <div style={divStyles}>
+                    <div style={{
+                        marginLeft: "auto"
+                    }}>
 
-                        <div>{formatTime(currentTime)}</div>
+                        <DownloadBtn onClick={handleDownload}>
 
-                        <div>/</div>
+                            <FaDownload style={{fontSize: "14px"}}/> Stáhnout
 
-                        <div>{formatTime(videoLength)}</div>
-
+                        </DownloadBtn>
                     </div>
 
                 </div>
@@ -741,7 +883,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             </TimelineContainer>
         </div>
     )
-};
+}
+;
 
 /** Funkce pro přeformátování času **/
 const formatTime = (seconds) => {

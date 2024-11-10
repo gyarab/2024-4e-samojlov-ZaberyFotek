@@ -96,3 +96,21 @@ export const CanvasContent = styled.div`
         background: var(--color-shadow-6);
     }
 `;
+
+export const DownloadBtn = styled.button`
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    gap: 5px;
+    background: linear-gradient(to right, #9e1a1f , var(--color-blue-7));
+    border-radius: 25px;
+    padding: 5px 10px 5px 10px;
+    transition: background 0.5s ease-in, opacity 0.5s ease-out;
+    
+    &:hover {
+        background: linear-gradient(to left, #9e1a1f , var(--color-blue-7));
+        opacity: 0.8;
+    }
+`;
