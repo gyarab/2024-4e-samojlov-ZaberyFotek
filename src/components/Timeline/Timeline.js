@@ -56,8 +56,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         setIsPlaying(true);
     }
 
-    const [recording, setRecording] = useState(false);
-
     const [pieceIsClicked, setPieceClicked] = useState(false);
 
     // Inicializace plochy pro vytváření klipu
@@ -74,6 +72,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         return parseInt(localStorage.getItem('canvasSelector'));
     });
 
+    const [isFirstRun, setIsFirstRun] = useState(true);
+
     // Výpočet pozice X obrázku
     const [coordinateX, setCoordinateX] = useState(0);
 
@@ -86,6 +86,10 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const mediaRecorderRef = useRef(null);
     const chunks = useRef([]);
 
+    const [downloadBtn, setDownloadBtn] = useState(false);
+
+    const [count, setCount] = useState(0);
+
     /**
      * Spustí nahrávání videa z canvasu (25 fps).
      * Vytvoří `MediaRecorder`, který ukládá data do pole `chunks`.
@@ -95,7 +99,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const startRecording = (canvas) => {
 
         if (canvas) {
-            const stream = canvas.captureStream(25);
+            const stream = canvas.captureStream(120);
             const mediaRecorder = new MediaRecorder(stream, {mimeType: 'video/webm'});
 
             mediaRecorder.ondataavailable = (event) => {
@@ -112,19 +116,21 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             mediaRecorder.start();
             mediaRecorderRef.current = mediaRecorder;
             setIsRecording(true);
-
-            setTimeout(() => {
-                mediaRecorder.stop();
-                setIsRecording(false);
-            }, 10000);
         }
     };
 
     /**
-     * Umožní stáhnout video. Vytvoří a klikne na odkaz pro stažení videa.
+     * Funkce umožňuje stáhnout video. Vytvoří a klikne na odkaz pro stažení videa.
      */
     const handleDownload = () => {
+
+        // setDownloadLink(null);
+        // chunks.current = [];
+
+        setDownloadBtn(true);
+
         if (downloadLink) {
+
             const link = document.createElement('a');
             link.href = downloadLink.toString();
             link.download = 'canvas-video.webm';
@@ -136,24 +142,24 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
      * Zastaví nahrávání videa, pokud je aktivní.
      */
     const stopRecording = () => {
+
         if (mediaRecorderRef.current && isRecording) {
             mediaRecorderRef.current.stop();
             setIsRecording(false);
         }
     };
 
-    /** Zobrazení fotek do videa **/
-    useEffect(() => {
+    /** Hlavní funkce pro správu plochy **/
+    const handleCanvasContent = () => {
 
         // Plocha videa
         const canvas = videoRef.current;
 
         const ctx = canvas.getContext('2d');
 
-        console.log("RATIO: " + activeRatio)
+        console.log("RATIO: " + activeRatio);
 
         if (activeRatio) {
-
             // Uložení aktivního poměru do místního úložiště
             localStorage.setItem('activeRatio', activeRatio.toString());
         }
@@ -161,218 +167,192 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         // Nastavení velikosti plochy dle poměru
         setRatioCanvas(canvas, canvasSelector, activeRatio);
 
-        if (!videoRef.current || selectedPieces.length === 0) return;
+        if (!canvas || selectedPieces.length === 0) return;
 
-        if (!isRecording) {
+        if (!isRecording && downloadBtn) {
 
             startRecording(canvas);
         }
 
+        // Funkce pro vykreslení aktuálního snímku
+        const createClip = (count) => {
 
-        // Procházení pole částic
-        for (let i = 0; i < selectedPieces.length; i++) {
+            // Procházení pole částic
+            for (let i = 0; i < selectedPieces.length; i++) {
+                // Začáteční bod částice
+                const startPiece = (selectedPieces[i].left * videoLength) / barWidth;
 
-            // Začáteční bod částice
-            const startPiece = (selectedPieces[i].left * videoLength) / barWidth;
+                // Konečný bod částice
+                const endPiece = ((selectedPieces[i].left + selectedPieces[i].width) * videoLength) / barWidth;
 
-            // Konečný bod částice
-            const endPiece = ((selectedPieces[i].left + selectedPieces[i].width) * videoLength) / barWidth;
+                // Proměnná pro zjištění zda další částice je na ploše
+                const nextPiece = selectedPieces[i + 1]
+                    ? (selectedPieces[i + 1].left * videoLength) / barWidth
+                    : null;
 
-            // Proměnná pro zjištění zda další částice je na ploše
-            const nextPiece = selectedPieces[i + 1] ? (selectedPieces[i + 1].left * videoLength) / barWidth : null;
+                // 3 proměnné, které určují prostor mezi částicemi
+                const beforeFirstCheck = count < startPiece;
+                const middleCheck = count > endPiece && nextPiece && count < nextPiece;
+                const lastEndCheck = count > endPiece && !nextPiece;
 
-            // 3 proměnné, které určují prostor mezi částicemi
-            const beforeFirstCheck = currentTime < startPiece;
-            const middleCheck = currentTime > endPiece && nextPiece && currentTime < nextPiece;
-            const lastEndCheck = currentTime > endPiece && !nextPiece;
+                // Aktuálně zvolená částice
+                const currentPiece = selectedPieces[i];
 
-            // Aktuálně zvolená částice
-            const currentPiece = selectedPieces[i];
+                const img = new Image();
 
-            const img = new Image();
+                // Obsah obrázku
+                img.src = currentPiece.src;
 
-            // Obsah obrázku
-            img.src = currentPiece.src;
+                // Kontrola, zda je aktuální čas v rámci částice
+                const pieceTimeConditional = count >= startPiece && count <= endPiece;
 
-            // Kontrola, zda je aktuální čas v rámci částice
-            const pieceTimeContional = currentTime >= startPiece && currentTime <= endPiece;
+                // Čas od začátku klipu
+                const startClip = count - startPiece;
 
-            // Čas od začátku klipu
-            const startClip = currentTime - startPiece;
+                // Délka klipu
+                const duration = endPiece - startPiece;
 
-            // Délka klipu
-            const duration = endPiece - startPiece;
+                const ratioCanvas = getRatioValues(activeRatio);
 
-            const ratioCanvas = getRatioValues(activeRatio);
+                // Velikost kamery
+                const cameraWidth = img.width / (ratioCanvas.x + ratioCanvas.y);
+                const cameraHeight = img.height / (ratioCanvas.x + ratioCanvas.y);
 
-            const imgAspectRatio = img.width / img.height;
+                const speedX = (img.width - cameraWidth) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
+                const speedY = (img.height - cameraHeight) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
 
-            // Velikost kamery
-            const cameraWidth = img.width / (ratioCanvas.x + ratioCanvas.y);
-            const cameraHeight = img.height / (ratioCanvas.x + ratioCanvas.y);
+                console.log(ratioCanvas.y);
 
-            const speedX = (img.width - cameraWidth) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
-            const speedY = (img.height - cameraHeight) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
+                // Výpočet pozice kamery
+                let positionX = speedX * startClip;
+                let positionY = speedY * startClip;
 
-            console.log(ratioCanvas.y)
+                const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
 
-            // Výpočet pozice kamery
-            let positionX = (speedX * startClip);
-            let positionY = (speedY * startClip);
-
-            const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
-
-            // Funkce pro určení správného směru pozice na základě směru pohybu
-            const arrowSetUp = (arrow, positionClip, maxDimension, cameraDimension) => {
-
-                if (arrow === "+") {
-
-                    return positionClip;
-
-                } else if (arrow === "-") {
-
-                    return maxDimension - (positionClip + cameraDimension);
-
-                } else {
-
-                    return 0.0;
-                }
-            };
-
-            // Vypočítání pozic kamery na základě směru šipek
-            positionX = arrowSetUp(arrowPosition.x, positionX, img.width, cameraWidth);
-            positionY = arrowSetUp(arrowPosition.y, positionY, img.height, cameraHeight);
-
-            // Nastavení vypočítaných pozic pro animaci
-            setCoordinateX(positionX);
-            setCoordinateY(positionY);
-
-            // Částice obsahující klip
-            if (currentPiece.isSubmitted && pieceTimeContional) {
-
-                // startRecording();
-
-                /** Funkce pro vytvoření klipu **/
-                const createClip = () => {
-
-                    // Ukončení klipu
-                    // if (!isPlaying || currentTime < startPiece || currentTime > endPiece) {
-                    //
-                    //     // stopRecording();
-                    //     return;
-                    // }
-
-                    console.log(coordinateY + " " + canvas.width + " " + img.width + " " + coordinateX);
-
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                    // Vykreslení obrázku s posunem (zleva doprava)
-                    ctx.drawImage(
-                        img,
-                        coordinateX, coordinateY,
-                        cameraWidth, cameraHeight,
-                        0, 0,
-                        canvas.width, canvas.height
-                    );
+                // Funkce pro určení správného směru pozice na základě směru pohybu
+                const arrowSetUp = (arrow, positionClip, maxDimension, cameraDimension) => {
+                    if (arrow === "+") {
+                        return positionClip;
+                    } else if (arrow === "-") {
+                        return maxDimension - (positionClip + cameraDimension);
+                    } else {
+                        return 0.0;
+                    }
                 };
 
-                // Přehrání klipu
-                if (isPlaying && pieceTimeContional) {
+                // Vypočítání pozic kamery na základě směru šipek
+                positionX = arrowSetUp(arrowPosition.x, positionX, img.width, cameraWidth);
+                positionY = arrowSetUp(arrowPosition.y, positionY, img.height, cameraHeight);
 
-                    requestAnimationFrame(createClip);
-                }
+                console.log("POSITION " + positionX + " " + canvas.width);
 
-                // Vykreslení aktuálního snímku klipu
-                else {
+                // Nastavení vypočítaných pozic pro animaci
+                setCoordinateX(positionX);
+                setCoordinateY(positionY);
 
+                // Částice obsahující klip
+                if (currentPiece.isSubmitted && pieceTimeConditional) {
+                    // Funkce pro vytvoření klipu
+                    const createClip = () => {
+                        console.log(coordinateY + " " + canvas.width + " " + img.width + " " + coordinateX);
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        // Vykreslení obrázku s posunem (zleva doprava)
+                        ctx.drawImage(
+                            img,
+                            coordinateX,
+                            coordinateY,
+                            cameraWidth,
+                            cameraHeight,
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        );
+                    };
+
+                    // Přehrání klipu
+                    if (isPlaying && pieceTimeConditional) {
+                        requestAnimationFrame(createClip);
+                    } else {
+                        // Vykreslení aktuálního snímku klipu
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(
+                            img,
+                            coordinateX,
+                            coordinateY,
+                            cameraWidth,
+                            cameraHeight,
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        );
+                    }
+
+                    break;
+
+                    // Častice neobsahující klip
+                } else if (!currentPiece.isSubmitted && pieceTimeConditional) {
+                    // Vyčistění plochy
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    ctx.drawImage(
-                        img,
-                        coordinateX, coordinateY,
-                        cameraWidth, cameraHeight,
-                        0, 0,
-                        canvas.width, canvas.height
-                    );
+                    // Vykreslení částice
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    setPieceClicked(true);
+
+                    handlePieceClick(true);
+
+                    break;
+
+                    // Částice se nachází v meziprostoru
+                } else if (beforeFirstCheck || middleCheck || lastEndCheck) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    setPieceClicked(false);
+
+                    handlePieceClick(false);
+
+                    break;
                 }
 
-                break;
-
-
-                // Častice neobsahující klip
-            } else if (!currentPiece.isSubmitted && pieceTimeContional) {
-
-                // Vyčistění plochy
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Vykreslení částice
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                setPieceClicked(true);
-
-                handlePieceClick(true);
-
-                break;
-
-                // Částice se nachází v meziprostoru
-            } else if (beforeFirstCheck || middleCheck || lastEndCheck) {
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                setPieceClicked(false);
-
-                handlePieceClick(false);
-
-                break;
+                console.log("COUNT " + count);
             }
+        };
 
-        }
-
-    }, [currentTime, videoRef.current, selectedPieces, videoLength, barWidth, activeRatio, canvasSelector, isRecording, isPlaying, coordinateX, coordinateY]);
-
-
-    // const drawFrame = (canvas, ctx, img, cameraWidth, cameraHeight) => {
-    //
-    //     if (canvasTime < videoLength) {
-    //
-    //         // Draw the frame on the canvas
-    //         const createClip = () => {
-    //
-    //             ctx.drawImage(img, coordinateX, coordinateY, cameraWidth, cameraHeight, 0, 0, canvas.width, canvas.height);
-    //         };
-    //
-    //         // Update canvas time
-    //         setCanvasTime(prevTime => prevTime + 1 / 25); // Increment the time based on frame rate
-    //
-    //         // Start recording if it hasn't started
-    //         // startRecording();
-    //
-    //         requestAnimationFrame(createClip); // Call drawFrame recursively to continue the animation
-    //
-    //     } else {
-    //         stopRecording(); // Stop recording once the video reaches the desired length
-    //     }
-    // };
-
+        return createClip;
+    };
 
     /** Průběžné přidávání času **/
     useEffect(() => {
-
         let intervalId = null;
 
-        console.log(currentTime, "s")
+        console.log("Count: ", currentTime, "s");
 
-        if (isPlaying && !isDragging) {
+        // Pokud uživatel klikne na tlačítko 'Stáhnout video'
+        if (downloadBtn) {
 
-            // Nastavení času a pozice časomíry
             intervalId = setInterval(() => {
 
-                setCurrentTime(prevTime => {
+                setCurrentTime((prevTime) => {
 
-                    if (prevTime + 0.15 >= videoLength) {
+                    console.log(isFirstRun)
+
+                    if (isFirstRun && currentTime !== 0) {
+                        setDownloadLink(null);
+                        chunks.current = [];
+                        setBarPosition(0);
+                        setIsFirstRun(false);
+                        return 0;
+                    }
+
+                    else if (prevTime + 0.15 >= 5) {
 
                         clearInterval(intervalId);
                         setIsPlaying(false);
+                        stopRecording();
 
                         return videoLength;
                     }
@@ -380,21 +360,42 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     return prevTime + 0.15;
                 });
 
-                setBarPosition(prevPosition => prevPosition + 0.25);
+                setBarPosition((prevPosition) => prevPosition + 0.25);
+
+            }, 150);
+
+        } else if (isPlaying && !isDragging) {
+
+            intervalId = setInterval(() => {
+
+                setCurrentTime((prevTime) => {
+
+                    if (prevTime + 0.15 >= videoLength) {
+
+                        clearInterval(intervalId);
+                        setIsPlaying(false);
+                        return videoLength;
+                    }
+
+                    return prevTime + 0.15;
+                });
+
+                setBarPosition((prevPosition) => prevPosition + 0.25);
 
             }, 100);
 
         }
 
-        return () => {
+        const renderFrame = handleCanvasContent();
+        renderFrame(currentTime);
 
+        return () => {
             if (intervalId) {
                 clearInterval(intervalId);
             }
-
         };
 
-    }, [isPlaying, isDragging]);
+    }, [downloadBtn, isPlaying, isDragging, videoLength, currentTime]);
 
 
     /** Zastavení času **/
