@@ -726,6 +726,7 @@ function Zabery(props) {
                     item.id === id
                         ? {
                             ...item,
+                            width: newWidth,
                             isSubmitted: isSubmitted,
                             arrow: arrow,
                             duration: duration,
@@ -734,7 +735,7 @@ function Zabery(props) {
                         : item
                 );
 
-                // Vyjíměčný případ pro
+                // Vyjíměčný případ
             } else if (existingItem && special === 1) {
 
                 // Smazání částice s číslem
@@ -841,7 +842,7 @@ function Zabery(props) {
 
         console.log(arrowDirection);
 
-        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
+        handlePieces(timelineItem, null, 550, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
 
         setIsMarked(true);
 
@@ -863,7 +864,6 @@ function Zabery(props) {
             setPieceStatus(status);
         }
     };
-
 
     return (
         <ZaberyPage>

@@ -325,6 +325,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         return createClip;
     };
 
+
     /** Průběžné přidávání času **/
     useEffect(() => {
         let intervalId = null;
@@ -346,9 +347,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         setBarPosition(0);
                         setIsFirstRun(false);
                         return 0;
-                    }
 
-                    else if (prevTime + 0.15 >= 5) {
+                    } else if (prevTime + 0.15 >= videoLength) {
 
                         clearInterval(intervalId);
                         setIsPlaying(false);
@@ -389,6 +389,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         const renderFrame = handleCanvasContent();
         renderFrame(currentTime);
 
+
         return () => {
             if (intervalId) {
                 clearInterval(intervalId);
@@ -424,6 +425,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         const bar = event.currentTarget;
 
         const mouseX = event.clientX - bar.getBoundingClientRect().left;
+
+        console.log(mouseX)
 
         // Výpočet nového času
         const newTime = (mouseX / barWidth) * videoLength;
@@ -830,6 +833,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                 handlePieceUpdate={handlePieceUpdate}
                                 activeIndex={activeIndex}
                                 pieceIsClicked={pieceIsClicked}
+                                timelineWidth={timelineRef}
                             />
                         ))}
 

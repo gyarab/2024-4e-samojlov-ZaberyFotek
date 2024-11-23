@@ -10,7 +10,8 @@ const TimelinePieces = ({
                             barWidth,
                             handlePieceUpdate,
                             activeIndex,
-                            pieceIsClicked
+                            pieceIsClicked,
+                            timelineWidth
                         }) => {
 
     // Změna velikosti prvku
@@ -121,16 +122,23 @@ const TimelinePieces = ({
 
         if (piece.isSubmitted) {
             setCancelBtn(false);
+
+            const timelineWidthPX = timelineWidth.current.offsetWidth;
+
+            const durationWidth = (timelineWidthPX / 60) * piece.duration;
+
+            // Nastavení délky částice z výběru časového úseku
+            setWidth(durationWidth);
         }
 
     }, [piece.isSubmitted]);
 
     /** Funkce spravující kliknutí na částici v Timeline **/
-    const handleClick = (type, event) => {
+    const handleClick = (type) => {
 
         pieceIsClicked = true;
 
-        console.log("TYPE " + type)
+        console.log("TYPE " + type + piece.isSubmitted);
 
         if (type === "piece" && cancelClipBtn) {
 
