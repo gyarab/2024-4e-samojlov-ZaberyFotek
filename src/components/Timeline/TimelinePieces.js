@@ -65,20 +65,20 @@ const TimelinePieces = ({
             // Změna velikosti levé strany
             if (isResizing === 'left') {
 
-                // console.log(newLeft);
+                if ((leftSidePiece && newLeft < leftSidePiece.left + leftSidePiece.width) || newWidth === MIN_WIDTH) {
 
-                if (leftSidePiece && newLeft < leftSidePiece.left + leftSidePiece.width) {
+                    // newLeft = leftSidePiece.left + leftSidePiece.width;
+                    //
+                    // if (deltaX > 0) {
+                    //
+                    //     newWidth = startWidth.current;
+                    //
+                    // } else {
+                    //
+                    //     newWidth = -startWidth.current;
+                    // }
 
-                    newLeft = leftSidePiece.left + leftSidePiece.width;
-
-                    if (deltaX > 0) {
-
-                        newWidth = startWidth.current;
-
-                    } else {
-
-                        newWidth = -startWidth.current;
-                    }
+                    return;
 
                 }
 
@@ -93,7 +93,9 @@ const TimelinePieces = ({
 
                 if (rightSidePiece && newLeft + newWidth > rightSidePiece.left) {
 
-                    newWidth = rightSidePiece.left - newLeft;
+                    // newWidth = rightSidePiece.left - newLeft;
+
+                    return;
                 }
 
                 // Funkce drag-resize je zastavena tak, aby nepřesahovala konec prvku Timeline
@@ -120,18 +122,43 @@ const TimelinePieces = ({
 
     useEffect(() => {
 
-        if (piece.isSubmitted) {
+        // ID prvku
+        const pieceID = piecesArray.findIndex(p => p.id === piece.id);
+
+        // Nejbližší pravý prvek
+        const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
+
+        if (piece.isSubmitted && !isResizing) {
+
             setCancelBtn(false);
 
             const timelineWidthPX = timelineWidth.current.offsetWidth;
 
             const durationWidth = (timelineWidthPX / 60) * piece.duration;
 
-            // Nastavení délky částice z výběru časového úseku
-            setWidth(durationWidth);
+            if (rightSidePiece !== null && (piece.left + durationWidth) < piecesArray[pieceID + 1].left) {
+
+                console.log("V PORADKU");
+
+                // Nastavení délky částice z výběru časového úseku
+                setWidth(durationWidth);
+
+            } else if (rightSidePiece !== null && (piece.left + durationWidth) > piecesArray[pieceID + 1].left){
+
+                const maxWidth = piecesArray[pieceID + 1].left - (piece.left);
+
+                console.log(maxWidth);
+
+                setWidth(maxWidth);
+            }
+
+            handlePieceUpdate(
+                piece.id, piece.src, width, piece.left, piece.isSubmitted, piece.arrow,
+                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
+            );
         }
 
-    }, [piece.isSubmitted]);
+    }, [piece.isSubmitted, width]);
 
     /** Funkce spravující kliknutí na částici v Timeline **/
     const handleClick = (type) => {

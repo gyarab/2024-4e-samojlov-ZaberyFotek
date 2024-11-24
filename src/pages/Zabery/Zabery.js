@@ -28,6 +28,8 @@ import {
 import {TimelineWidth} from "../../components/Timeline/TimelineWidth";
 import Timeline from "../../components/Timeline/Timeline";
 import {IoIosCheckmarkCircleOutline} from "react-icons/io";
+import {MdOutlineZoomOutMap, MdZoomInMap} from "react-icons/md";
+import {AiOutlineRotateLeft, AiOutlineRotateRight} from "react-icons/ai";
 
 function Zabery(props) {
 
@@ -726,7 +728,6 @@ function Zabery(props) {
                     item.id === id
                         ? {
                             ...item,
-                            width: newWidth,
                             isSubmitted: isSubmitted,
                             arrow: arrow,
                             duration: duration,
@@ -735,7 +736,7 @@ function Zabery(props) {
                         : item
                 );
 
-                // Vyjíměčný případ
+                // Vyjíměčný případ pro
             } else if (existingItem && special === 1) {
 
                 // Smazání částice s číslem
@@ -842,7 +843,7 @@ function Zabery(props) {
 
         console.log(arrowDirection);
 
-        handlePieces(timelineItem, null, 550, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
+        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
 
         setIsMarked(true);
 
@@ -864,6 +865,7 @@ function Zabery(props) {
             setPieceStatus(status);
         }
     };
+
 
     return (
         <ZaberyPage>
@@ -955,7 +957,7 @@ function Zabery(props) {
 
                     <PiecesContainer>
 
-                        <p>Zvolit směr:</p>
+                        <p>Směry:</p>
 
                         <div
                             style={{
@@ -967,43 +969,75 @@ function Zabery(props) {
 
                             <ArrowBtn isClicked={activeArrow === 'arrow1'}
                                       onClick={() => handleVisibility('arrow1', setActiveArrow, {x: "+", y: "-"})}
+                                      title={"Vpravo nahoru"}
                             >
                                 <GoArrowUpRight/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow2'}
-                                      onClick={() => handleVisibility('arrow2', setActiveArrow, {x: "+", y: "0"})}>
+                                      onClick={() => handleVisibility('arrow2', setActiveArrow, {x: "+", y: "0"})}
+                                      title={"Vpravo"}>
                                 <GoArrowRight/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow3'}
-                                      onClick={() => handleVisibility('arrow3', setActiveArrow, {x: "+", y: "+"})}>
+                                      onClick={() => handleVisibility('arrow3', setActiveArrow, {x: "+", y: "+"})}
+                                      title={"Vpravo dolů"}>
                                 <GoArrowDownRight/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow4'}
-                                      onClick={() => handleVisibility('arrow4', setActiveArrow, {x: "0", y: "+"})}>
+                                      onClick={() => handleVisibility('arrow4', setActiveArrow, {x: "0", y: "+"})}
+                                      title={"Dolů"}>
                                 <GoArrowDown/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow5'}
-                                      onClick={() => handleVisibility('arrow5', setActiveArrow, {x: "-", y: "+"})}>
+                                      onClick={() => handleVisibility('arrow5', setActiveArrow, {x: "-", y: "+"})}
+                                      title={"Vlevo dolů"}>
                                 <GoArrowDownLeft/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow6'}
-                                      onClick={() => handleVisibility('arrow6', setActiveArrow, {x: "-", y: "0"})}>
+                                      onClick={() => handleVisibility('arrow6', setActiveArrow, {x: "-", y: "0"})}
+                                      title={"Vlevo"}>
                                 <GoArrowLeft/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow7'}
-                                      onClick={() => handleVisibility('arrow7', setActiveArrow, {x: "-", y: "-"})}>
+                                      onClick={() => handleVisibility('arrow7', setActiveArrow, {x: "-", y: "-"})}
+                                      title={"Vlevo nahoru"}>
                                 <GoArrowUpLeft/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow8'}
-                                      onClick={() => handleVisibility('arrow8', setActiveArrow, {x: "0", y: "-"})}>
+                                      onClick={() => handleVisibility('arrow8', setActiveArrow, {x: "0", y: "-"})}
+                                      title={"Nahoru"}>
                                 <GoArrowUp/>
+                            </ArrowBtn>
+
+                            <ArrowBtn isClicked={activeArrow === 'arrow9'}
+                                      onClick={() => handleVisibility('arrow9', setActiveArrow, {x: "zoom", y: "in"})}
+                                      title={"Přiblížení"}>
+                                <MdZoomInMap />
+                            </ArrowBtn>
+
+                            <ArrowBtn isClicked={activeArrow === 'arrow10'}
+                                      onClick={() => handleVisibility('arrow10', setActiveArrow, {x: "zoom", y: "out"})}
+                                      title={"Oddálení"}>
+                                <MdOutlineZoomOutMap />
+                            </ArrowBtn>
+
+                            <ArrowBtn isClicked={activeArrow === 'arrow11'}
+                                      onClick={() => handleVisibility('arrow11', setActiveArrow, {x: "rotation", y: "positive"})}
+                                      title={"Rotace ve směru hodin"}>
+                                <AiOutlineRotateRight />
+                            </ArrowBtn>
+
+                            <ArrowBtn isClicked={activeArrow === 'arrow12'}
+                                      onClick={() => handleVisibility('arrow12', setActiveArrow, {x: "rotation", y: "positive"})}
+                                      title={"Rotace proti směru hodin"}>
+                                <AiOutlineRotateLeft />
                             </ArrowBtn>
 
                         </div>

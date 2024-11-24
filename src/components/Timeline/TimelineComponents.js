@@ -31,6 +31,68 @@ export const VideoPreview = styled.div`
     }
 `;
 
+// return;
+
+//console.log("NEW WIDTH " + newWidth)
+
+/** if (type === "piece" && cancelClipBtn) {
+
+ handlePieceUpdate(
+ piece.id, piece.src, piece.width, piece.left, piece.isSubmitted, piece.arrow,
+ piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
+ );
+
+ } else if (type === "cancel") {
+
+ // Zabraňuje spuštění kliknutí na prvek
+ // event.stopPropagation();
+
+ handlePieceUpdate(
+ piece.id, piece.src, piece.width, piece.left, false, piece.arrow,
+ piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
+ );
+
+ // Smazání tlačítka
+ setCancelBtn(true);
+ }**/
+
+/**useEffect(() => {
+
+ // ID prvku
+ const pieceID = piecesArray.findIndex(p => p.id === piece.id);
+
+ // Nejbližší pravý prvek
+ const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
+
+ setCancelBtn(false);
+
+ // if (piece.isSubmitted) {
+ //
+ //     setCancelBtn(false);
+ //
+ //     const timelineWidthPX = timelineWidth.current.offsetWidth;
+ //
+ //     const durationWidth = (timelineWidthPX / 60) * piece.duration;
+ //
+ //     if (rightSidePiece !== null && (piece.left + durationWidth) < piecesArray[pieceID + 1].left) {
+ //
+ //         console.log("V PORADKU");
+ //
+ //         // Nastavení délky částice z výběru časového úseku
+ //         setWidth(durationWidth);
+ //
+ //     } else if (rightSidePiece !== null && (piece.left + durationWidth) > piecesArray[pieceID + 1].left){
+ //
+ //         const maxWidth = piecesArray[pieceID + 1].left - (piece.left);
+ //
+ //         console.log(maxWidth);
+ //
+ //         setWidth(maxWidth);
+ //     }
+ // }
+
+ }, [piece.isSubmitted]); **/
+
 export const TimelineContainer = styled.div`
     display: grid;
     padding: 20px;

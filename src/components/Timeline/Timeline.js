@@ -149,6 +149,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         }
     };
 
+    const [currentDirection, setCurrentDirection] = useState("right");
+
     /** Hlavní funkce pro správu plochy **/
     const handleCanvasContent = () => {
 
@@ -214,9 +216,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 const ratioCanvas = getRatioValues(activeRatio);
 
+                const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
+
+                const basicArrowType = arrowPosition.x !== "zoom" && arrowPosition.x !== "rotate";
+
                 // Velikost kamery
-                const cameraWidth = img.width / (ratioCanvas.x + ratioCanvas.y);
-                const cameraHeight = img.height / (ratioCanvas.x + ratioCanvas.y);
+                let cameraWidth = basicArrowType ? img.width / (ratioCanvas.x + ratioCanvas.y) : img.width;
+                let cameraHeight = basicArrowType ? img.height / (ratioCanvas.x + ratioCanvas.y) : img.height;
 
                 const speedX = (img.width - cameraWidth) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
                 const speedY = (img.height - cameraHeight) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
@@ -224,10 +230,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 console.log(ratioCanvas.y);
 
                 // Výpočet pozice kamery
-                let positionX = speedX * startClip;
-                let positionY = speedY * startClip;
-
-                const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
+                let positionX = speedX * startClip * 5;
+                let positionY = speedY * startClip * 5;
 
                 // Funkce pro určení správného směru pozice na základě směru pohybu
                 const arrowSetUp = (arrow, positionClip, maxDimension, cameraDimension) => {
@@ -240,20 +244,43 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     }
                 };
 
-                // Vypočítání pozic kamery na základě směru šipek
-                positionX = arrowSetUp(arrowPosition.x, positionX, img.width, cameraWidth);
-                positionY = arrowSetUp(arrowPosition.y, positionY, img.height, cameraHeight);
+                // Výpočet parametrů kamery pro efekt přiblížení/oddálení
+                if (arrowPosition.x === "zoom") {
 
-                console.log("POSITION " + positionX + " " + canvas.width);
+                    const zoomProgress = (startClip / duration);
+
+                    if  (arrowPosition.y === "in") {
+                        cameraWidth = img.width / (1 + zoomProgress);
+                        cameraHeight = img.height / (1 + zoomProgress);
+
+                    } else {
+                        cameraWidth = (img.width / 2) * (1 + zoomProgress);
+                        cameraHeight = (img.height / 2) * (1 + zoomProgress);
+                    }
+
+                    positionX = (img.width - cameraWidth) / 2;
+                    positionY = (img.height - cameraHeight) / 2;
+
+
+                } else {
+
+                    // Vypočítání pozic kamery na základě směru šipek
+                    positionX = arrowSetUp(arrowPosition.x, positionX, img.width, cameraWidth);
+                    positionY = arrowSetUp(arrowPosition.y, positionY, img.height, cameraHeight);
+
+                    console.log("POSITION " + positionX + " " + canvas.width);
+                }
 
                 // Nastavení vypočítaných pozic pro animaci
                 setCoordinateX(positionX);
                 setCoordinateY(positionY);
 
+
                 // Částice obsahující klip
                 if (currentPiece.isSubmitted && pieceTimeConditional) {
                     // Funkce pro vytvoření klipu
                     const createClip = () => {
+
                         console.log(coordinateY + " " + canvas.width + " " + img.width + " " + coordinateX);
 
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
