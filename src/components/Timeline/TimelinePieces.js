@@ -170,7 +170,7 @@ const TimelinePieces = ({
         if (type === "piece" && cancelClipBtn) {
 
             handlePieceUpdate(
-                piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
+                piece.id, piece.src, piece.width, piece.left, piece.isSubmitted, piece.arrow,
                 piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
             );
 
@@ -180,7 +180,7 @@ const TimelinePieces = ({
             // event.stopPropagation();
 
             handlePieceUpdate(
-                piece.id, piece.src, width, left, false, piece.arrow,
+                piece.id, piece.src, piece.width, piece.left, false, piece.arrow,
                 piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
             );
 

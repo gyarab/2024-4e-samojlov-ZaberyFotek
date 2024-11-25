@@ -1035,7 +1035,7 @@ function Zabery(props) {
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow12'}
-                                      onClick={() => handleVisibility('arrow12', setActiveArrow, {x: "rotation", y: "positive"})}
+                                      onClick={() => handleVisibility('arrow12', setActiveArrow, {x: "rotation", y: "negative"})}
                                       title={"Rotace proti směru hodin"}>
                                 <AiOutlineRotateLeft />
                             </ArrowBtn>

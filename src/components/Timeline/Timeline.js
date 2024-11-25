@@ -88,7 +88,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     const [downloadBtn, setDownloadBtn] = useState(false);
 
-    const [count, setCount] = useState(0);
+    // Aktuální směr v rotaci
+    const [currentDirection, setCurrentDirection] = useState("right");
 
     /**
      * Spustí nahrávání videa z canvasu (25 fps).
@@ -99,7 +100,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const startRecording = (canvas) => {
 
         if (canvas) {
-            const stream = canvas.captureStream(120);
+            const stream = canvas.captureStream(50);
             const mediaRecorder = new MediaRecorder(stream, {mimeType: 'video/webm'});
 
             mediaRecorder.ondataavailable = (event) => {
@@ -149,8 +150,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         }
     };
 
-    const [currentDirection, setCurrentDirection] = useState("right");
-
     /** Hlavní funkce pro správu plochy **/
     const handleCanvasContent = () => {
 
@@ -179,8 +178,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         // Funkce pro vykreslení aktuálního snímku
         const createClip = (count) => {
 
-            // Procházení pole částic
+// Procházení pole částic
             for (let i = 0; i < selectedPieces.length; i++) {
+
                 // Začáteční bod částice
                 const startPiece = (selectedPieces[i].left * videoLength) / barWidth;
 
@@ -224,14 +224,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 let cameraWidth = basicArrowType ? img.width / (ratioCanvas.x + ratioCanvas.y) : img.width;
                 let cameraHeight = basicArrowType ? img.height / (ratioCanvas.x + ratioCanvas.y) : img.height;
 
-                const speedX = (img.width - cameraWidth) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
-                const speedY = (img.height - cameraHeight) / (duration * (ratioCanvas.x + ratioCanvas.y) * 0.5);
+                let speedX = (img.width - cameraWidth) / (duration);
+                let speedY = (img.height - cameraHeight) / (duration);
 
                 console.log(ratioCanvas.y);
 
                 // Výpočet pozice kamery
-                let positionX = speedX * startClip * 5;
-                let positionY = speedY * startClip * 5;
+                let positionX = arrowPosition.x !== "rotation" ? speedX * startClip : speedX * startClip;
+                let positionY = arrowPosition.x !== "rotation" ? speedY * startClip : speedY * startClip;
 
                 // Funkce pro určení správného směru pozice na základě směru pohybu
                 const arrowSetUp = (arrow, positionClip, maxDimension, cameraDimension) => {
@@ -249,7 +249,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     const zoomProgress = (startClip / duration);
 
-                    if  (arrowPosition.y === "in") {
+                    if (arrowPosition.y === "in") {
                         cameraWidth = img.width / (1 + zoomProgress);
                         cameraHeight = img.height / (1 + zoomProgress);
 
@@ -261,6 +261,34 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     positionX = (img.width - cameraWidth) / 2;
                     positionY = (img.height - cameraHeight) / 2;
 
+                } else if (arrowPosition.x === "rotation") {
+
+                    console.log("TIME " + count + " " + startPiece);
+
+                    const slowFactor = 0.5;
+                    const newSpeedX = speedX * slowFactor;
+                    const newSpeedY = speedY * slowFactor;
+
+                    console.log("DIRECTION: " + currentDirection)
+
+                    // Pokud se začátek částice rovná aktuálnímu času
+                    if (Math.round(startPiece * 10) === Math.round(count * 10)) {
+
+                        setCoordinateX(0);
+                        setCoordinateY(0);
+                        positionX = 0;
+                        positionY = 0;
+                        setCurrentDirection("right");
+                    }
+
+                    if (coordinateX === 0 && coordinateY === 0) {
+
+                        setCurrentDirection("right");
+                    }
+
+                    const squareRotation = getSquareRotation(arrowPosition, positionX, newSpeedX, positionY, cameraWidth, newSpeedY, cameraHeight);
+                    positionX = squareRotation.positionX;
+                    positionY = squareRotation.positionY;
 
                 } else {
 
@@ -274,7 +302,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 // Nastavení vypočítaných pozic pro animaci
                 setCoordinateX(positionX);
                 setCoordinateY(positionY);
-
 
                 // Částice obsahující klip
                 if (currentPiece.isSubmitted && pieceTimeConditional) {
@@ -325,8 +352,16 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     // Vyčistění plochy
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+                    console.log("BUBU")
+
                     // Vykreslení částice
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(
+                        img,
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    );
 
                     setPieceClicked(true);
 
@@ -389,7 +424,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 setBarPosition((prevPosition) => prevPosition + 0.25);
 
-            }, 150);
+                // 150
+            }, 100);
 
         } else if (isPlaying && !isDragging) {
 
@@ -424,7 +460,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         };
 
     }, [downloadBtn, isPlaying, isDragging, videoLength, currentTime]);
-
 
     /** Zastavení času **/
     const handlePause = () => setIsPlaying(false);
@@ -493,6 +528,146 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             handleFunction(event);
         }
     };
+
+    /** Funkce pro zobrazení úplné rotace obrázku ve směru nebo proti směru hodinových ručiček **/
+    const getSquareRotation = (arrowPosition, positionX, newSpeedX, positionY, cameraWidth, newSpeedY, cameraHeight) => {
+
+        if (arrowPosition.y === "positive") {
+
+            switch (currentDirection) {
+
+                // Směr doprava
+                case "right":
+                    positionX = coordinateX + newSpeedX;
+                    positionY = 0;
+
+                    if (positionX + newSpeedX >= cameraWidth) {
+                        console.log("Reached right edge, changing direction to down");
+
+                        setCoordinateX(positionX);
+                        setCoordinateY(0);
+                        setCurrentDirection("down");
+                    }
+                    break;
+
+                // Směr dolů
+                case "down":
+                    console.log("Moving down " + positionX + " " + positionY);
+                    console.log("Moving down " + coordinateX + " " + coordinateY);
+
+                    positionX = coordinateX;
+                    positionY = coordinateY + newSpeedY;
+
+                    if (positionY + newSpeedY >= cameraHeight) {
+                        console.log("Reached bottom edge, changing direction to left");
+
+                        setCoordinateX(positionX);
+                        setCoordinateY(positionY);
+                        setCurrentDirection("left");
+                    }
+                    break;
+
+                // Směr vlevo
+                case "left":
+                    positionX = coordinateX - newSpeedX;
+                    positionY = coordinateY;
+                    console.log("Moving left " + positionX);
+
+                    if (positionX - newSpeedX <= 0) {
+                        console.log("Reached left edge, changing direction to up");
+
+                        setCoordinateX(positionX);
+                        setCoordinateY(positionY);
+                        setCurrentDirection("up");
+                    }
+                    break;
+
+                // Směr nahoru
+                case "up":
+                    positionX = coordinateX;
+                    positionY = coordinateY - newSpeedY;
+                    console.log("Moving up " + positionY);
+
+                    if (positionY - newSpeedY <= 0) {
+                        console.log("Reached top edge, changing direction to right");
+
+                        setCoordinateX(positionX);
+                        setCoordinateY(0);
+                        setCurrentDirection("right");
+                    }
+                    break;
+
+                default:
+                    console.error("Neznámý směr: ", currentDirection);
+            }
+
+            // Rotace proti směru hodinových ručiček
+        } else {
+
+            switch (currentDirection) {
+
+                case "right":
+                    positionX = coordinateX - newSpeedX;
+                    positionY = 0;
+                    console.log("Moving left (inverse) " + positionX);
+
+                    if (positionX - newSpeedX <= 0) {
+                        console.log("Reached left edge (inverse), changing direction to up");
+
+                        setCoordinateX(positionX);
+                        setCoordinateY(0);
+                        setCurrentDirection("up");
+                    }
+                    break;
+
+                case "down":
+                    console.log("Moving up (inverse) " + positionX + " " + positionY);
+                    positionX = coordinateX;
+                    positionY = coordinateY - newSpeedY;
+
+                    if (positionY - newSpeedY <= 0) {
+                        console.log("Reached top edge (inverse), changing direction to right");
+
+                        setCoordinateX(positionX);
+                        setCoordinateY(positionY);
+                        setCurrentDirection("right");
+                    }
+                    break;
+
+                case "left":
+                    positionX = coordinateX + newSpeedX;
+                    positionY = coordinateY;
+                    console.log("Moving right (inverse) " + positionX);
+
+                    if (positionX + newSpeedX >= cameraWidth) {
+                        console.log("Reached right edge (inverse), changing direction to down");
+
+                        setCoordinateX(positionX);
+                        setCoordinateY(positionY);
+                        setCurrentDirection("down");
+                    }
+                    break;
+
+                case "up":
+                    positionX = coordinateX;
+                    positionY = coordinateY + newSpeedY;
+                    console.log("Moving down (inverse) " + positionY);
+
+                    if (positionY + newSpeedY >= cameraHeight) {
+                        console.log("Reached bottom edge (inverse), changing direction to left");
+
+                        setCoordinateX(positionX);
+                        setCoordinateY(positionY);
+                        setCurrentDirection("left");
+                    }
+                    break;
+
+                default:
+                    console.error("Neznámý směr: ", currentDirection);
+            }
+        }
+        return {positionX, positionY};
+    }
 
     const playStyling = {
         fontSize: "35px",
