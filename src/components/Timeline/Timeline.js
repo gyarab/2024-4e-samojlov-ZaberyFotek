@@ -20,10 +20,8 @@ import {MdAnimation} from "react-icons/md";
 import {GoArrowLeft} from "react-icons/go";
 import {ArrowBtn} from "../../pages/Zabery/ZaberyComponents";
 import {CgScreenWide} from "react-icons/cg";
-import {FaDownload} from "react-icons/fa";
+import {FaCameraRetro, FaDownload} from "react-icons/fa";
 import * as url from "url";
-
-// import { createFFmpeg } from 'ffmpeg.js';
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -79,6 +77,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     // Výpočet pozice Y obrázku
     const [coordinateY, setCoordinateY] = useState(0)
+
+    const [elementX, setElementX] = useState(0);
+
+    // Výpočet pozice Y obrázku
+    const [elementY, setElementY] = useState(0)
+
+    const [isFirst, setIsFirst] = useState(true)
 
     const [downloadLink, setDownloadLink] = useState(null);
     const [isRecording, setIsRecording] = useState(false);
@@ -158,7 +163,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         const ctx = canvas.getContext('2d');
 
-        console.log("RATIO: " + activeRatio);
+        // console.log("RATIO: " + activeRatio);
 
         if (activeRatio) {
             // Uložení aktivního poměru do místního úložiště
@@ -178,7 +183,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         // Funkce pro vykreslení aktuálního snímku
         const createClip = (count) => {
 
-// Procházení pole částic
+            // Procházení pole částic
             for (let i = 0; i < selectedPieces.length; i++) {
 
                 // Začáteční bod částice
@@ -221,13 +226,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 const basicArrowType = arrowPosition.x !== "zoom" && arrowPosition.x !== "rotate";
 
                 // Velikost kamery
-                let cameraWidth = basicArrowType ? img.width / (ratioCanvas.x + ratioCanvas.y) : img.width;
-                let cameraHeight = basicArrowType ? img.height / (ratioCanvas.x + ratioCanvas.y) : img.height;
+                let cameraWidth = basicArrowType ? img.width / 2 : img.width;
+                let cameraHeight = basicArrowType ? img.height / 2 : img.height;
 
                 let speedX = (img.width - cameraWidth) / (duration);
                 let speedY = (img.height - cameraHeight) / (duration);
-
-                console.log(ratioCanvas.y);
 
                 // Výpočet pozice kamery
                 let positionX = arrowPosition.x !== "rotation" ? speedX * startClip : speedX * startClip;
@@ -263,30 +266,30 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 } else if (arrowPosition.x === "rotation") {
 
-                    console.log("TIME " + count + " " + startPiece);
+                    // console.log("TIME " + count + " " + startPiece);
 
                     const slowFactor = 0.5;
                     const newSpeedX = speedX * slowFactor;
                     const newSpeedY = speedY * slowFactor;
 
-                    console.log("DIRECTION: " + currentDirection)
+                    // console.log("DIRECTION: " + currentDirection)
 
                     // Pokud se začátek částice rovná aktuálnímu času
-                    if (Math.round(startPiece * 10) === Math.round(count * 10)) {
+                    // if (Math.round(startPiece * 10) === Math.round(count * 10)) {
+                    //
+                    //     setCoordinateX(0);
+                    //     setCoordinateY(0);
+                    //     positionX = 0;
+                    //     positionY = 0;
+                    //     setCurrentDirection("right");
+                    // }
+                    //
+                    // if (coordinateX === 0 && coordinateY === 0) {
+                    //
+                    //     setCurrentDirection("right");
+                    // }
 
-                        setCoordinateX(0);
-                        setCoordinateY(0);
-                        positionX = 0;
-                        positionY = 0;
-                        setCurrentDirection("right");
-                    }
-
-                    if (coordinateX === 0 && coordinateY === 0) {
-
-                        setCurrentDirection("right");
-                    }
-
-                    const squareRotation = getSquareRotation(arrowPosition, positionX, newSpeedX, positionY, cameraWidth, newSpeedY, cameraHeight);
+                    const squareRotation = getSquareRotation(arrowPosition, positionX, newSpeedX, positionY, cameraWidth, newSpeedY, cameraHeight, startClip, duration);
                     positionX = squareRotation.positionX;
                     positionY = squareRotation.positionY;
 
@@ -296,7 +299,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     positionX = arrowSetUp(arrowPosition.x, positionX, img.width, cameraWidth);
                     positionY = arrowSetUp(arrowPosition.y, positionY, img.height, cameraHeight);
 
-                    console.log("POSITION " + positionX + " " + canvas.width);
+                    // console.log("POSITION " + positionX + " " + canvas.width);
                 }
 
                 // Nastavení vypočítaných pozic pro animaci
@@ -308,7 +311,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     // Funkce pro vytvoření klipu
                     const createClip = () => {
 
-                        console.log(coordinateY + " " + canvas.width + " " + img.width + " " + coordinateX);
+                        // console.log(coordinateY + " " + canvas.width + " " + img.width + " " + coordinateX);
 
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -352,8 +355,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     // Vyčistění plochy
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    console.log("BUBU")
-
                     // Vykreslení částice
                     ctx.drawImage(
                         img,
@@ -380,7 +381,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     break;
                 }
 
-                console.log("COUNT " + count);
+                // console.log("COUNT " + count);
             }
         };
 
@@ -401,7 +402,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 setCurrentTime((prevTime) => {
 
-                    console.log(isFirstRun)
+                    // console.log(isFirstRun)
 
                     if (isFirstRun && currentTime !== 0) {
                         setDownloadLink(null);
@@ -488,7 +489,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         const mouseX = event.clientX - bar.getBoundingClientRect().left;
 
-        console.log(mouseX)
+        // console.log(mouseX)
 
         // Výpočet nového času
         const newTime = (mouseX / barWidth) * videoLength;
@@ -530,7 +531,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     };
 
     /** Funkce pro zobrazení úplné rotace obrázku ve směru nebo proti směru hodinových ručiček **/
-    const getSquareRotation = (arrowPosition, positionX, newSpeedX, positionY, cameraWidth, newSpeedY, cameraHeight) => {
+    const getSquareRotation = (arrowPosition, positionX, newSpeedX, positionY, cameraWidth, newSpeedY, cameraHeight, startClip, duration) => {
 
         if (arrowPosition.y === "positive") {
 
@@ -669,6 +670,48 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         return {positionX, positionY};
     }
 
+    /*
+if (arrowPosition.y === "positive") {
+    const quarterDuration = duration / 4;
+
+    if (startClip < quarterDuration) { // Moving right
+        positionX += newSpeedX;
+        positionY = 0; // Stay at the top edge during right movement
+
+        if (positionX >= cameraWidth) {
+            console.log("Reached right edge, changing direction to down");
+            positionX = cameraWidth; // Snap to the right edge
+        }
+
+    } else if (startClip >= quarterDuration && startClip < 2 * quarterDuration) { // Moving down
+        positionY += newSpeedY; // Increment downward
+        console.log(`Moving down - POSITION X: ${positionX} POSITION Y: ${positionY}`);
+
+        if (positionY >= cameraHeight) {
+            console.log("Reached bottom edge, changing direction to left");
+            positionY = cameraHeight; // Snap to the bottom edge
+        }
+
+    } else if (startClip >= 2 * quarterDuration && startClip < 3 * quarterDuration) { // Moving left
+        positionX -= newSpeedX; // Decrement leftward
+        console.log(`Moving left - POSITION X: ${positionX} POSITION Y: ${positionY}`);
+
+        if (positionX <= 0) {
+            console.log("Reached left edge, changing direction to up");
+            positionX = 0; // Snap to the left edge
+        }
+
+    } else if (startClip >= 3 * quarterDuration && startClip < duration) { // Moving up
+        positionY -= newSpeedY; // Decrement upward
+        console.log(`Moving up - POSITION X: ${positionX} POSITION Y: ${positionY}`);
+
+        if (positionY <= 0) {
+            console.log("Reached top edge, changing direction to right");
+            positionY = 0; // Snap to the top edge
+        }
+    }
+*/
+
     const playStyling = {
         fontSize: "35px",
         borderRadius: "50%",
@@ -692,13 +735,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         userSelect: "none"
     };
 
-// Body na časové ose
+    // Body na časové ose
     const checkPoints = [];
 
-// Vzdálenost mezi body
+    // Vzdálenost mezi body
     const spacingPoints = 2;
 
-// Výpočet měřítka
+    // Výpočet měřítka
     const pixelsPerSecond = barWidth / videoLength;
 
     for (let i = 0; i <= videoLength; i += spacingPoints) {
@@ -719,10 +762,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         handlePieces(id, src, width, left, isSubmitted, arrow, duration, frameRate, scanSpeed, special, arrowDirection);
     };
 
-    /** Nástroje určené pro klipy **/
-
     const [isFlexStart, setIsFlexStart] = useState(false);
 
+    // Data pro výběr rozměrů velikosti plochy
     const canvasTypes = [
 
         {icon: <LuRectangleHorizontal/>, ratio: '4:3', name: 'Na šířku'},
@@ -735,20 +777,15 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {icon: <CgScreenWide/>, ratio: '21:9', name: 'Ultra širokoúhlý'}
     ];
 
-// useEffect(() => {
-//
-//     const interval = setInterval(() => {
-//
-//         setCanvasSelector(prev => prev === canvasSelector);
-//
-//     }, 1000);
-//
-//     return () => clearInterval(interval);
-//
-// }, [canvasTypes.length]);
+    // Data pro výběr rozměrů kamery
+    const cameraTypes = [
+
+        {sizeX: "25 px", sizeY: "25 px"},
+        {sizeX: "50 px", sizeY: "50 px"},
+    ];
 
     /** Funkce pro úpravu rozměrů plochy **/
-    const canvasContent = (type) => {
+    const resizeCanvas = (type) => {
 
         const canvas = videoRef.current;
 
@@ -764,6 +801,130 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 </CanvasContent>
             );
         });
+    };
+
+    /** Funkce pro výběr optimální rozměrů kamery dle uživatele **/
+    const cameraOptions = (type) => {
+
+        // Šířka a výška ze vstupu
+        const [widthDecimal, setWidthDecimal] = useState('');
+        const [heightDecimal, setHeightDecimal] = useState('');
+
+        // Maximální délka vstupu
+        const maxLength = 3;
+
+        /** Kontrola nastavené šířky ve vstupu **/
+        const handleWidthChange = (e) => {
+            const value = e.target.value;
+            if (value.length <= maxLength && value > 0) {
+                setWidthDecimal(value);
+            }
+        };
+
+        /** Kontrola nastavené výšky ve vstupu **/
+        const handleHeightChange = (e) => {
+            const value = e.target.value;
+            if (value.length <= maxLength && value > 0) {
+                setHeightDecimal(value);
+            }
+        };
+
+        return (
+            <div>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '10px',
+                    width: '100%',
+                    color: "#53ff71",
+                    gap: "25px"
+                }}>
+                    <div style={{textAlign: 'center'}}>ŠÍŘKA</div>
+                    <div style={{textAlign: 'center'}}>VÝŠKA</div>
+                </div>
+
+                <hr style={{margin: '10px 0', border: '1px solid #a4ffb5'}}/>
+
+                {type.map((item, index) => {
+                    return (
+                        <div key={index} style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            width: '100%',
+                            gap: "25px",
+                            marginTop: "10px"
+                        }}>
+
+                            <CanvasContent
+                                style={{width: "100%"}}
+                                key={index}
+                                isClicked={index === canvasSelector}
+                                onClick={() => setRatioCanvas(videoRef.current, index, item)}
+                            >
+                                <div style={{textAlign: 'center'}}>
+
+                                    {item.sizeX}
+
+                                </div>
+                                <div style={{textAlign: 'center'}}>
+
+                                    {item.sizeY}
+
+                                </div>
+                            </CanvasContent>
+                        </div>
+                    );
+                })}
+
+                <div style={{textAlign: 'center', marginTop: "10px", color: "#53ff71"}}>VLASTNÍ</div>
+                <hr style={{margin: '10px 0', border: '1px solid #a4ffb5'}}/>
+
+                <CanvasContent
+                    style={{width: "100%"}}
+                    key={index}
+                    isClicked={index === canvasSelector}
+                    onClick={() => setRatioCanvas(videoRef.current, index, 2)}
+                >
+                     <div style={{display: 'flex', alignItems: 'center'}}>
+                        <input
+                            id="widthDecimal"
+                            type="number"
+                            value={widthDecimal}
+                            onChange={handleWidthChange}
+                            style={{
+                                width: '100%',
+                                padding: '4px',
+                                borderRadius: '10px',
+                                textAlign: "center",
+                                background: "transparent",
+                                border: "none"
+                            }}
+                        />
+                        <div>px</div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <input
+                            id="heightDecimal"
+                            type="number"
+                            value={heightDecimal}
+                            onChange={handleHeightChange}
+                            style={{
+                                width: '100%',
+                                padding: '4px',
+                                borderRadius: '10px',
+                                textAlign: "center",
+                                background: "transparent",
+                                border: "none"
+                            }}
+                        />
+                        <div>px</div>
+                    </div>
+
+                </CanvasContent>
+            </div>
+        );
     };
 
     /** Výpočet poměru **/
@@ -835,21 +996,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         canvas.height = newHeight;
     };
 
-
+    // Nástroje pro správu klipu
     const clipTools = [
         {icon: <RiUploadCloud2Line/>, label: 'Média'},
-        {icon: <VscScreenFull/>, label: 'Plátno', content: canvasContent},
+        {icon: <VscScreenFull/>, label: 'Plátno', content: resizeCanvas},
         {icon: <LuMusic4/>, label: 'Hudba'},
         {icon: <RxText/>, label: 'Text'},
         {icon: <TbTransitionRight/>, label: 'Přechody'},
-        {icon: <MdAnimation/>, label: 'Animace'}
+        {icon: <FaCameraRetro/>, label: 'Kamera', content: cameraOptions}
     ];
 
-// Aktivní nástroj zvolený uživatelem
+    // Aktivní nástroj zvolený uživatelem
     const [activeTool, setActiveTool] = useState(null);
 
     const [index, setIndex] = useState(0);
 
+    // Aktivní nástroj a index pro správu klipu
     const handleToolClick = (index) => {
 
         setActiveTool(index);
@@ -873,6 +1035,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                 key={index}
                                 onClick={() => handleToolClick(index)}
                             >
+                                {/** Nadpisy všech nástrojů (před otěvřením) **/}
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -905,6 +1068,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                     <GoArrowLeft/>
                                 </ArrowBtn>
 
+                                {/** Nadpis u otevřeného nástroje **/}
                                 <div style={{
                                     display: 'flex',
                                     justifyContent: 'center',
@@ -912,19 +1076,17 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                     gap: '10px',
                                     margin: '0 auto',
                                 }}>
-                                    {clipTools[activeTool].icon} {clipTools[activeTool].label}
+                                    {clipTools[activeTool].icon}
+                                    {clipTools[activeTool].label}
+
                                 </div>
+
 
                             </div>
 
                             {/** Vypsání obsahu nástroje **/}
-                            {clipTools[activeTool].content !== null ? (
-
-                                canvasContent(canvasTypes)
-
-                            ) : (
-                                <div>Někde nastala chyba</div>
-                            )}
+                            {clipTools[activeTool].content !== null && activeTool === 1 && resizeCanvas(canvasTypes)}
+                            {clipTools[activeTool].content !== null && activeTool === 5 && cameraOptions(cameraTypes)}
 
                         </ClipTool>
                     )}
