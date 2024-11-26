@@ -803,12 +803,12 @@ if (arrowPosition.y === "positive") {
         });
     };
 
+    // Šířka a výška ze vstupu
+    const [widthDecimal, setWidthDecimal] = useState('75');
+    const [heightDecimal, setHeightDecimal] = useState('75');
+
     /** Funkce pro výběr optimální rozměrů kamery dle uživatele **/
     const cameraOptions = (type) => {
-
-        // Šířka a výška ze vstupu
-        const [widthDecimal, setWidthDecimal] = useState('');
-        const [heightDecimal, setHeightDecimal] = useState('');
 
         // Maximální délka vstupu
         const maxLength = 3;
@@ -816,7 +816,7 @@ if (arrowPosition.y === "positive") {
         /** Kontrola nastavené šířky ve vstupu **/
         const handleWidthChange = (e) => {
             const value = e.target.value;
-            if (value.length <= maxLength && value > 0) {
+            if (value.length <= maxLength && value > 0 && !value.isEmpty) {
                 setWidthDecimal(value);
             }
         };
@@ -824,7 +824,7 @@ if (arrowPosition.y === "positive") {
         /** Kontrola nastavené výšky ve vstupu **/
         const handleHeightChange = (e) => {
             const value = e.target.value;
-            if (value.length <= maxLength && value > 0) {
+            if (value.length <= maxLength && value > 0 && !value.isEmpty) {
                 setHeightDecimal(value);
             }
         };
