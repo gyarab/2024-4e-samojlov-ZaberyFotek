@@ -22,6 +22,7 @@ import {ArrowBtn} from "../../pages/Zabery/ZaberyComponents";
 import {CgScreenWide} from "react-icons/cg";
 import {FaCameraRetro, FaDownload} from "react-icons/fa";
 import * as url from "url";
+import {CiImageOn} from "react-icons/ci";
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -60,15 +61,10 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const videoRef = useRef(null);
 
     // Aktivní poměr plochy
-    const [activeRatio, setActiveRatio] = useState(() => {
-        return localStorage.getItem('activeRatio') || '1:1';
-    });
+    const [activeRatio, setActiveRatio] = useState('');
 
-    // Ukládání výběru uživatele po kliknutí
-    const [canvasSelector, setCanvasSelector] = useState(() => {
-
-        return parseInt(localStorage.getItem('canvasSelector'));
-    });
+    // Ukládání výběru uživatele v panelu nástroje
+    const [canvasSelector, setCanvasSelector] = useState([]);
 
     const [isFirstRun, setIsFirstRun] = useState(true);
 
@@ -163,20 +159,20 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         const ctx = canvas.getContext('2d');
 
-        // console.log("RATIO: " + activeRatio);
+        // Získání hodnoty z paměti pro plochu klipu
+        setSelector(null, 'canvasSelector', false, 1);
 
-        if (activeRatio) {
-            // Uložení aktivního poměru do místního úložiště
-            localStorage.setItem('activeRatio', activeRatio.toString());
-        }
+        // Získání hodnoty z paměti pro velikost kamery
+        setSelector(null, 'cameraSelector', false, 5);
 
         // Nastavení velikosti plochy dle poměru
-        setRatioCanvas(canvas, canvasSelector, activeRatio);
+        setRatioCanvas(canvas, canvasSelector[0], activeRatio);
 
         if (!canvas || selectedPieces.length === 0) return;
 
         if (!isRecording && downloadBtn) {
 
+            // Zahájení snímaní videa
             startRecording(canvas);
         }
 
@@ -352,6 +348,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     // Častice neobsahující klip
                 } else if (!currentPiece.isSubmitted && pieceTimeConditional) {
+
                     // Vyčistění plochy
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -782,10 +779,16 @@ if (arrowPosition.y === "positive") {
 
         {sizeX: "25 px", sizeY: "25 px"},
         {sizeX: "50 px", sizeY: "50 px"},
+        {imgRatio: "1/2"},
+        {imgRatio: "1/3"},
+        {imgRatio: "1/4"},
+        {imgRatio: "2/3"},
     ];
 
     /** Funkce pro úpravu rozměrů plochy **/
     const resizeCanvas = (type) => {
+
+        const resizeIndex = 1;
 
         const canvas = videoRef.current;
 
@@ -794,8 +797,8 @@ if (arrowPosition.y === "positive") {
             return (
                 <CanvasContent
                     key={index}
-                    isClicked={index === canvasSelector}
-                    onClick={() => setRatioCanvas(canvas, index, item)}
+                    isClicked={index === canvasSelector[resizeIndex]}
+                    onClick={() => setRatioCanvas(canvas, index, item, resizeIndex)}
                 >
                     {item.icon} {item.ratio}
                 </CanvasContent>
@@ -807,25 +810,33 @@ if (arrowPosition.y === "positive") {
     const [widthDecimal, setWidthDecimal] = useState('75');
     const [heightDecimal, setHeightDecimal] = useState('75');
 
+    // Vypsání zprávy v případě chyby
+    const [errorMessage, setErrorMessage] = useState('');
+
     /** Funkce pro výběr optimální rozměrů kamery dle uživatele **/
     const cameraOptions = (type) => {
 
         // Maximální délka vstupu
         const maxLength = 3;
 
-        /** Kontrola nastavené šířky ve vstupu **/
-        const handleWidthChange = (e) => {
-            const value = e.target.value;
-            if (value.length <= maxLength && value > 0 && !value.isEmpty) {
-                setWidthDecimal(value);
-            }
-        };
+        // Index možnosti
+        const cameraIndex = 5;
 
-        /** Kontrola nastavené výšky ve vstupu **/
-        const handleHeightChange = (e) => {
+        /** Kontrola nastavené šířky nebo výšky **/
+        const handleInputChange = (e, setter) => {
+
             const value = e.target.value;
-            if (value.length <= maxLength && value > 0 && !value.isEmpty) {
-                setHeightDecimal(value);
+
+            if (value.length <= maxLength) {
+                setter(value);
+            }
+
+            if (value === "" || value < 10) {
+
+                setErrorMessage("Hodnota musí být větší než 0 a žádný z parametrů nesmí být prázdný");
+
+            } else {
+                setErrorMessage("");
             }
         };
 
@@ -837,16 +848,21 @@ if (arrowPosition.y === "positive") {
                     justifyContent: 'center',
                     marginBottom: '10px',
                     width: '100%',
-                    color: "#53ff71",
+                    color: "#f7ff63",
                     gap: "25px"
                 }}>
                     <div style={{textAlign: 'center'}}>ŠÍŘKA</div>
                     <div style={{textAlign: 'center'}}>VÝŠKA</div>
                 </div>
 
-                <hr style={{margin: '10px 0', border: '1px solid #a4ffb5'}}/>
+                <hr style={{margin: '10px 0', border: '1px solid #f9ffa6'}}/>
 
                 {type.map((item, index) => {
+
+                    if (!item.sizeX || !item.sizeY) {
+                        return null;
+                    }
+
                     return (
                         <div key={index} style={{
                             display: 'flex',
@@ -859,8 +875,8 @@ if (arrowPosition.y === "positive") {
                             <CanvasContent
                                 style={{width: "100%"}}
                                 key={index}
-                                isClicked={index === canvasSelector}
-                                onClick={() => setRatioCanvas(videoRef.current, index, item)}
+                                isClicked={index === canvasSelector[cameraIndex]}
+                                onClick={() => setRatioCanvas(videoRef.current, index, item, cameraIndex)}
                             >
                                 <div style={{textAlign: 'center'}}>
 
@@ -877,21 +893,68 @@ if (arrowPosition.y === "positive") {
                     );
                 })}
 
-                <div style={{textAlign: 'center', marginTop: "10px", color: "#53ff71"}}>VLASTNÍ</div>
-                <hr style={{margin: '10px 0', border: '1px solid #a4ffb5'}}/>
+                <div style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: 'center',
+                    marginTop: "10px",
+                    color: "#f7ff63",
+                    gap: "5px"
+                }}>
+                    POMĚRY <CiImageOn style={{fontSize: "22px"}}/></div>
+                <hr style={{margin: '10px 0', border: '1px solid #f9ffa6'}}/>
+
+                {type.map((item, index) => {
+
+                    if (!item.imgRatio) {
+                        return null;
+                    }
+
+                    return (
+                        <div key={index} style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            width: '50px',
+                            gap: "25px",
+                            marginTop: "10px"
+                        }}>
+
+                            <CanvasContent
+                                style={{width: "100%"}}
+                                key={index}
+                                isClicked={index === canvasSelector[cameraIndex]}
+                                onClick={() => setRatioCanvas(videoRef.current, index, item, cameraIndex)}
+                            >
+                                <div style={{textAlign: 'center'}}>
+
+                                    {item.imgRatio}
+
+                                </div>
+
+                            </CanvasContent>
+                        </div>
+                    );
+                })}
+
+                <div style={{textAlign: 'center', marginTop: "10px", color: "#f7ff63"}}>VLASTNÍ</div>
+                <hr style={{margin: '10px 0', border: '1px solid #f9ffa6'}}/>
 
                 <CanvasContent
                     style={{width: "100%"}}
                     key={index}
-                    isClicked={index === canvasSelector}
-                    onClick={() => setRatioCanvas(videoRef.current, index, 2)}
+                    isClicked={index === canvasSelector[cameraIndex]}
+                    onClick={() => setRatioCanvas(videoRef.current, index, 2, cameraIndex)}
+                    hasError={!!errorMessage}
                 >
-                     <div style={{display: 'flex', alignItems: 'center'}}>
+                    <div style={{display: 'flex', alignItems: 'center'}}>
                         <input
                             id="widthDecimal"
                             type="number"
                             value={widthDecimal}
-                            onChange={handleWidthChange}
+                            onChange={(e) => handleInputChange(e, setWidthDecimal)}
                             style={{
                                 width: '100%',
                                 padding: '4px',
@@ -904,12 +967,12 @@ if (arrowPosition.y === "positive") {
                         <div>px</div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{display: 'flex', alignItems: 'center'}}>
                         <input
                             id="heightDecimal"
                             type="number"
                             value={heightDecimal}
-                            onChange={handleHeightChange}
+                            onChange={(e) => handleInputChange(e, setHeightDecimal)}
                             style={{
                                 width: '100%',
                                 padding: '4px',
@@ -923,6 +986,8 @@ if (arrowPosition.y === "positive") {
                     </div>
 
                 </CanvasContent>
+
+                <div style={{marginTop: "10px", fontSize: "12px", color: "#ffe564"}}>{errorMessage}</div>
             </div>
         );
     };
@@ -935,66 +1000,111 @@ if (arrowPosition.y === "positive") {
         return {x: width, y: height};
     };
 
+    /** Funkce pro nastavení předchozích hodnot z paměti **/
+    const setSelector = (index, localStorageItem, set, selectedOption) => {
+
+        const storedValue = set ? localStorage.setItem(localStorageItem, index.toString()) : parseInt(localStorage.getItem(localStorageItem));
+
+        if (storedValue >= 0) {
+
+            setCanvasSelector((prev) => {
+
+                const updatedArray = [...prev];
+                updatedArray[selectedOption] = storedValue;
+                return updatedArray;
+            });
+
+            console.log("STORE " + storedValue + " " + canvasSelector);
+        }
+    }
+
+    /** Funkce pro obnovení hodnot metody setSelector **/
+    const updateSelector = (key, defaultValue) => {
+
+        const storedValue = localStorage.getItem(key);
+        const value = storedValue !== null ? storedValue : defaultValue;
+        setSelector(value, key, true);
+    };
 
     /** Rozměry plochy (Canvas) **/
-    const setRatioCanvas = (canvas, index, item) => {
+    const setRatioCanvas = (canvas, index, item, selectedOption) => {
+
+        console.log("index :" + index + " " + activeRatio);
 
         if (index !== null && !isNaN(index)) {
 
-            // Nastavení aktuálního indexu
-            setCanvasSelector(index);
+            setCanvasSelector(prev => {
 
-            console.log("index :" + index);
+                const updatedArray = [...prev];
+                updatedArray[selectedOption] = index;
+                return updatedArray;
+            });
 
-            localStorage.setItem('canvasSelector', index.toString());
+            if (selectedOption === 1 || selectedOption === undefined) {
+                setSelector(index, 'canvasSelector', true, 1);
+
+            } else if (selectedOption === 5 || selectedOption === undefined) {
+                setSelector(index, 'cameraSelector', true, 5);
+            }
 
         } else {
 
-            console.log("INDEX :" + index);
-
-            setCanvasSelector(4);
-
-            localStorage.setItem('canvasSelector', "4");
+            // Obnovení hodnot v paměti
+            updateSelector('canvasSelector', '4');
+            updateSelector('cameraSelector', '1');
         }
 
+        // Nastavení aktuálního poměru
         if (item && item.ratio) {
 
-            // Nastavení vybraného poměru plochy uživatelem
             setActiveRatio(item.ratio);
 
-        } else if (!item.ratio && !activeRatio) {
+        } else {
 
-            // Nastavení výchozího poměru plochy
-            setActiveRatio('1:1');
+            // Použití poměru z paměti
+            const memoryRatio = localStorage.getItem('activeRatio');
+
+            if (memoryRatio) {
+
+                setActiveRatio(memoryRatio);
+            }
         }
-
-        const ratioValues = getRatioValues(activeRatio);
-
-        const parentWidth = canvas.parentElement.clientWidth;
-        const parentHeight = canvas.parentElement.clientHeight;
-
-        // Poměr X:Y
-        const aspectRatioX = ratioValues.x;
-        const aspectRatioY = ratioValues.y;
-
-        // Výpočet poměru
-        const aspectRatio = aspectRatioX / aspectRatioY;
-
-        // Na základě výšky určujeme délku šířky
-        let newWidth = parentHeight * aspectRatio;
-        let newHeight = parentHeight;
-
-        // Přenastavení šířky
-        if (newWidth > parentWidth) {
-
-            newWidth = parentWidth;
-            newHeight = parentWidth / aspectRatio;
-        }
-
-        // Nastavení rozměrů plochy
-        canvas.width = newWidth;
-        canvas.height = newHeight;
     };
+
+    /** Aktivní načítání při změně plochy klipu **/
+    useEffect(() => {
+
+        if (activeRatio) {
+            localStorage.setItem('activeRatio', activeRatio.toString());
+
+            const ratioValues = getRatioValues(activeRatio);
+
+            const parentWidth = videoRef.current.parentElement.clientWidth;
+            const parentHeight = videoRef.current.parentElement.clientHeight;
+
+            // Poměr X:Y
+            const aspectRatioX = ratioValues.x;
+            const aspectRatioY = ratioValues.y;
+
+            // Výpočet poměru
+            const aspectRatio = aspectRatioX / aspectRatioY;
+
+            // Na základě výšky určujeme délku šířky
+            let newWidth = parentHeight * aspectRatio;
+            let newHeight = parentHeight;
+
+            // Přenastavení šířky
+            if (newWidth > parentWidth) {
+
+                newWidth = parentWidth;
+                newHeight = parentWidth / aspectRatio;
+            }
+
+            // Nastavení rozměrů plochy
+            videoRef.current.width = newWidth;
+            videoRef.current.height = newHeight;
+        }
+    }, [activeRatio]);
 
     // Nástroje pro správu klipu
     const clipTools = [
