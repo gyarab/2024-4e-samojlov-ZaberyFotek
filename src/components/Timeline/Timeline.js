@@ -61,7 +61,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const videoRef = useRef(null);
 
     // Aktivní poměr plochy
-    const [activeRatio, setActiveRatio] = useState('');
+    const [activeRatio, setActiveRatio] = useState('1:1');
 
     // Ukládání výběru uživatele v panelu nástroje
     const [canvasSelector, setCanvasSelector] = useState([]);
@@ -91,6 +91,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     // Aktuální směr v rotaci
     const [currentDirection, setCurrentDirection] = useState("right");
+
+    // Aktuální velikost kamery
+    const [cameraSize, setCameraSize] = useState({width: "50px", height: "50px"});
 
     /**
      * Spustí nahrávání videa z canvasu (25 fps).
@@ -781,8 +784,7 @@ if (arrowPosition.y === "positive") {
         {sizeX: "50 px", sizeY: "50 px"},
         {imgRatio: "1/2"},
         {imgRatio: "1/3"},
-        {imgRatio: "1/4"},
-        {imgRatio: "2/3"},
+        {imgRatio: "1/4"}
     ];
 
     /** Funkce pro úpravu rozměrů plochy **/
@@ -813,6 +815,10 @@ if (arrowPosition.y === "positive") {
     // Vypsání zprávy v případě chyby
     const [errorMessage, setErrorMessage] = useState('');
 
+    // Počet bodů ve výběru poměru vůči obrázku šířky a výšky
+    const [selectedCounts, setSelectedCounts] = useState({});
+    const [totalBullets, setTotalBullets] = useState(0);
+
     /** Funkce pro výběr optimální rozměrů kamery dle uživatele **/
     const cameraOptions = (type) => {
 
@@ -830,7 +836,6 @@ if (arrowPosition.y === "positive") {
             if (value.length <= maxLength) {
                 setter(value);
             }
-
             if (value === "" || value < 10) {
 
                 setErrorMessage("Hodnota musí být větší než 0 a žádný z parametrů nesmí být prázdný");
@@ -840,6 +845,10 @@ if (arrowPosition.y === "positive") {
             }
         };
 
+        // Styly pro odlišení výběru výšky a šířky
+        const stylesWidth = {textAlign: 'center', color: '#f7ff63'};
+        const stylesHeight = {textAlign: 'center', color: '#52ffe4'};
+
         return (
             <div>
                 <div style={{
@@ -848,14 +857,19 @@ if (arrowPosition.y === "positive") {
                     justifyContent: 'center',
                     marginBottom: '10px',
                     width: '100%',
-                    color: "#f7ff63",
                     gap: "25px"
                 }}>
-                    <div style={{textAlign: 'center'}}>ŠÍŘKA</div>
-                    <div style={{textAlign: 'center'}}>VÝŠKA</div>
+                    <div style={stylesWidth}>ŠÍŘKA</div>
+                    <div style={stylesHeight}>VÝŠKA</div>
                 </div>
 
-                <hr style={{margin: '10px 0', border: '1px solid #f9ffa6'}}/>
+                <hr style={{
+                    margin: '10px 0',
+                    border: 'none',
+                    height: '1px',
+                    background: 'linear-gradient(to right, #f7ff63, #52ffe4)'
+                }}/>
+
 
                 {type.map((item, index) => {
 
@@ -906,47 +920,113 @@ if (arrowPosition.y === "positive") {
                     POMĚRY <CiImageOn style={{fontSize: "22px"}}/></div>
                 <hr style={{margin: '10px 0', border: '1px solid #f9ffa6'}}/>
 
-                {type.map((item, index) => {
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '5px',
+                        marginTop: '10px',
+                    }}
+                >
 
-                    if (!item.imgRatio) {
-                        return null;
-                    }
+                    {type.map((item, index) => {
+                        if (!item.imgRatio) {
+                            return null;
+                        }
 
-                    return (
-                        <div key={index} style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'center',
-                            width: '50px',
-                            gap: "25px",
-                            marginTop: "10px"
-                        }}>
+                        const count = selectedCounts[index] || 0;
+                        const circleColors = [];
+                        const circleColor = index % 2 === 0 ? `${stylesWidth.color}` : `${stylesHeight.color}`;
 
-                            <CanvasContent
-                                style={{width: "100%"}}
+                        if (count === 1) {
+                            circleColors.push(circleColor);
+                        }
+
+                        if (count === 2) {
+                            circleColors.push(circleColor);
+                            circleColors.push(stylesHeight.color);
+                        }
+
+                        return (
+                            <div
                                 key={index}
-                                isClicked={index === canvasSelector[cameraIndex]}
-                                onClick={() => setRatioCanvas(videoRef.current, index, item, cameraIndex)}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '50px',
+                                    gap: '10px',
+                                    marginTop: '10px',
+                                    position: 'relative'
+                                }}
                             >
-                                <div style={{textAlign: 'center'}}>
+                                <CanvasContent
+                                    style={{
+                                        width: '100%'
+                                    }}
+                                    key={index}
+                                    isClicked={count > 0}
 
-                                    {item.imgRatio}
+                                    onClick={() => {
 
+                                        // Maximální počet bodů je 2
+                                        if (count < 2 && totalBullets < 2) {
+
+                                            // Nastavení pro index počet bodů
+                                            setSelectedCounts((prev) => ({
+                                                ...prev,
+                                                [index]: count + 1,
+                                            }));
+
+                                            setTotalBullets(totalBullets + 1);
+                                        }
+
+                                        setRatioCanvas(videoRef.current, index, item, cameraIndex);
+                                    }}
+                                >
+                                    <div style={{ textAlign: 'center' }}>
+                                        {item.imgRatio}
+                                    </div>
+
+                                </CanvasContent>
+
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        gap: '5px',
+                                        position: 'absolute',
+                                        top: '35px',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                    }}
+                                >
+                                    {circleColors.map((color, i) => (
+                                        <span
+                                            key={i}
+                                            style={{
+                                                width: '10px',
+                                                height: '10px',
+                                                borderRadius: '50%',
+                                                backgroundColor: color,
+                                            }}
+                                        />
+                                    ))}
                                 </div>
+                            </div>
+                        );
+                    })}
 
-                            </CanvasContent>
-                        </div>
-                    );
-                })}
+                </div>
 
-                <div style={{textAlign: 'center', marginTop: "10px", color: "#f7ff63"}}>VLASTNÍ</div>
+                <div style={{textAlign: 'center', marginTop: "25px", color: "#f7ff63"}}>VLASTNÍ</div>
                 <hr style={{margin: '10px 0', border: '1px solid #f9ffa6'}}/>
 
                 <CanvasContent
                     style={{width: "100%"}}
                     key={index}
                     isClicked={index === canvasSelector[cameraIndex]}
-                    onClick={() => setRatioCanvas(videoRef.current, index, 2, cameraIndex)}
+                    onClick={() => setRatioCanvas(videoRef.current, index, 5, cameraIndex)}
                     hasError={!!errorMessage}
                 >
                     <div style={{display: 'flex', alignItems: 'center'}}>
@@ -1045,6 +1125,17 @@ if (arrowPosition.y === "positive") {
 
             } else if (selectedOption === 5 || selectedOption === undefined) {
                 setSelector(index, 'cameraSelector', true, 5);
+
+                console.log("INDEX CAMERA " + index);
+
+                if (cameraTypes[index].sizeX !== null && cameraTypes[index].sizeY !== null) {
+
+                    setCameraSize({width: cameraTypes[index].sizeX, height: cameraTypes[index].sizeY});
+
+                } else if (cameraTypes[index].imgRatio !== null) {
+
+
+                }
             }
 
         } else {
@@ -1070,6 +1161,7 @@ if (arrowPosition.y === "positive") {
             }
         }
     };
+
 
     /** Aktivní načítání při změně plochy klipu **/
     useEffect(() => {
