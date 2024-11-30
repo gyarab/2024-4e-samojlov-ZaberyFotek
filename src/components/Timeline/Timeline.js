@@ -5,7 +5,7 @@ import {
     CanvasContent,
     ClipContainer,
     ClipTool,
-    DownloadBtn,
+    DownloadBtn, SubmitBtn,
     TimelineContainer,
     VideoPreview,
     VideoTools
@@ -819,6 +819,12 @@ if (arrowPosition.y === "positive") {
     const [selectedCounts, setSelectedCounts] = useState({});
     const [totalBullets, setTotalBullets] = useState(0);
 
+    // Výběr poměru uživatele
+    const [ratioSelection, setRatioSelection] = useState([]);
+
+    // Počet kliknutí na poměry kamer
+    const [countClicks, setCountClicks] = useState(0);
+
     /** Funkce pro výběr optimální rozměrů kamery dle uživatele **/
     const cameraOptions = (type) => {
 
@@ -929,14 +935,18 @@ if (arrowPosition.y === "positive") {
                     }}
                 >
 
+                    {/** Výběr poměru z nabídky **/}
                     {type.map((item, index) => {
+
                         if (!item.imgRatio) {
                             return null;
                         }
 
                         const count = selectedCounts[index] || 0;
                         const circleColors = [];
-                        const circleColor = index % 2 === 0 ? `${stylesWidth.color}` : `${stylesHeight.color}`;
+
+                        // Rozlišování barev dle kliknutí
+                        const circleColor = countClicks % 2 === 0 ? `${stylesHeight.color}` : `${stylesWidth.color}`;
 
                         if (count === 1) {
                             circleColors.push(circleColor);
@@ -944,7 +954,7 @@ if (arrowPosition.y === "positive") {
 
                         if (count === 2) {
                             circleColors.push(circleColor);
-                            circleColors.push(stylesHeight.color);
+                            circleColors.push(stylesWidth.color);
                         }
 
                         return (
@@ -966,9 +976,13 @@ if (arrowPosition.y === "positive") {
                                         width: '100%'
                                     }}
                                     key={index}
-                                    isClicked={count > 0}
+                                    isClicked={count > 0 && totalBullets > 0 && ratioSelection.length > 0}
 
                                     onClick={() => {
+
+                                        if (countClicks >= 2) {
+                                            return;
+                                        }
 
                                         // Maximální počet bodů je 2
                                         if (count < 2 && totalBullets < 2) {
@@ -979,13 +993,15 @@ if (arrowPosition.y === "positive") {
                                                 [index]: count + 1,
                                             }));
 
+                                            setCountClicks(prev => prev + 1);
+
                                             setTotalBullets(totalBullets + 1);
                                         }
 
                                         setRatioCanvas(videoRef.current, index, item, cameraIndex);
                                     }}
                                 >
-                                    <div style={{ textAlign: 'center' }}>
+                                    <div style={{textAlign: 'center'}}>
                                         {item.imgRatio}
                                     </div>
 
@@ -1008,7 +1024,7 @@ if (arrowPosition.y === "positive") {
                                                 width: '10px',
                                                 height: '10px',
                                                 borderRadius: '50%',
-                                                backgroundColor: color,
+                                                backgroundColor: index === canvasSelector[cameraIndex] ? color : "none",
                                             }}
                                         />
                                     ))}
@@ -1025,8 +1041,18 @@ if (arrowPosition.y === "positive") {
                 <CanvasContent
                     style={{width: "100%"}}
                     key={index}
-                    isClicked={index === canvasSelector[cameraIndex]}
-                    onClick={() => setRatioCanvas(videoRef.current, index, 5, cameraIndex)}
+                    isClicked={5 === canvasSelector[cameraIndex]}
+                    onClick={() => {
+
+                        setSelectedCounts({});
+                        setTotalBullets(0);
+                        setRatioSelection([]);
+                        setCountClicks(0);
+
+                        setRatioCanvas(videoRef.current, 5, "vlastni", cameraIndex)
+
+                    }
+                    }
                     hasError={!!errorMessage}
                 >
                     <div style={{display: 'flex', alignItems: 'center'}}>
@@ -1068,6 +1094,22 @@ if (arrowPosition.y === "positive") {
                 </CanvasContent>
 
                 <div style={{marginTop: "10px", fontSize: "12px", color: "#ffe564"}}>{errorMessage}</div>
+
+                <SubmitBtn onClick={() => {
+
+                    setSelectedCounts({});
+                    setTotalBullets(0);
+                    setRatioSelection([]);
+                    setCountClicks(0);
+
+                    // Výchozí nastavení
+                    setCanvasSelector(prev => {
+                        const updatedArray = [...prev];
+                        updatedArray[5] = 1;
+                        return updatedArray;
+                    });
+
+                }}>RESET</SubmitBtn>
             </div>
         );
     };
@@ -1079,6 +1121,31 @@ if (arrowPosition.y === "positive") {
 
         return {x: width, y: height};
     };
+
+    /** Funkce pro ukládání dat o poměru kamery vybraným uživatelem **/
+    const setCameraRatio = (item, index) => {
+
+        if (ratioSelection.length < 2) {
+
+            setRatioSelection((prev) => {
+                const updatedArray = [...prev];
+                updatedArray.push(item.imgRatio);
+                return updatedArray;
+            });
+
+            // console.log("LENGTH " + ratioSelection.length);
+
+        }
+
+        // Pokud se kliknutí uživatele nenachází v intervalu "poměrů kamer"
+        if (!(index >= 2 && index <= 4)) {
+
+            setSelectedCounts({});
+            setTotalBullets(0);
+            setRatioSelection([]);
+            setCountClicks(0);
+        }
+    }
 
     /** Funkce pro nastavení předchozích hodnot z paměti **/
     const setSelector = (index, localStorageItem, set, selectedOption) => {
@@ -1109,12 +1176,11 @@ if (arrowPosition.y === "positive") {
     /** Rozměry plochy (Canvas) **/
     const setRatioCanvas = (canvas, index, item, selectedOption) => {
 
-        console.log("index :" + index + " " + activeRatio);
+        console.log("index :" + index + " " + activeRatio + " " + item.imgRatio + " " + ratioSelection);
 
         if (index !== null && !isNaN(index)) {
 
             setCanvasSelector(prev => {
-
                 const updatedArray = [...prev];
                 updatedArray[selectedOption] = index;
                 return updatedArray;
@@ -1126,15 +1192,25 @@ if (arrowPosition.y === "positive") {
             } else if (selectedOption === 5 || selectedOption === undefined) {
                 setSelector(index, 'cameraSelector', true, 5);
 
-                console.log("INDEX CAMERA " + index);
+                console.log("INDEX CAMERA " + index + " ");
 
-                if (cameraTypes[index].sizeX !== null && cameraTypes[index].sizeY !== null) {
+                if (cameraTypes && cameraTypes[index]) {
 
-                    setCameraSize({width: cameraTypes[index].sizeX, height: cameraTypes[index].sizeY});
+                    if (cameraTypes[index].sizeX > 0 && cameraTypes[index].sizeY > 0) {
 
-                } else if (cameraTypes[index].imgRatio !== null) {
+                        setCameraSize({width: cameraTypes[index].sizeX, height: cameraTypes[index].sizeY})
+                    }
 
+                    if (cameraTypes[index].imgRatio) {
 
+                        setCameraRatio(item, index);
+                    }
+                }
+
+                // Vlastní výběr kamery
+                if (item === "vlastni"){
+
+                    setCameraSize({width: widthDecimal, height: heightDecimal});
                 }
             }
 
@@ -1162,9 +1238,27 @@ if (arrowPosition.y === "positive") {
         }
     };
 
-
-    /** Aktivní načítání při změně plochy klipu **/
+    /** Aktivní načítání při změně plochy klipu a obnovení pole pro parametry kamery **/
     useEffect(() => {
+
+        // if (countClicks === 0 && ratioSelection.length === 0 && Object.keys(selectedCounts).length === 0 && totalBullets === 0) {
+        //
+        //     // Výchozí nastavení
+        //     setCanvasSelector(prev => {
+        //         const updatedArray = [...prev];
+        //         updatedArray[2] = 2;
+        //         return updatedArray;
+        //     });
+        // }
+
+        // Kontrola zda byly vybrány 2 poměry
+        if (ratioSelection[0] && ratioSelection[1]) {
+
+            setCameraSize({
+                width: `${ratioSelection[0]}`,
+                height: `${ratioSelection[1]}`,
+            })
+        }
 
         if (activeRatio) {
             localStorage.setItem('activeRatio', activeRatio.toString());
@@ -1196,7 +1290,10 @@ if (arrowPosition.y === "positive") {
             videoRef.current.width = newWidth;
             videoRef.current.height = newHeight;
         }
-    }, [activeRatio]);
+
+        cameraOptions(cameraTypes);
+
+    }, [activeRatio, ratioSelection]);
 
     // Nástroje pro správu klipu
     const clipTools = [

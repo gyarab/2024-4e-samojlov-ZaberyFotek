@@ -116,3 +116,18 @@ export const DownloadBtn = styled.button`
         opacity: 0.8;
     }
 `;
+
+export const SubmitBtn = styled.button`
+    color: white;
+    gap: 5px;
+    background: #ce2323;
+    border-radius: 5px;
+    padding: 2px 10px 2px 10px;
+    transition: background 0.5s ease-in, opacity 0.5s ease-out;
+    box-shadow: 0 2px 10px #ff3030;
+    font-size: 15px;
+
+    &:hover {
+        opacity: 0.8;
+    }
+`;
