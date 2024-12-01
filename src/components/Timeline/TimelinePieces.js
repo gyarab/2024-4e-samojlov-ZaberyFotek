@@ -154,7 +154,7 @@ const TimelinePieces = ({
 
             handlePieceUpdate(
                 piece.id, piece.src, width, piece.left, piece.isSubmitted, piece.arrow,
-                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
+                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize
             );
         }
 
@@ -167,11 +167,13 @@ const TimelinePieces = ({
 
         console.log("TYPE " + type + piece.isSubmitted);
 
+        console.log("CAMERA SIZE " + piece.cameraSize )
+
         if (type === "piece" && cancelClipBtn) {
 
             handlePieceUpdate(
                 piece.id, piece.src, piece.width, piece.left, piece.isSubmitted, piece.arrow,
-                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
+                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize
             );
 
         } else if (type === "cancel") {
@@ -180,8 +182,8 @@ const TimelinePieces = ({
             // event.stopPropagation();
 
             handlePieceUpdate(
-                piece.id, piece.src, piece.width, piece.left, false, piece.arrow,
-                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection
+                piece.id, piece.src, width, left, false, piece.arrow,
+                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize
             );
 
             // Smazání tlačítka
@@ -196,12 +198,12 @@ const TimelinePieces = ({
         if (isResizing) {
 
             onPieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
-                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection);
+                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize);
         }
 
         setIsResizing(null);
 
-    }, [isResizing, width, left, onPieceUpdate, piece.id, piece.isSubmitted, piece.arrow, piece.duration, piece.frameRate, piece.scanSpeed, piece.arrowDirection]);
+    }, [isResizing, width, left, onPieceUpdate, piece.id, piece.isSubmitted, piece.arrow, piece.duration, piece.frameRate, piece.scanSpeed, piece.arrowDirection, piece.cameraSize]);
 
     useEffect(() => {
         document.addEventListener('mousemove', onMouseMove);

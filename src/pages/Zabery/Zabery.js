@@ -99,6 +99,9 @@ function Zabery(props) {
     // Směr pohybu v klipu
     const [arrowDirection, setArrowDirection] = useState({x: "+", y: "-"});
 
+    // Aktivní směr pro obrázek
+    const [newCameraSize, setNewCameraSize] = useState({width: 50, height: 50});
+
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction, directions) => {
 
@@ -123,7 +126,7 @@ function Zabery(props) {
 
         if (item.includes('arrow') && activeArrow != null) {
 
-            handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue, null, null, null, arrowDirection);
+            handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue, null, null, null, arrowDirection, null);
             console.log("direction", activeArrow, directions);
 
             setActiveArrow(item);
@@ -645,7 +648,8 @@ function Zabery(props) {
                                     null,
                                     null,
                                     1,
-                                    arrowDirection)}
+                                    arrowDirection,
+                                    null)}
 
                             style={{
                                 position: "relative"
@@ -699,9 +703,15 @@ function Zabery(props) {
                           frameRate = null,
                           scanSpeed = null,
                           special = null,
-                          arrowDirection = null) => {
+                          arrowDirection = null,
+                          cameraSize = null) => {
 
-        const checkNull = id !== null && isSubmitted !== null && arrowDirection !== null && (newWidth == null || newLeft == null);
+        const checkNull =
+            id !== null &&
+            isSubmitted !== null &&
+            arrowDirection !== null &&
+            (newWidth == null || newLeft == null) &&
+            cameraSize !== null;
 
         setTimelineItem(id);
 
@@ -711,7 +721,7 @@ function Zabery(props) {
 
         setArrowDirection(arrowDirection);
 
-        console.log("SUBMITTED", isSubmitted);
+        console.log("SUBMITTED", cameraSize);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
@@ -768,7 +778,8 @@ function Zabery(props) {
                             duration: duration,
                             frameRate: 30,
                             scanSpeed: 30,
-                            arrowDirection: arrowDirection
+                            arrowDirection: arrowDirection,
+                            cameraSize: cameraSize
                         }
                         : item
                 );
@@ -790,7 +801,8 @@ function Zabery(props) {
                         duration: 15,
                         frameRate: 30,
                         scanSpeed: 30,
-                        arrowDirection: arrowDirection
+                        arrowDirection: arrowDirection,
+                        cameraSize: cameraSize
                     }
                 ];
 
@@ -843,7 +855,7 @@ function Zabery(props) {
 
         console.log(arrowDirection);
 
-        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection);
+        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection, null);
 
         setIsMarked(true);
 
