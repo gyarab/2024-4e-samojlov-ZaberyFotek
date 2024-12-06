@@ -802,7 +802,7 @@ function Zabery(props) {
                         frameRate: 30,
                         scanSpeed: 30,
                         arrowDirection: arrowDirection,
-                        cameraSize: cameraSize
+                        cameraSize: cameraSize || { width: "50px", height: "50px" }
                     }
                 ];
 
@@ -855,7 +855,7 @@ function Zabery(props) {
 
         console.log(arrowDirection);
 
-        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection, null);
+        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection, selectedPieces[timelineItem].cameraSize);
 
         setIsMarked(true);
 
