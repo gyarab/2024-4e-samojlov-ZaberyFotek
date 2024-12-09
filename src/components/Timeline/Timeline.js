@@ -101,7 +101,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [ratioSelection, setRatioSelection] = useState([]);
 
     // Aktuální velikost kamery
-    const [cameraSize, setCameraSize] = useState({width: "50px", height: "50px"});
+    const [cameraSize, setCameraSize] = useState({width: "100 px", height: "100 px", currentIndex: 1});
 
     const [cameraIndex, setCameraIndex] = useState(0);
 
@@ -248,10 +248,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     const finalWidth = img.width * (widthRatio1 / heightRatio1);
                     const finalHeight = img.height * (widthRatio2 / heightRatio2);
 
-                        setCameraSize({
-                            width: finalWidth.toString(),
-                            height: finalHeight.toString()
-                        })
+                    setCameraSize({
+                        width: finalWidth.toString(),
+                        height: finalHeight.toString(),
+                        currentIndex: cameraSize.currentIndex
+                    })
                 }
 
                 // let cameraWidth = parseInt(currentPiece.cameraSize.width)|| 100;
@@ -784,13 +785,26 @@ if (arrowPosition.y === "positive") {
 
     /** Nastavení aktuálního indexu částice **/
     const handlePieceUpdate = (id, src, width, left, isSubmitted, arrow, duration, frameRate, scanSpeed, special, arrowDirection, cameraSizeObject) => {
-
         setActiveIndex(id);
 
-        console.log("SUBMITTED", cameraSizeObject);
+        console.log("SUBMITTED", cameraSizeObject, id);
 
-        // Nastavení po stisknutí tlačítka parametru isSubmitted na true
-        handlePieces(id, src, width, left, isSubmitted, arrow, duration, frameRate, scanSpeed, special, arrowDirection, cameraSizeObject);
+        handlePieces(
+            id,
+            src,
+            width,
+            left,
+            isSubmitted,
+            arrow,
+            duration,
+            frameRate,
+            scanSpeed,
+            special,
+            arrowDirection,
+            cameraSize
+        );
+
+        console.log("SUBMITTED 22", selectedPieces[id]?.cameraSize);
     };
 
     const [isFlexStart, setIsFlexStart] = useState(false);
@@ -1236,7 +1250,7 @@ if (arrowPosition.y === "positive") {
                         parseInt(cameraTypes[index].sizeY.replace("px", "").trim()) : 0;
 
                     if (sizeX > 0 && sizeY > 0) {
-                        setCameraSize({ width: sizeX.toString(), height: sizeY.toString() });
+                        setCameraSize({ width: sizeX.toString(), height: sizeY.toString(), currentIndex: index });
                     }
 
                     if (cameraTypes[index]?.imgRatio) {
@@ -1248,7 +1262,7 @@ if (arrowPosition.y === "positive") {
                 // Vlastní výběr kamery
                 if (item === "vlastni"){
 
-                    setCameraSize({width: widthDecimal, height: heightDecimal});
+                    setCameraSize({width: widthDecimal, height: heightDecimal, currentIndex: index});
                 }
             }
 
@@ -1270,17 +1284,18 @@ if (arrowPosition.y === "positive") {
     /** Aktivní načítání při změně plochy klipu a obnovení pole pro parametry kamery **/
     useEffect(() => {
 
-        // if (activeIndex) {
-        //
-        //     // setRatioCanvas(canvas, canvasSelector[5], selectedPieces[activeIndex].cameraSize, 5);
-        //     console.log("Obnovení velikosti kamery " + selectedPieces[activeIndex].cameraSize)
-        //
-        //     setCanvasSelector(prev => {
-        //         const updatedArray = [...prev];
-        //         updatedArray[5] = selectedPieces[activeIndex].cameraSize;
-        //         return updatedArray;
-        //     });
-        // }
+        if (activeIndex) {
+
+            console.log("Obnovení velikosti kamery", selectedPieces[activeIndex].cameraSize, activeIndex);
+
+            setCanvasSelector(prev => {
+                const updatedArray = [...prev];
+                updatedArray[5] = selectedPieces[activeIndex].cameraSize.currentIndex;
+                return updatedArray;
+            });
+        }
+
+        console.log("CANVAS SELECT: " + canvasSelector[5]);
 
         // const getCameraSelector = localStorage.getItem('cameraSelector');
         //
@@ -1293,7 +1308,7 @@ if (arrowPosition.y === "positive") {
 
         console.log("CAMERA " + getCameraSelector)
 
-         //setRatioCanvas(videoRef.current, 3, null, 5);
+        //setRatioCanvas(videoRef.current, 3, null, 5);
 
 
         if (activeRatio) {
@@ -1328,7 +1343,7 @@ if (arrowPosition.y === "positive") {
 
         cameraOptions(cameraTypes);
 
-    }, [activeRatio, ratioSelection, activeIndex]);
+    }, [activeRatio, ratioSelection, activeIndex, selectedPieces]);
 
     // Nástroje pro správu klipu
     const clipTools = [

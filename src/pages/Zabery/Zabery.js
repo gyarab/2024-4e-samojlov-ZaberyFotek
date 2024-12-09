@@ -746,7 +746,7 @@ function Zabery(props) {
                         : item
                 );
 
-                // Vyjíměčný případ pro
+                // Vyjíměčný případ
             } else if (existingItem && special === 1) {
 
                 // Smazání částice s číslem
@@ -802,7 +802,7 @@ function Zabery(props) {
                         frameRate: 30,
                         scanSpeed: 30,
                         arrowDirection: arrowDirection,
-                        cameraSize: cameraSize || { width: "50px", height: "50px" }
+                        cameraSize: cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 }
                     }
                 ];
 
@@ -852,18 +852,36 @@ function Zabery(props) {
 
     /** Funkce pro zobrazení efektů tlačítka **/
     const handleClickMark = () => {
+        console.log(arrowDirection, "HAF", timelineItem);
 
-        console.log(arrowDirection);
+        // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };
+        //
+        // console.log("CAMERA fkeofkowe " + cameraSizeObject.currentIndex)
 
-        handlePieces(timelineItem, null, null, null, true, activeArrow, rangeValue, null, null, null, arrowDirection, selectedPieces[timelineItem].cameraSize);
+        handlePieces(
+            timelineItem,
+            null,
+            null,
+            null,
+            true,
+            activeArrow,
+            rangeValue,
+            null,
+            null,
+            null,
+            arrowDirection,
+            selectedPieces[timelineItem].cameraSize
+        );
+
+        // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };
+        //
+        // console.log("CAMERA fkeofkowe " + cameraSizeObject.currentIndex)
 
         setIsMarked(true);
 
         // po jedné sekundě se tlačítko vrátí do původního stavu
         setTimeout(() => {
-
             setIsMarked(false);
-
         }, 1000);
     };
 
