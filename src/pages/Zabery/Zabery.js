@@ -100,7 +100,7 @@ function Zabery(props) {
     const [arrowDirection, setArrowDirection] = useState({x: "+", y: "-"});
 
     // Aktivní směr pro obrázek
-    const [newCameraSize, setNewCameraSize] = useState({width: 50, height: 50});
+    const [newCameraSize, setNewCameraSize] = useState({width: "100 px", height: "100 px", currentIndex: 1});
 
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction, directions) => {
@@ -731,6 +731,17 @@ function Zabery(props) {
 
             const checkItems = [newWidth, newLeft, isSubmitted, arrow, duration, frameRate, scanSpeed].every(param => param !== null);
 
+            if (special === 2) {
+
+                return prevItems.map(item =>
+                    item.id === id
+                        ? {
+                            ...item,
+                            cameraSize: cameraSize
+                        } : item
+                );
+            }
+
             // Vyjíměčný případ pro změnu proměnných po klinutí na tlačítko "ULOŽIT"
             if (checkNull) {
 
@@ -779,7 +790,8 @@ function Zabery(props) {
                             frameRate: 30,
                             scanSpeed: 30,
                             arrowDirection: arrowDirection,
-                            cameraSize: cameraSize
+                            cameraSize: cameraSize,
+                            special: special
                         }
                         : item
                 );
@@ -802,7 +814,8 @@ function Zabery(props) {
                         frameRate: 30,
                         scanSpeed: 30,
                         arrowDirection: arrowDirection,
-                        cameraSize: cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 }
+                        cameraSize: cameraSize,
+                        special: special
                     }
                 ];
 
@@ -852,25 +865,26 @@ function Zabery(props) {
 
     /** Funkce pro zobrazení efektů tlačítka **/
     const handleClickMark = () => {
-        console.log(arrowDirection, "HAF", timelineItem);
 
         // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };
         //
         // console.log("CAMERA fkeofkowe " + cameraSizeObject.currentIndex)
 
+        const piece = selectedPieces[timelineItem];
+
         handlePieces(
             timelineItem,
-            null,
-            null,
-            null,
+            piece.src,
+            piece.width,
+            piece.left,
             true,
             activeArrow,
             rangeValue,
-            null,
-            null,
+            piece.frameRate,
+            piece.scanSpeed,
             null,
             arrowDirection,
-            selectedPieces[timelineItem].cameraSize
+            piece.cameraSize
         );
 
         // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };
