@@ -743,7 +743,7 @@ function Zabery(props) {
             }
 
             // Vyjíměčný případ pro změnu proměnných po klinutí na tlačítko "ULOŽIT"
-            if (checkNull) {
+            else if (special === 3) {
 
                 return prevItems.map(item =>
                     item.id === id
@@ -870,22 +870,16 @@ function Zabery(props) {
         //
         // console.log("CAMERA fkeofkowe " + cameraSizeObject.currentIndex)
 
-        const piece = selectedPieces[timelineItem];
+        // const piece = selectedPieces[timelineItem];
 
-        handlePieces(
-            timelineItem,
-            piece.src,
-            piece.width,
-            piece.left,
-            true,
-            activeArrow,
-            rangeValue,
-            piece.frameRate,
-            piece.scanSpeed,
-            null,
-            arrowDirection,
-            piece.cameraSize
-        );
+        for (let i = 0; i < selectedPieces.length; i++) {
+
+            const piece = selectedPieces[i];
+
+            console.log("WIDTH " + piece.width, piece.left)
+
+            handlePieces(timelineItem, piece.src, piece.width, piece.left, true, activeArrow, rangeValue, null, null, 3, arrowDirection, piece.cameraSize);
+        }
 
         // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };
         //

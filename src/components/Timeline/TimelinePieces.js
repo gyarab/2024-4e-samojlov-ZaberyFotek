@@ -11,9 +11,7 @@ const TimelinePieces = ({
                             handlePieceUpdate,
                             activeIndex,
                             pieceIsClicked,
-                            timelineWidth,
-                            cameraSize,
-                            specialSelect
+                            timelineWidth
                         }) => {
 
     // Změna velikosti prvku
@@ -155,31 +153,21 @@ const TimelinePieces = ({
             }
 
             handlePieceUpdate(
-                piece.id, piece.src, piece.width, piece.left, piece.isSubmitted, piece.arrow,
+                piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
                 piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize
             );
         }
 
-    }, [piece.isSubmitted, width]);
+    }, [piece.isSubmitted, width, left]);
 
     /** Funkce spravující kliknutí na částici v Timeline **/
     const handleClick = (type) => {
-
-        // console.log("XXXXXXX "  + cameraSize.currentIndex + " " + piece.special)
-        //
-        // if (cameraSize.currentIndex && specialSelect === 2) {
-        //
-        //     handlePieceUpdate(
-        //         piece.id, piece.src, piece.width, piece.left, piece.isSubmitted, piece.arrow,
-        //         piece.duration, piece.frameRate, piece.scanSpeed, 2, piece.arrowDirection, cameraSize
-        //     );
-        // }
 
         pieceIsClicked = true;
 
         console.log("TYPE " + type + piece.isSubmitted);
 
-        console.log("CAMERA SIZE " + piece?.cameraSize?.currentIndex )
+        console.log("CAMERA SIZE " + piece.cameraSize, piece.width, piece.left)
 
         if (type === "piece" && cancelClipBtn) {
 

@@ -83,8 +83,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     //
     // const [isFirst, setIsFirst] = useState(true)
 
-    const [specialSelect, setSpecialSelect] = useState(0)
-
     // Link pro stažení výsledného videa
     const [downloadLink, setDownloadLink] = useState(null);
 
@@ -182,7 +180,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         // setRatioCanvas(canvas, canvasSelector[5], canvasTypes[activeIndex], selectedPieces[activeIndex], 5);
 
-        console.log("ACTIVE " + activeIndex)
+        // console.log("ACTIVE " + activeIndex)
 
         // // Nastavení velikosti plochy dle poměru
         // setRatioCanvas(canvas, canvasSelector[0], canvasTypes[activeIndex], selectedPieces[activeIndex], 5);
@@ -240,22 +238,26 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 const basicArrowType = arrowPosition.x !== "zoom" && arrowPosition.x !== "rotate";
 
-                // Velikost kamery
-                // Kontrola zda byly vybrány 2 poměry
-                if (ratioSelection[0] && ratioSelection[1]) {
+                // // Velikost kamery
+                // // Kontrola zda byly vybrány 2 poměry
+                if (ratioSelection[0] !== null && ratioSelection[1] !== null) {
 
-                    const [widthRatio1, heightRatio1] = ratioSelection[0].split('/').map(Number);
+                    console.log("zzzyzY " + ratioSelection[0].ratio)
 
-                    const [widthRatio2, heightRatio2] = ratioSelection[1].split('/').map(Number);
+                    // const [widthRatio1, heightRatio1] = ratioSelection[0].ratio.split('/').map(Number);
+                    //
+                    // const [widthRatio2, heightRatio2] = ratioSelection[1].ratio.split('/').map(Number);
+                    //
+                    // const finalWidth = img.width * (widthRatio1 / heightRatio1);
+                    // const finalHeight = img.height * (widthRatio2 / heightRatio2);
+                    //
+                    // setCameraSize({
+                    //     width: finalWidth.toString(),
+                    //     height: finalHeight.toString(),
+                    //     currentIndex: parseInt(`${ratioSelection[0]?.index}${ratioSelection[1]?.index}`, 10)
+                    // })
 
-                    const finalWidth = img.width * (widthRatio1 / heightRatio1);
-                    const finalHeight = img.height * (widthRatio2 / heightRatio2);
-
-                    setCameraSize({
-                        width: finalWidth.toString(),
-                        height: finalHeight.toString(),
-                        currentIndex: cameraSize?.currentIndex
-                    })
+                    console.log("RATIO CAMERA " + cameraSize.width, cameraSize.height, cameraSize.currentIndex, "RATIO", ratioSelection[0], ratioSelection[1], img.width)
                 }
 
                 // let cameraWidth = parseInt(currentPiece.cameraSize.width)|| 100;
@@ -881,10 +883,6 @@ if (arrowPosition.y === "positive") {
             arrowDirection,
             cameraSizeObject
         );
-
-        setSpecialSelect(special);
-
-        console.log("KKK: "  + canvasSelector[5])
     };
 
     const [isFlexStart, setIsFlexStart] = useState(false);
@@ -1017,16 +1015,19 @@ if (arrowPosition.y === "positive") {
                             <CanvasContent
                                 style={{width: "100%"}}
                                 key={index}
-                                isClicked={index === canvasSelector[cameraIndex]}
+                                isClicked={index === canvasSelector[cameraIndex] && (ratioSelection.length === 0 || false)}
                                 onClick={() => {
+
+                                    console.log("RATIO SSS " + ratioSelection.length)
 
                                     setSelectedCounts({});
                                     setTotalBullets(0);
                                     setRatioSelection([]);
                                     setCountClicks(0);
 
-                                    setRatioCanvas(videoRef.current, index, item, cameraIndex)}
-                            }
+                                    setRatioCanvas(videoRef.current, index, item, cameraIndex)
+                                }
+                                }
                             >
                                 <div style={{textAlign: 'center'}}>
 
@@ -1173,7 +1174,7 @@ if (arrowPosition.y === "positive") {
                 <CanvasContent
                     style={{width: "100%"}}
                     key={index}
-                    isClicked={5 === canvasSelector[cameraIndex]}
+                    isClicked={5 === canvasSelector[cameraIndex] && (ratioSelection.length === 0 || false)}
                     onClick={() => {
 
                         setSelectedCounts({});
@@ -1235,14 +1236,18 @@ if (arrowPosition.y === "positive") {
                         setRatioSelection([]);
                         setCountClicks(0);
 
-                        // Výchozí možnost výběru
-                        setTimeout(() => {
-                            setCanvasSelector(prev => {
-                                const updatedArray = [...prev];
-                                updatedArray[5] = 1;
-                                return updatedArray;
-                            });
-                        }, 0);
+                        setRatioCanvas(videoRef.current, 1, null, cameraIndex);
+
+                        // // Výchozí možnost výběru
+                        // setTimeout(() => {
+                        //     setCanvasSelector(prev => {
+                        //         const updatedArray = [...prev];
+                        //         updatedArray[5] = 1;
+                        //         return updatedArray;
+                        //     });
+                        // }, 0);
+                        //
+                        // setCameraSize({width: "100 px", height: "100 px", currentIndex: 1});
                     }}
                 >
                     RESET
@@ -1266,20 +1271,39 @@ if (arrowPosition.y === "positive") {
         if (ratioSelection.length < 2) {
 
             setRatioSelection((prev) => {
-                const updatedArray = [...prev];
-                updatedArray.push(item.imgRatio);
-                return updatedArray;
+                const updatedArray = prev.filter((entry) => entry.index !== index);
+                return [...updatedArray, { index: index, ratio: item.imgRatio }];
             });
         }
 
-        // Pokud se kliknutí uživatele nenachází v intervalu "poměrů kamer"
-        if (!(index >= 2 && index <= 4)) {
+        // // Velikost kamery
+        // // Kontrola zda byly vybrány 2 poměry
+        // if (ratioSelection[0] && ratioSelection[1]) {
+        //
+        //     const [widthRatio1, heightRatio1] = ratioSelection[0].split('/').map(Number);
+        //
+        //     const [widthRatio2, heightRatio2] = ratioSelection[1].split('/').map(Number);
+        //
+        //     const finalWidth = img.width * (widthRatio1 / heightRatio1);
+        //     const finalHeight = img.height * (widthRatio2 / heightRatio2);
+        //
+        //     setCameraSize({
+        //         width: `${finalWidth.toString()} px`,
+        //         height: `${finalHeight.toString()} px`,
+        //         currentIndex: cameraSize?.currentIndex
+        //     })
+        //
+        //     console.log("RATIO CAMERA " + cameraSize.width, cameraSize.height, cameraSize.currentIndex)
+        // }
 
-            setSelectedCounts({});
-            setTotalBullets(0);
-            setRatioSelection([]);
-            setCountClicks(0);
-        }
+        // Pokud se kliknutí uživatele nenachází v intervalu "poměrů kamer"
+        // if (!(index >= 2 && index <= 4)) {
+        //
+        //     setSelectedCounts({});
+        //     setTotalBullets(0);
+        //     setRatioSelection([]);
+        //     setCountClicks(0);
+        // }
     }
 
     /** Funkce pro nastavení předchozích hodnot z paměti **/
@@ -1345,9 +1369,8 @@ if (arrowPosition.y === "positive") {
 
                     if (sizeX > 0 && sizeY > 0) {
                         setCameraSize({width: sizeX.toString(), height: sizeY.toString(), currentIndex: index});
-                    }
 
-                    if (cameraTypes[index]?.imgRatio) {
+                    } else if (cameraTypes[index]?.imgRatio) {
                         console.log("ITEM " + cameraTypes[index]?.imgRatio);
                         setCameraRatio(item, index);
                     }
@@ -1359,22 +1382,18 @@ if (arrowPosition.y === "positive") {
                     setCameraSize({width: widthDecimal, height: heightDecimal, currentIndex: index});
                 }
 
-                setSpecialSelect(2);
 
-                handlePieceUpdate(
-                    activeIndex,
-                    null, // src
-                    null, // width
-                    null, // left
-                    null, // isSubmitted
-                    null, // arrow
-                    null, // duration
-                    null, // frameRate
-                    null, // scanSpeed
-                    2, // special
-                    null, // arrowDirection
-                    cameraSize
-                );
+                for (let i = 0; i < selectedPieces.length; i++) {
+
+                    const piece = selectedPieces[i];
+
+                    console.log("WIDTH " + piece.width, piece.left)
+
+                    handlePieceUpdate(
+                        activeIndex, piece.src, piece.width, piece.left, piece.isSubmitted, piece.arrow,
+                        piece.duration, piece.frameRate, piece.scanSpeed, 2, piece.arrowDirection, cameraSize
+                    );
+                }
             }
 
         } else {
@@ -1628,8 +1647,6 @@ if (arrowPosition.y === "positive") {
                                 activeIndex={activeIndex}
                                 pieceIsClicked={pieceIsClicked}
                                 timelineWidth={timelineRef}
-                                cameraSize={cameraSize}
-                                specialSelect={specialSelect}
                             />
                         ))}
 
