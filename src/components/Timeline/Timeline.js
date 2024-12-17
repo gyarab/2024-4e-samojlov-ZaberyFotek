@@ -109,7 +109,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     // Načtený obrázek
     const [imgPiece, setIMG] = useState(null);
 
+    // Prevence nekonečného cyklu
     const [checkLoop, setCheckLoop] = useState(null);
+
+    // // Počet bodů ve výběru poměru vůči obrázku šířky a výšky
+    // const [selectedCounts, setSelectedCounts] = useState({});
+    //
+    // // Počet kliknutí na poměry kamer
+    // const [countClicks, setCountClicks] = useState(0);
 
     /**
      * Spustí nahrávání videa z canvasu (25 fps).
@@ -224,26 +231,21 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 // Aktuálně zvolená částice
                 const currentPiece = selectedPieces[i];
 
-                if (checkLoop) {
-
-                    // Pravidelné obnovení změny kamery
-                    handlePieceUpdate(
-                        activeIndex,
-                        currentPiece.src,
-                        currentPiece.width,
-                        currentPiece.left,
-                        currentPiece.isSubmitted,
-                        currentPiece.arrow,
-                        currentPiece.duration,
-                        currentPiece.frameRate,
-                        currentPiece.scanSpeed,
-                        2,
-                        currentPiece.arrowDirection,
-                        cameraSize
-                    );
-
-                    setCheckLoop(false);
-                }
+                // Pravidelné obnovení změny kamery
+                handlePieceUpdate(
+                    activeIndex,
+                    currentPiece.src,
+                    currentPiece.width,
+                    currentPiece.left,
+                    currentPiece.isSubmitted,
+                    currentPiece.arrow,
+                    currentPiece.duration,
+                    currentPiece.frameRate,
+                    currentPiece.scanSpeed,
+                    2,
+                    currentPiece.arrowDirection,
+                    cameraSize
+                );
 
                 const img = new Image();
 
@@ -434,37 +436,55 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     setActiveIndex(currentPiece.id);
 
-                    console.log("XYZ", currentPiece.id, activeIndex, currentPiece?.cameraSize?.currentIndex, cameraRes )
+                    console.log("XYZ", currentPiece.id, activeIndex, currentPiece?.cameraSize?.currentIndex, cameraRes)
 
-                    console.log("INDEX " + currentPiece?.cameraSize?.currentIndex)
+                    console.log("INDEX " + currentPiece?.cameraSize?.currentIndex);
 
-                    // if (cameraRes > 5) {
-                    //
-                    //     const digits = cameraSize.currentIndex.toString().split('');
-                    //
-                    //     const firstDigit = parseInt(digits[0]);
-                    //     const secondDigit = parseInt(digits[1]);
-                    //
-                    //     console.log("FF "+ firstDigit)
-                    //
-                    //     // setSelectedCounts({});
-                    //     setTotalBullets(2);
-                    //     setCountClicks(2);
-                    //
-                    //     setCanvasSelector(prev => {
-                    //         const updatedArray = [...prev];
-                    //         updatedArray[5] = firstDigit; // currentPiece?.cameraSize?.currentIndex
-                    //         return updatedArray;
-                    //     });
-                    //
-                    // } else {
+                    /* ========================================================= */
+
+                    const digits = cameraSize.currentIndex.toString().split('');
+
+                    const firstDigit = parseInt(digits[0]);
+                    const secondDigit = parseInt(digits[1]);
+
+                    if (cameraRes > 5 && firstDigit && secondDigit) {
+
+                        console.log("FF " + firstDigit + secondDigit)
+
+                        // setSelectedCounts({});
+                        //setCountClicks(2);
+
+                        // if (firstDigit === secondDigit) {
+                        //
+                        //     setSelectedCounts((prev) => ({
+                        //         ...prev,
+                        //         [firstDigit]: 1,
+                        //         [secondDigit]: 1
+                        //     }));
+                        //
+                        // } else {
+                        //
+                        //     setSelectedCounts((prev) => ({
+                        //         ...prev,
+                        //         [firstDigit]: 2,
+                        //         [secondDigit]: 0
+                        //     }));
+                        // }
+
+                        console.log("COUNT CLICKS", countClicks, ratioSelection.length)
+
+                        // Object.keys(selectedCounts).forEach(key => {
+                        //     console.log(`${key}: ${selectedCounts[key]}`);
+                        // });
+
+                    } else {
 
                         setCanvasSelector(prev => {
                             const updatedArray = [...prev];
                             updatedArray[5] = cameraRes; // currentPiece?.cameraSize?.currentIndex
                             return updatedArray;
                         });
-                    //}
+                    }
 
                     // handlePieceUpdate(
                     //     currentPiece.id, currentPiece.src, currentPiece.width, currentPiece.left, currentPiece.isSubmitted, currentPiece.arrow,
@@ -500,10 +520,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     }
 
                     // Resetování parametrů pro poměry kamery
-                    if (Object.keys(selectedCounts).length > 0 || totalBullets > 0 || ratioSelection.length > 0 || countClicks > 0) {
+                    if (Object.keys(selectedCounts).length > 0 || ratioSelection.length > 0 || countClicks > 0) {
                         setSelectedCounts({});
-                        setTotalBullets(0);
-                        setRatioSelection([]);
+                        //setRatioSelection([]);
                         setCountClicks(0);
                     }
 
@@ -520,8 +539,15 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     /** Průběžné přidávání času **/
     useEffect(() => {
 
+        // const storedColors = JSON.parse(localStorage.getItem('circleColors'));
+        // console.log("STORED COLORS", storedColors);
+
+        // Object.keys(selectedCounts).forEach(key => {
+        //     console.log(`SELECTED ${key}: ${selectedCounts[key]}`);
+        // });
+
         // Pokud výběr kamery poměru je hotový
-        if (ratioSelection.length === 2) {
+        if (ratioSelection.length === 2 && checkLoop) {
 
             const [widthRatio1, heightRatio1] = ratioSelection[0]?.ratio.split('/').map(Number);
             const [widthRatio2, heightRatio2] = ratioSelection[1]?.ratio.split('/').map(Number);
@@ -536,6 +562,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             });
 
             console.log("Effect: Updated Ratios", finalWidth, finalHeight, ratioSelection);
+
+            setCheckLoop(false);
         }
 
         let intervalId = null;
@@ -978,7 +1006,7 @@ if (arrowPosition.y === "positive") {
 //                 // Use the camera size from the current piece
 //                 const currentPieceCameraRes = currentPiece?.cameraSize?.currentIndex;
 //
-//                 console.log("PENDREK " + currentPieceCameraRes);
+//
 //
 //                 if (currentPieceCameraRes !== undefined && cameraSize.currentIndex !== currentPieceCameraRes) {
 //                     setCameraSize(prev => ({
@@ -1072,7 +1100,6 @@ if (arrowPosition.y === "positive") {
 
     // Počet bodů ve výběru poměru vůči obrázku šířky a výšky
     const [selectedCounts, setSelectedCounts] = useState({});
-    const [totalBullets, setTotalBullets] = useState(0);
 
     // Počet kliknutí na poměry kamer
     const [countClicks, setCountClicks] = useState(0);
@@ -1153,7 +1180,6 @@ if (arrowPosition.y === "positive") {
                                     console.log("RATIO SSS " + ratioSelection.length)
 
                                     setSelectedCounts({});
-                                    setTotalBullets(0);
                                     setRatioSelection([]);
                                     setCountClicks(0);
 
@@ -1201,15 +1227,26 @@ if (arrowPosition.y === "positive") {
                     {/** Výběr poměru z nabídky **/}
                     {type.map((item, index) => {
 
+                        // console.log("PPPP " + pieceIsClicked, ratioSelection[0]?.index, index)
+
                         if (!item.imgRatio) {
                             return null;
                         }
+
+                        // Získání existujících barev z localStorage (nebo prázdné pole, pokud neexistují)
+                        const storedColors = JSON.parse(localStorage.getItem('circleColors')) || [];
 
                         const count = selectedCounts[index] || 0;
                         const circleColors = [];
 
                         // Rozlišování barev dle kliknutí
                         const circleColor = countClicks % 2 === 0 ? `${stylesHeight.color}` : `${stylesWidth.color}`;
+
+                        if (storedColors.length > 2) {
+
+                            // Resetování uložené proměnné
+                            localStorage.setItem('circleColors', JSON.stringify([]));
+                        }
 
                         if (count === 1) {
                             circleColors.push(circleColor);
@@ -1219,6 +1256,15 @@ if (arrowPosition.y === "positive") {
                             circleColors.push(circleColor);
                             circleColors.push(stylesWidth.color);
                         }
+
+                        // Filtr nových barev, které nejsou již v existujících barvách
+                        const newColors = circleColors.filter(newColor => !storedColors.includes(newColor));
+
+                        // Sloučení pouze nových barev, které nejsou duplikáty
+                        const finalRes = [...storedColors, ...newColors];
+
+                        // Uložení sloučených barev zpět do localStorage
+                        localStorage.setItem('circleColors', JSON.stringify(finalRes));
 
                         return (
                             <div
@@ -1239,7 +1285,7 @@ if (arrowPosition.y === "positive") {
                                         width: '100%'
                                     }}
                                     key={index}
-                                    isClicked={count > 0 && totalBullets > 0 && ratioSelection.length > 0}
+                                    isClicked={count > 0 && ratioSelection.length > 0}
 
                                     onClick={() => {
 
@@ -1248,7 +1294,7 @@ if (arrowPosition.y === "positive") {
                                         }
 
                                         // Maximální počet bodů je 2
-                                        if (count < 2 && totalBullets < 2) {
+                                        if (count < 2) {
 
                                             // Nastavení pro index počet bodů
                                             setSelectedCounts((prev) => ({
@@ -1260,13 +1306,8 @@ if (arrowPosition.y === "positive") {
                                                 console.log(`${key}: ${selectedCounts[key]}`);
                                             });
 
-                                            // console.log("SELECTED " + selectedCounts)
-
                                             // Zvětšění počet kliknutí o jedna
                                             setCountClicks(prev => prev + 1);
-
-                                            // Nastavení počet zvolených bodů
-                                            setTotalBullets(totalBullets + 1);
                                         }
 
                                         setRatioCanvas(videoRef.current, index, item, cameraIndex);
@@ -1288,17 +1329,34 @@ if (arrowPosition.y === "positive") {
                                         transform: 'translateX(-50%)',
                                     }}
                                 >
-                                    {circleColors.map((color, i) => (
-                                        <span
-                                            key={i}
-                                            style={{
-                                                width: '10px',
-                                                height: '10px',
-                                                borderRadius: '50%',
-                                                backgroundColor: index === canvasSelector[cameraIndex] ? color : "none",
-                                            }}
-                                        />
-                                    ))}
+                                    {
+
+                                        circleColors.map((color, i) => (
+                                            <span
+                                                key={i}
+                                                style={{
+                                                    width: '10px',
+                                                    height: '10px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: index === canvasSelector[cameraIndex] ? color : "none",
+                                                }}
+                                            />
+                                        ))
+                                    // ) : (pieceIsClicked &&
+                                    //
+                                    //     JSON.parse(localStorage.getItem('circleColors'))?.map((color, i) => (
+                                    //         <span
+                                    //             key={i}
+                                    //             style={{
+                                    //                 width: '10px',
+                                    //                 height: '10px',
+                                    //                 borderRadius: '50%',
+                                    //                 backgroundColor: index === ratioSelection[0]?.index ? color : "none",
+                                    //             }}
+                                    //         />
+                                    //     ))
+                                    // )}
+                                    }
                                 </div>
                             </div>
                         );
@@ -1316,7 +1374,6 @@ if (arrowPosition.y === "positive") {
                     onClick={() => {
 
                         setSelectedCounts({});
-                        setTotalBullets(0);
                         setRatioSelection([]);
                         setCountClicks(0);
 
@@ -1370,7 +1427,6 @@ if (arrowPosition.y === "positive") {
 
                     onClick={() => {
                         setSelectedCounts({});
-                        setTotalBullets(0);
                         setRatioSelection([]);
                         setCountClicks(0);
 
