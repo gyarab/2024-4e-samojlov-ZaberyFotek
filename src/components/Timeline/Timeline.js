@@ -110,13 +110,16 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [imgPiece, setIMG] = useState(null);
 
     // Prevence nekonečného cyklu
-    const [checkLoop, setCheckLoop] = useState(null);
+    const [checkLoop, setCheckLoop] = useState(false);
 
-    // // Počet bodů ve výběru poměru vůči obrázku šířky a výšky
-    // const [selectedCounts, setSelectedCounts] = useState({});
-    //
-    // // Počet kliknutí na poměry kamer
-    // const [countClicks, setCountClicks] = useState(0);
+    // Počet bodů ve výběru poměru vůči obrázku šířky a výšky
+    const [selectedCounts, setSelectedCounts] = useState({});
+
+    // Počet kliknutí na poměry kamer
+    const [countClicks, setCountClicks] = useState(0);
+
+    // Počet kliknutí na poměry kamer
+    const [data, setData] = useState([{index: 2, count: 2}]);
 
     /**
      * Spustí nahrávání videa z canvasu (25 fps).
@@ -422,75 +425,68 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     if (currentPiece?.id === activeIndex) {
 
                         cameraRes = cameraSize.currentIndex;
+
                     } else {
 
                         cameraRes = currentPiece?.cameraSize?.currentIndex;
 
+                        console.log("CAMERA RES", cameraRes, "WIDTH", currentPiece?.cameraSize?.width)
+
                         if (cameraSize.currentIndex !== cameraRes) {
+
+                            setSelectedCounts({});
+                            setRatioSelection([]);
+                            setCountClicks(0);
+
                             setCameraSize(prev => ({
                                 ...prev,
                                 currentIndex: cameraRes,
                             }));
+
+                            if ((cameraRes >= 2 && cameraRes <= 4) || cameraRes >= 10) {
+
+                                const digits = cameraRes?.toString()?.split('');
+
+                                const firstDigit = digits && digits[0] ? parseInt(digits[0], 10) : null;
+                                const secondDigit = digits && digits[1] ? parseInt(digits[1], 10) : null;
+
+                                console.log("First and Second Digits:", firstDigit, secondDigit);
+
+                                setCountClicks(2);
+
+                                if (firstDigit !== null && secondDigit !== null) {
+
+                                    if (firstDigit === secondDigit) {
+
+                                        setSelectedCounts((prev) => ({
+                                            ...prev,
+                                            [firstDigit]: 2
+                                        }));
+
+                                    } else if (firstDigit !== secondDigit){
+
+                                        setSelectedCounts((prev) => ({
+                                            ...prev,
+                                            [firstDigit]: 1,
+                                            [secondDigit]: 1,
+                                        }));
+                                    }
+                                }
+
+                                console.log("COUNT CLICKS", countClicks, ratioSelection.length)
+
+                                console.log("XYZ", currentPiece.id, activeIndex, currentPiece?.cameraSize?.currentIndex, cameraRes)
+                            }
                         }
                     }
 
                     setActiveIndex(currentPiece.id);
 
-                    console.log("XYZ", currentPiece.id, activeIndex, currentPiece?.cameraSize?.currentIndex, cameraRes)
-
-                    console.log("INDEX " + currentPiece?.cameraSize?.currentIndex);
-
-                    /* ========================================================= */
-
-                    const digits = cameraSize.currentIndex.toString().split('');
-
-                    const firstDigit = parseInt(digits[0]);
-                    const secondDigit = parseInt(digits[1]);
-
-                    if (cameraRes > 5 && firstDigit && secondDigit) {
-
-                        console.log("FF " + firstDigit + secondDigit)
-
-                        // setSelectedCounts({});
-                        //setCountClicks(2);
-
-                        // if (firstDigit === secondDigit) {
-                        //
-                        //     setSelectedCounts((prev) => ({
-                        //         ...prev,
-                        //         [firstDigit]: 1,
-                        //         [secondDigit]: 1
-                        //     }));
-                        //
-                        // } else {
-                        //
-                        //     setSelectedCounts((prev) => ({
-                        //         ...prev,
-                        //         [firstDigit]: 2,
-                        //         [secondDigit]: 0
-                        //     }));
-                        // }
-
-                        console.log("COUNT CLICKS", countClicks, ratioSelection.length)
-
-                        // Object.keys(selectedCounts).forEach(key => {
-                        //     console.log(`${key}: ${selectedCounts[key]}`);
-                        // });
-
-                    } else {
-
-                        setCanvasSelector(prev => {
-                            const updatedArray = [...prev];
-                            updatedArray[5] = cameraRes; // currentPiece?.cameraSize?.currentIndex
-                            return updatedArray;
-                        });
-                    }
-
-                    // handlePieceUpdate(
-                    //     currentPiece.id, currentPiece.src, currentPiece.width, currentPiece.left, currentPiece.isSubmitted, currentPiece.arrow,
-                    //     currentPiece.duration, currentPiece.frameRate, currentPiece.scanSpeed, 0, currentPiece.arrowDirection, cameraRes
-                    // );
-
+                    setCanvasSelector(prev => {
+                        const updatedArray = [...prev];
+                        updatedArray[5] = cameraRes; // currentPiece?.cameraSize?.currentIndex
+                        return updatedArray;
+                    });
 
                     break;
 
@@ -517,13 +513,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                             updatedArray[5] = null;
                             return updatedArray;
                         });
-                    }
-
-                    // Resetování parametrů pro poměry kamery
-                    if (Object.keys(selectedCounts).length > 0 || ratioSelection.length > 0 || countClicks > 0) {
-                        setSelectedCounts({});
-                        //setRatioSelection([]);
-                        setCountClicks(0);
                     }
 
                     break;
@@ -978,55 +967,7 @@ if (arrowPosition.y === "positive") {
     /** Nastavení aktuálního indexu částice **/
     const handlePieceUpdate = (id, src, width, left, isSubmitted, arrow, duration, frameRate, scanSpeed, special, arrowDirection, cameraSizeObject) => {
 
-        //const cameraRes = activeIndex === id || activeIndex === null ? cameraSize : cameraSizeObject;
-
-        // setActiveIndex(id);
-
-//         console.log("SUBMITTED", cameraSizeObject, cameraSize, activeIndex, id);
-//
-//         // const camera = cameraSizeObject !== null && cameraSizeObject !== undefined ? cameraSizeObject : null;
-//
-//         let cameraRes = cameraSize.currentIndex; // Default to current camera size
-//
-//         for (let i = 0; i < selectedPieces.length; i++) {
-//             // Aktuálně zvolená částice
-//             const currentPiece = selectedPieces[activeIndex];
-//
-//             console.log("ID", id, activeIndex, currentPiece)
-//
-//             // Determine the camera resolution based on conditions
-//             if (
-//                 id === activeIndex
-//                 //  || activeIndex === null
-//                 // || currentPiece?.cameraSize?.currentIndex === undefined
-//             ) {
-//                 // Use the current camera size if the active index matches or is null
-//                 cameraRes = cameraSize.currentIndex;
-//             } else {
-//                 // Use the camera size from the current piece
-//                 const currentPieceCameraRes = currentPiece?.cameraSize?.currentIndex;
-//
-//
-//
-//                 if (currentPieceCameraRes !== undefined && cameraSize.currentIndex !== currentPieceCameraRes) {
-//                     setCameraSize(prev => ({
-//                         ...prev,
-//                         currentIndex: currentPieceCameraRes,
-//                     }));
-//                 }
-//
-//                 // Update cameraRes to reflect the current piece's resolution
-//                 cameraRes = currentPieceCameraRes;
-//             }
-//         }
-//
-// // Log the final camera resolution used
-//         console.log("SUS " + cameraRes);
-//
-// // Nastavení aktivního indexu
-//         setActiveIndex(id);
-
-// Obsluha částice s určeným rozlišením kamery
+        // Obsluha částice s určeným rozlišením kamery
         handlePieces(
             id,
             src,
@@ -1097,12 +1038,6 @@ if (arrowPosition.y === "positive") {
 
     // Vypsání zprávy v případě chyby
     const [errorMessage, setErrorMessage] = useState('');
-
-    // Počet bodů ve výběru poměru vůči obrázku šířky a výšky
-    const [selectedCounts, setSelectedCounts] = useState({});
-
-    // Počet kliknutí na poměry kamer
-    const [countClicks, setCountClicks] = useState(0);
 
     /** Funkce pro výběr optimální rozměrů kamery dle uživatele **/
     const cameraOptions = (type) => {
@@ -1233,20 +1168,11 @@ if (arrowPosition.y === "positive") {
                             return null;
                         }
 
-                        // Získání existujících barev z localStorage (nebo prázdné pole, pokud neexistují)
-                        const storedColors = JSON.parse(localStorage.getItem('circleColors')) || [];
-
                         const count = selectedCounts[index] || 0;
                         const circleColors = [];
 
                         // Rozlišování barev dle kliknutí
                         const circleColor = countClicks % 2 === 0 ? `${stylesHeight.color}` : `${stylesWidth.color}`;
-
-                        if (storedColors.length > 2) {
-
-                            // Resetování uložené proměnné
-                            localStorage.setItem('circleColors', JSON.stringify([]));
-                        }
 
                         if (count === 1) {
                             circleColors.push(circleColor);
@@ -1256,15 +1182,6 @@ if (arrowPosition.y === "positive") {
                             circleColors.push(circleColor);
                             circleColors.push(stylesWidth.color);
                         }
-
-                        // Filtr nových barev, které nejsou již v existujících barvách
-                        const newColors = circleColors.filter(newColor => !storedColors.includes(newColor));
-
-                        // Sloučení pouze nových barev, které nejsou duplikáty
-                        const finalRes = [...storedColors, ...newColors];
-
-                        // Uložení sloučených barev zpět do localStorage
-                        localStorage.setItem('circleColors', JSON.stringify(finalRes));
 
                         return (
                             <div
@@ -1285,7 +1202,7 @@ if (arrowPosition.y === "positive") {
                                         width: '100%'
                                     }}
                                     key={index}
-                                    isClicked={count > 0 && ratioSelection.length > 0}
+                                    isClicked={count > 0 && pieceIsClicked && Object.keys(selectedCounts).length > 0}
 
                                     onClick={() => {
 
@@ -1331,31 +1248,43 @@ if (arrowPosition.y === "positive") {
                                 >
                                     {
 
-                                        circleColors.map((color, i) => (
-                                            <span
-                                                key={i}
-                                                style={{
-                                                    width: '10px',
-                                                    height: '10px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: index === canvasSelector[cameraIndex] ? color : "none",
-                                                }}
-                                            />
-                                        ))
-                                    // ) : (pieceIsClicked &&
-                                    //
-                                    //     JSON.parse(localStorage.getItem('circleColors'))?.map((color, i) => (
-                                    //         <span
-                                    //             key={i}
-                                    //             style={{
-                                    //                 width: '10px',
-                                    //                 height: '10px',
-                                    //                 borderRadius: '50%',
-                                    //                 backgroundColor: index === ratioSelection[0]?.index ? color : "none",
-                                    //             }}
-                                    //         />
-                                    //     ))
-                                    // )}
+                                        circleColors.map((color, i) => {
+                                            console.log('pieceIsClicked:', pieceIsClicked, index, color, cameraSize?.currentIndex); // Log the value of pieceIsClicked
+
+                                            const checkIndices = cameraSize?.currentIndex?.toString().split('').map(Number) || [];
+
+                                            console.log(checkIndices[0], checkIndices[1])
+
+                                            return (
+                                                <span
+                                                    key={i}
+                                                    style={{
+                                                        width: '10px',
+                                                        height: '10px',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: pieceIsClicked &&
+                                                        (index === canvasSelector[cameraIndex] || checkIndices[1] === index)
+                                                            ? color
+                                                            : (checkIndices[0] === index ? stylesWidth.color : "none")
+                                                    }}
+                                                />
+                                            );
+                                        })
+
+                                        // ) : (pieceIsClicked &&
+                                        //
+                                        //     JSON.parse(localStorage.getItem('circleColors'))?.map((color, i) => (
+                                        //         <span
+                                        //             key={i}
+                                        //             style={{
+                                        //                 width: '10px',
+                                        //                 height: '10px',
+                                        //                 borderRadius: '50%',
+                                        //                 backgroundColor: index === ratioSelection[0]?.index ? color : "none",
+                                        //             }}
+                                        //         />
+                                        //     ))
+                                        // )}
                                     }
                                 </div>
                             </div>
@@ -1465,8 +1394,8 @@ if (arrowPosition.y === "positive") {
         if (ratioSelection.length <= 2) {
 
             setRatioSelection((prev) => {
-                const updatedArray = prev.filter((entry) => entry.index !== index);
-                return [...updatedArray, {index: index, ratio: item.imgRatio}];
+
+                return [...prev, {index: index, ratio: item.imgRatio}];
             });
         }
 
