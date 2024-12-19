@@ -92,10 +92,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     // Tlačítko pro ukládání vytvořeného klipu
     const [downloadBtn, setDownloadBtn] = useState(false);
 
+    /** Proměnné pro sekci - PŘECHODY **/
+
+    // Proměnná pro název tlačítka
+    const [btnName, setBtnName] = useState("Vyberte prosím jeden z přechodů");
 
     /** Proměnné pro sekci - KAMERA **/
 
-        // Aktuální směr v rotaci
+    // Aktuální směr v rotaci
     const [currentDirection, setCurrentDirection] = useState("right");
 
     // Výběr poměru v sekci nástroje kamery
@@ -1002,14 +1006,13 @@ if (arrowPosition.y === "positive") {
     // Data pro výběr přechodů mezi snímky
     const transitionTypes = [
 
-        {ratio: '4:3', name: 'Žádný'},
-        {ratio: '4:5', name: 'Prolnout'},
-        {ratio: '5:4', name: 'Plynule zesílit'},
-        {ratio: '2:3', name: 'Snímek zprava'},
-        {ratio: '1:1', name: 'Snímek zleva'},
-        {ratio: '16:9', name: 'Překlopit'},
-        {ratio: '9:16', name: 'Krychle'},
-        {ratio: '21:9', name: 'Galerie'}
+        {name: 'Prolnout'},
+        {name: 'Plynule zesílit'},
+        {name: 'Snímek zprava'},
+        {name: 'Snímek zleva'},
+        {name: 'Překlopit'},
+        {name: 'Krychle'},
+        {name: 'Galerie'}
     ];
 
     // Data pro výběr rozměrů kamery
@@ -1247,7 +1250,9 @@ if (arrowPosition.y === "positive") {
                                     transitionTypes,
                                     videoRef,
                                     canvasSelector,
-                                    setRatioCanvas)}
+                                    setRatioCanvas,
+                                    setBtnName,
+                                    btnName)}
 
                             {clipTools[activeTool].content !== null && activeTool === 5 &&
                                 cameraOption(

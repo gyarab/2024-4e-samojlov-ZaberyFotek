@@ -15,6 +15,7 @@ export const resizeCanvasOption = (type, videoRef, canvasSelector, setRatioCanva
                 isClicked={index === canvasSelector[resizeIndex]}
                 onClick={() => setRatioCanvas(canvas, index, item, resizeIndex)}
                 title={item.name}
+                style={{borderBottom: '1px solid var(--color-shadow-6)'}}
             >
                 {item.icon} {item.ratio}
             </CanvasContent>

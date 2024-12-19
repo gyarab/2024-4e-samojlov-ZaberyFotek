@@ -32,8 +32,6 @@ const TimelinePieces = ({
     // Počet stisknutí částice uživatelem
     const [clicks, setClicks] = useState(0);
 
-    const [pieceID, setPieceID] = useState(null);
-
     /** Tah je detekován **/
     const onMouseDown = useCallback((e, direction) => {
 
@@ -159,7 +157,7 @@ const TimelinePieces = ({
 
             handlePieceUpdate(
                 piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
-                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize
+                piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
             );
         }
 
@@ -174,14 +172,12 @@ const TimelinePieces = ({
         //
         // console.log("CAMERA SIZE " + piece.cameraSize, piece.width, piece.left)
 
-        console.log("ID :D " + piece.id, pieceID);
+        console.log("ID :D " + piece.id, activeIndex);
 
-        if (piece.id !== pieceID || pieceID === null) {
+        if (piece.id !== activeIndex || activeIndex === null) {
 
             setClicks(prevState => prevState + 1);
         }
-
-        setPieceID(piece.id);
 
         console.log(clicks);
 
@@ -189,7 +185,7 @@ const TimelinePieces = ({
 
             handlePieceUpdate(
                 piece.id, piece.src, piece.width, piece.left, piece.isSubmitted, piece.arrow,
-                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize
+                piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
             );
 
         } else if (type === "cancel") {
@@ -199,7 +195,7 @@ const TimelinePieces = ({
 
             handlePieceUpdate(
                 piece.id, piece.src, width, left, false, piece.arrow,
-                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize
+                piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
             );
 
             // Smazání tlačítka
@@ -214,12 +210,12 @@ const TimelinePieces = ({
         if (isResizing) {
 
             onPieceUpdate(piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
-                piece.duration, piece.frameRate, piece.scanSpeed, 0, piece.arrowDirection, piece.cameraSize);
+                piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize);
         }
 
         setIsResizing(null);
 
-    }, [isResizing, width, left, onPieceUpdate, piece.id, piece.isSubmitted, piece.arrow, piece.duration, piece.frameRate, piece.scanSpeed, piece.arrowDirection, piece.cameraSize]);
+    }, [isResizing, width, left, onPieceUpdate, piece.id, piece.isSubmitted, piece.arrow, piece.duration, piece.arrowDirection, piece.transition, piece.cameraSize]);
 
     useEffect(() => {
         document.addEventListener('mousemove', onMouseMove);

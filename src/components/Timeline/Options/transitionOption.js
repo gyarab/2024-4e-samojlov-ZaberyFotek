@@ -1,7 +1,7 @@
 import {CanvasContent, SubmitBtn} from "../TimelineComponents";
 
 /** Funkce pro úpravu rozměrů plochy **/
-export const transitionOption = (type, videoRef, canvasSelector, setRatioCanvas) => {
+export const transitionOption = (type, videoRef, canvasSelector, setRatioCanvas, setBtnName, btnName) => {
 
     const transitionIndex = 4;
 
@@ -38,31 +38,43 @@ export const transitionOption = (type, videoRef, canvasSelector, setRatioCanvas)
                 })}
             </div>
 
+            <hr
+                style={{
+                    margin: '10px 0',
+                    width: '100%',
+                    height: '2px',
+                    border: 'none',
+                    backgroundImage: 'repeating-linear-gradient(45deg, #ffe564 0, #ffe564 10px, transparent 10px, transparent 20px)',
+                }}
+            />
+
+
             <SubmitBtn
 
-                style={{marginTop: '10px', width: '75%', background: '#4000c7', boxShadow: '0 2px 10px #5960ff', letterSpacing: '1px'}}
+                style={{
+                    width: '75%',
+                    background: '#4000c7',
+                    boxShadow: '0 2px 10px #5960ff',
+                    letterSpacing: '1px'
+                }}
 
                 onClick={() => {
-                    // setSelectedCounts({});
-                    // setRatioSelection([]);
-                    // setCountClicks(0);
-                    //
-                    // setRatioCanvas(videoRef.current, 1, null, cameraIndex);
 
-                    // // Výchozí možnost výběru
-                    // setTimeout(() => {
-                    //     setCanvasSelector(prev => {
-                    //         const updatedArray = [...prev];
-                    //         updatedArray[5] = 1;
-                    //         return updatedArray;
-                    //     });
-                    // }, 0);
-                    //
-                    // setCameraSize({width: "100 px", height: "100 px", currentIndex: 1});
+                    if (canvasSelector[transitionIndex] === undefined) {
+
+                        console.log("NN", canvasSelector[transitionIndex]);
+                        setBtnName("Vyberte prosím jeden z přechodů");
+
+                    } else {
+
+                        setBtnName("Zvolte 2 snímky na časové ose");
+                    }
                 }}
             >
                 VYTVOŘIT
             </SubmitBtn>
+
+            <div style={{marginTop: "15px", fontSize: "11px", color: "#ffe564"}}>{btnName}</div>
 
         </div>);
 };

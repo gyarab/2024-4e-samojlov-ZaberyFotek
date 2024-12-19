@@ -39,7 +39,7 @@ export const cameraOption = (
         }
         if (value === "" || value < 10) {
 
-            setErrorMessage("Hodnota musí být větší než 0 a žádný z parametrů nesmí být prázdný");
+            setErrorMessage("Hodnota musí být dvojciferné číslo a žádný z parametrů nesmí být prázdný");
 
         } else {
             setErrorMessage("");
@@ -266,6 +266,7 @@ export const cameraOption = (
                 style={{width: "100%"}}
                 key={5}
                 isClicked={5 === canvasSelector[cameraIndex] && (ratioSelection.length === 0 || false)}
+
                 onClick={() => {
 
                     setSelectedCounts({});
@@ -319,6 +320,8 @@ export const cameraOption = (
             <div style={{marginTop: "10px", fontSize: "12px", color: "#ffe564"}}>{errorMessage}</div>
 
             <SubmitBtn
+
+                style={{marginTop: "5px"}}
 
                 onClick={() => {
                     setSelectedCounts({});
