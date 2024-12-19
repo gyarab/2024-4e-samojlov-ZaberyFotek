@@ -99,9 +99,6 @@ function Zabery(props) {
     // Směr pohybu v klipu
     const [arrowDirection, setArrowDirection] = useState({x: "+", y: "-"});
 
-    // Aktivní směr pro obrázek
-    const [newCameraSize, setNewCameraSize] = useState({width: "100 px", height: "100 px", currentIndex: 1});
-
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction, directions) => {
 
@@ -126,7 +123,7 @@ function Zabery(props) {
 
         if (item.includes('arrow') && activeArrow != null) {
 
-            handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue, null, null, null, arrowDirection, null);
+            handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue,3, arrowDirection, null);
             console.log("direction", activeArrow, directions);
 
             setActiveArrow(item);
@@ -645,8 +642,6 @@ function Zabery(props) {
                                     null,
                                     activeArrow,
                                     rangeValue,
-                                    null,
-                                    null,
                                     1,
                                     arrowDirection,
                                     null)}
@@ -700,10 +695,9 @@ function Zabery(props) {
                           isSubmitted = null,
                           arrow = null,
                           duration = null,
-                          frameRate = null,
-                          scanSpeed = null,
                           special = null,
                           arrowDirection = null,
+                          transition = null,
                           cameraSize = null) => {
 
         const checkNull =
@@ -729,7 +723,7 @@ function Zabery(props) {
             const existingItem = prevItems.find(item => item.id === id);
             const pieceWidth = newWidth || 100;
 
-            const checkItems = [newWidth, newLeft, isSubmitted, arrow, duration, frameRate, scanSpeed].every(param => param !== null);
+            const checkItems = [newWidth, newLeft, isSubmitted, arrow, duration].every(param => param !== null);
 
             if (special === 2) {
 
@@ -787,11 +781,10 @@ function Zabery(props) {
                             isSubmitted: isSubmitted,
                             arrow: arrow,
                             duration: duration,
-                            frameRate: 30,
-                            scanSpeed: 30,
+                            special: special,
                             arrowDirection: arrowDirection,
+                            transition: transition,
                             cameraSize: cameraSize,
-                            special: special
                         }
                         : item
                 );
@@ -811,11 +804,10 @@ function Zabery(props) {
                         isSubmitted: false,
                         arrow: 'arrow1',
                         duration: 15,
-                        frameRate: 30,
-                        scanSpeed: 30,
+                        special: special,
                         arrowDirection: arrowDirection,
-                        cameraSize: cameraSize,
-                        special: special
+                        transition: transition,
+                        cameraSize: {width: "100 px", height: "100 px", currentIndex: 1},
                     }
                 ];
 
@@ -878,7 +870,7 @@ function Zabery(props) {
 
             console.log("WIDTH " + piece.width, piece.left)
 
-            handlePieces(timelineItem, piece.src, piece.width, piece.left, true, activeArrow, rangeValue, null, null, 3, arrowDirection, piece.cameraSize);
+            handlePieces(timelineItem, piece.src, piece.width, piece.left, true, activeArrow, rangeValue, 3, arrowDirection, piece.cameraSize);
         }
 
         // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };

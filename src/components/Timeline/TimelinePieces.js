@@ -29,6 +29,11 @@ const TimelinePieces = ({
     // Levá odchylka prvku
     const [left, setLeft] = useState(piece.left || 0);
 
+    // Počet stisknutí částice uživatelem
+    const [clicks, setClicks] = useState(0);
+
+    const [pieceID, setPieceID] = useState(null);
+
     /** Tah je detekován **/
     const onMouseDown = useCallback((e, direction) => {
 
@@ -165,9 +170,20 @@ const TimelinePieces = ({
 
         pieceIsClicked = true;
 
-        console.log("TYPE " + type + piece.isSubmitted);
+        // console.log("TYPE " + type + piece.isSubmitted);
+        //
+        // console.log("CAMERA SIZE " + piece.cameraSize, piece.width, piece.left)
 
-        console.log("CAMERA SIZE " + piece.cameraSize, piece.width, piece.left)
+        console.log("ID :D " + piece.id, pieceID);
+
+        if (piece.id !== pieceID || pieceID === null) {
+
+            setClicks(prevState => prevState + 1);
+        }
+
+        setPieceID(piece.id);
+
+        console.log(clicks);
 
         if (type === "piece" && cancelClipBtn) {
 
