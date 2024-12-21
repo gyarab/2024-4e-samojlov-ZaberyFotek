@@ -30,7 +30,10 @@ const TimelinePieces = ({
     const [left, setLeft] = useState(piece.left || 0);
 
     // Počet stisknutí částice uživatelem
-    const [clicks, setClicks] = useState(0);
+    const [clicks, setClicks] = useState(() => (clicks !== undefined ? clicks : 0));
+
+    // Aktuální velikost kamery
+    const [transition, setTransition] = useState(piece.transition || {id: {}, transitionID: 0, clicks: 0});
 
     /** Tah je detekován **/
     const onMouseDown = useCallback((e, direction) => {
@@ -123,46 +126,6 @@ const TimelinePieces = ({
 
     const checkCancel = piece.isSubmitted && !cancelClipBtn;
 
-    useEffect(() => {
-
-        // ID prvku
-        const pieceID = piecesArray.findIndex(p => p.id === piece.id);
-
-        // Nejbližší pravý prvek
-        const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
-
-        if (piece.isSubmitted && !isResizing) {
-
-            setCancelBtn(false);
-
-            const timelineWidthPX = timelineWidth.current.offsetWidth;
-
-            const durationWidth = (timelineWidthPX / 60) * piece.duration;
-
-            if (rightSidePiece !== null && (piece.left + durationWidth) < piecesArray[pieceID + 1].left) {
-
-                console.log("V PORADKU");
-
-                // Nastavení délky částice z výběru časového úseku
-                setWidth(durationWidth);
-
-            } else if (rightSidePiece !== null && (piece.left + durationWidth) > piecesArray[pieceID + 1].left){
-
-                const maxWidth = piecesArray[pieceID + 1].left - (piece.left);
-
-                console.log(maxWidth);
-
-                setWidth(maxWidth);
-            }
-
-            handlePieceUpdate(
-                piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
-                piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
-            );
-        }
-
-    }, [piece.isSubmitted, width, left]);
-
     /** Funkce spravující kliknutí na částici v Timeline **/
     const handleClick = (type) => {
 
@@ -172,9 +135,23 @@ const TimelinePieces = ({
         //
         // console.log("CAMERA SIZE " + piece.cameraSize, piece.width, piece.left)
 
+        console.log("TRANSITION", transition, piece.transition);
+
         console.log("ID :D " + piece.id, activeIndex);
 
-        if (piece.id !== activeIndex || activeIndex === null) {
+        // Ukládání počtu kliknutí na částici
+        if ((piece.id !== activeIndex || activeIndex === null) && clicks <= 2) {
+
+            console.log()
+
+            setTransition(prevState => ({
+                ...prevState,
+                id: {
+                    ...prevState.id,
+                    [clicks]: piece.id,
+                },
+                transitionID: 1
+            }));
 
             setClicks(prevState => prevState + 1);
         }
@@ -185,7 +162,7 @@ const TimelinePieces = ({
 
             handlePieceUpdate(
                 piece.id, piece.src, piece.width, piece.left, piece.isSubmitted, piece.arrow,
-                piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
+                piece.duration, 0, piece.arrowDirection, transition, piece.cameraSize
             );
 
         } else if (type === "cancel") {
@@ -215,9 +192,60 @@ const TimelinePieces = ({
 
         setIsResizing(null);
 
-    }, [isResizing, width, left, onPieceUpdate, piece.id, piece.isSubmitted, piece.arrow, piece.duration, piece.arrowDirection, piece.transition, piece.cameraSize]);
+    }, [isResizing, width, left, transition, onPieceUpdate, piece.id, piece.isSubmitted, piece.arrow, piece.duration, piece.arrowDirection, piece.transition, piece.cameraSize]);
 
     useEffect(() => {
+
+        if (!piece) return;
+
+        if (pieceIsClicked) {
+
+            // setTransition(prevState => ({
+            //     ...prevState,
+            //     id: {
+            //         ...prevState.id,
+            //         [Object.keys(prevState.id).length]: pieceID,
+            //     },
+            //     transitionID: 1
+            // }));
+        }
+
+        // ID prvku
+        const pieceID = piecesArray.findIndex(p => p.id === piece.id);
+
+        // Nejbližší pravý prvek
+        const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
+
+        if (piece.isSubmitted && !isResizing) {
+
+            setCancelBtn(false);
+
+            const timelineWidthPX = timelineWidth.current.offsetWidth;
+
+            const durationWidth = (timelineWidthPX / 60) * piece.duration;
+
+            if (rightSidePiece !== null && (piece.left + durationWidth) < piecesArray[pieceID + 1].left) {
+
+                console.log("V PORADKU");
+
+                // Nastavení délky částice z výběru časového úseku
+                setWidth(durationWidth);
+
+            } else if (rightSidePiece !== null && (piece.left + durationWidth) > piecesArray[pieceID + 1].left) {
+
+                const maxWidth = piecesArray[pieceID + 1].left - (piece.left);
+
+                console.log(maxWidth);
+
+                setWidth(maxWidth);
+            }
+
+            handlePieceUpdate(
+                piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
+                piece.duration, 0, piece.arrowDirection, transition, piece.cameraSize
+            );
+        }
+
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
 
@@ -225,7 +253,8 @@ const TimelinePieces = ({
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         };
-    }, [onMouseMove, onMouseUp]);
+
+    }, [piece.isSubmitted, width, left, transition, onMouseMove, onMouseUp]);
 
     const boxStyles = {
         display: 'flex',

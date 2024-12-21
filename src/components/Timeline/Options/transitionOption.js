@@ -1,4 +1,5 @@
 import {CanvasContent, SubmitBtn} from "../TimelineComponents";
+import {useEffect} from "react";
 
 /** Funkce pro úpravu rozměrů plochy **/
 export const transitionOption = (type, videoRef, canvasSelector, setRatioCanvas, setBtnName, btnName) => {
@@ -60,15 +61,7 @@ export const transitionOption = (type, videoRef, canvasSelector, setRatioCanvas,
 
                 onClick={() => {
 
-                    if (canvasSelector[transitionIndex] === undefined) {
 
-                        console.log("NN", canvasSelector[transitionIndex]);
-                        setBtnName("Vyberte prosím jeden z přechodů");
-
-                    } else {
-
-                        setBtnName("Zvolte 2 snímky na časové ose");
-                    }
                 }}
             >
                 VYTVOŘIT

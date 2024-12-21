@@ -547,12 +547,18 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     /** Průběžné přidávání času **/
     useEffect(() => {
 
-        // const storedColors = JSON.parse(localStorage.getItem('circleColors'));
-        // console.log("STORED COLORS", storedColors);
+        const transitionIndex = 4;
 
-        // Object.keys(selectedCounts).forEach(key => {
-        //     console.log(`SELECTED ${key}: ${selectedCounts[key]}`);
-        // });
+        // Nastavení nápovědy pro uživatele dle aktivity
+        if (canvasSelector[transitionIndex] === undefined) {
+
+            console.log("NN", canvasSelector[transitionIndex]);
+            setBtnName("Vyberte prosím jeden z přechodů");
+
+        } else {
+
+            setBtnName("Zvolte 2 snímky na časové ose");
+        }
 
         // Pokud výběr kamery poměru je hotový
         if (ratioSelection.length === 2 && checkLoop) {
@@ -673,7 +679,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             }
         };
 
-    }, [videoRef.current, downloadBtn, isPlaying, isDragging, videoLength, currentTime, ratioSelection, activeRatio, cameraSize]);
+    }, [videoRef.current, downloadBtn, isPlaying, isDragging, videoLength, currentTime, ratioSelection, activeRatio, cameraSize, canvasSelector[4]]);
 
     /** Zastavení času **/
     const handlePause = () => setIsPlaying(false);

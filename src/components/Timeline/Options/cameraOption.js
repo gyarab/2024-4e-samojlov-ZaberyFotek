@@ -1,6 +1,5 @@
 import {CanvasContent, SubmitBtn} from "../TimelineComponents";
 import {CiImageOn} from "react-icons/ci";
-import {useState} from "react";
 
 /** Funkce pro výběr optimální rozměrů kamery dle uživatele **/
 export const cameraOption = (
