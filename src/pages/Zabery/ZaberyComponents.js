@@ -224,7 +224,7 @@ export const ArrowBtn = styled.button`
     }
 `;
 
-/** Citace, tento kód byl z většiny převzán z níže uvedeného zdroje:
+/** Citace, tento kód byl z části převzán z níže uvedeného zdroje:
  *
  * https://blog.logrocket.com/creating-custom-css-range-slider-javascript-upgrades/
  *

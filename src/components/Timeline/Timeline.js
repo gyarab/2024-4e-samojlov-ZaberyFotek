@@ -5,7 +5,7 @@ import {
     CanvasContent,
     ClipContainer,
     ClipTool,
-    DownloadBtn, SubmitBtn,
+    DownloadBtn, Loader, SubmitBtn,
     TimelineContainer,
     VideoPreview,
     VideoTools
@@ -94,12 +94,15 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     /** Proměnné pro sekci - PŘECHODY **/
 
-    // Proměnná pro název tlačítka
+        // Proměnná pro název tlačítka
     const [btnName, setBtnName] = useState("Vyberte prosím jeden z přechodů");
+
+    // Aktuální velikost kamery
+    const [transition, setTransition] = useState({idPieces: {}, transitionID: 0});
 
     /** Proměnné pro sekci - KAMERA **/
 
-    // Aktuální směr v rotaci
+        // Aktuální směr v rotaci
     const [currentDirection, setCurrentDirection] = useState("right");
 
     // Výběr poměru v sekci nástroje kamery
@@ -254,6 +257,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     currentPiece.duration,
                     2,
                     currentPiece.arrowDirection,
+                    transition,
                     cameraSize
                 );
 
@@ -439,17 +443,31 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     handlePieceClick(true);
 
+                    console.log("TRANSITION", currentPiece?.transition?.idPieces)
+
+                    // *************************************************************
+
+                    let transitionRes;
                     let cameraRes;
 
                     if (currentPiece?.id === activeIndex) {
 
+                        transitionRes = transition.transitionID;
                         cameraRes = cameraSize.currentIndex;
 
                     } else {
-
+                        transitionRes = currentPiece?.transition?.transitionID;
                         cameraRes = currentPiece?.cameraSize?.currentIndex;
 
                         console.log("CAMERA RES", cameraRes, "WIDTH", currentPiece?.cameraSize?.width)
+
+                        if (transition.transitionID !== transitionRes) {
+
+                            setTransition(prev => ({
+                                ...prev,
+                                transitionID: transitionRes,
+                            }));
+                        }
 
                         if (cameraSize.currentIndex !== cameraRes) {
 
@@ -501,6 +519,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     setActiveIndex(currentPiece.id);
 
+                    console.log("AA", transitionRes)
+
+                    setCanvasSelector(prev => {
+                        const updatedArray = [...prev];
+                        updatedArray[4] = transitionRes; // currentPiece?.cameraSize?.currentIndex
+                        return updatedArray;
+                    });
+
                     setCanvasSelector(prev => {
                         const updatedArray = [...prev];
                         updatedArray[5] = cameraRes; // currentPiece?.cameraSize?.currentIndex
@@ -519,20 +545,20 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     //setActiveIndex(null);
 
-                    // handlePieceUpdate(
-                    //     currentPiece.id, currentPiece.src, currentPiece.width, currentPiece.left, currentPiece.isSubmitted, currentPiece.arrow,
-                    //     currentPiece.duration, currentPiece.frameRate, currentPiece.scanSpeed, 0, currentPiece.arrowDirection, null
-                    // );
+                    setBtnName("");
 
                     // Nastavení výběru na null
-                    if (canvasSelector[5] !== null) {
+                    setCanvasSelector(prev => {
+                        const updatedArray = [...prev];
+                        updatedArray[4] = null;
+                        return updatedArray;
+                    });
 
-                        setCanvasSelector(prev => {
-                            const updatedArray = [...prev];
-                            updatedArray[5] = null;
-                            return updatedArray;
-                        });
-                    }
+                    setCanvasSelector(prev => {
+                        const updatedArray = [...prev];
+                        updatedArray[5] = null;
+                        return updatedArray;
+                    });
 
                     break;
                 }
@@ -543,22 +569,48 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         return createClip;
     };
 
-
-    /** Průběžné přidávání času **/
+    /** Výběr indexů částic při možnosti sekce - PŘECHODY  **/
     useEffect(() => {
 
-        const transitionIndex = 4;
+        // if (btnName === "Zvolte 2 snímky na časové ose") {
+        //
+        //     setBarPosition(0);
+        //     setCurrentTime(0);
+        // }
 
-        // Nastavení nápovědy pro uživatele dle aktivity
-        if (canvasSelector[transitionIndex] === undefined) {
+        if (pieceIsClicked && btnName === "Zvolte 2 snímky na časové ose") {
 
-            console.log("NN", canvasSelector[transitionIndex]);
-            setBtnName("Vyberte prosím jeden z přechodů");
+            setTransition(prevState => {
 
-        } else {
+                const updatedId = {
+                    ...prevState.idPieces,
+                    [Object.keys(prevState.idPieces).length]: activeIndex,
+                };
 
-            setBtnName("Zvolte 2 snímky na časové ose");
+                if (Object.keys(updatedId).length === 2) {
+                    console.log("OFKK", updatedId);
+
+                    setBtnName("HOTOVO");
+
+                    // return {
+                    //     ...prevState,
+                    //     idPieces: {},
+                    //     transitionID: 0,
+                    // };
+                }
+
+                return {
+                    ...prevState,
+                    idPieces: updatedId,
+                    transitionID: transition?.transitionID,
+                };
+            });
         }
+
+    }, [pieceIsClicked, activeIndex, btnName]);
+
+    /** Průběžné přidávání času a generování obsahu plochy včetně nástrojů pro úpravu klipu **/
+    useEffect(() => {
 
         // Pokud výběr kamery poměru je hotový
         if (ratioSelection.length === 2 && checkLoop) {
@@ -679,7 +731,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             }
         };
 
-    }, [videoRef.current, downloadBtn, isPlaying, isDragging, videoLength, currentTime, ratioSelection, activeRatio, cameraSize, canvasSelector[4]]);
+    }, [videoRef.current, downloadBtn, isPlaying, isDragging, videoLength, currentTime, ratioSelection, activeRatio, cameraSize, transition]);
 
     /** Zastavení času **/
     const handlePause = () => setIsPlaying(false);
@@ -975,7 +1027,7 @@ if (arrowPosition.y === "positive") {
     }
 
     /** Nastavení aktuálního indexu částice **/
-    const handlePieceUpdate = (id, src, width, left, isSubmitted, arrow, duration, special, arrowDirection, cameraSizeObject) => {
+    const handlePieceUpdate = (id, src, width, left, isSubmitted, arrow, duration, special, arrowDirection, transition, cameraSizeObject) => {
 
         // Obsluha částice s určeným rozlišením kamery
         handlePieces(
@@ -988,10 +1040,9 @@ if (arrowPosition.y === "positive") {
             duration,
             special,
             arrowDirection,
+            transition,
             cameraSizeObject
         );
-
-
     };
 
     const [isFlexStart, setIsFlexStart] = useState(false);
@@ -1101,6 +1152,7 @@ if (arrowPosition.y === "positive") {
 
             console.log("PIECE " + piece?.cameraSize?.currentIndex + " ")
 
+            // SEKCE - VELIKOST PLÁTNA
             if (selectedOption === 1 || selectedOption === undefined) {
                 //setSelector(index, 'canvasSelector', true, 1);
 
@@ -1111,10 +1163,14 @@ if (arrowPosition.y === "positive") {
                     // localStorage.setItem('activeRatio', item.ratio);
                 }
 
-            } else if (selectedOption === 4  || selectedOption === undefined) {
+                // SEKCE - PŘECHODY
+            } else if (selectedOption === 4 || selectedOption === undefined) {
 
                 console.log("PRECHOD ", index);
 
+                //setTransition({idPieces: piece?.transition, transitionID: index});
+
+                // SEKCE - KAMERA
             } else if (selectedOption === 5 || selectedOption === undefined) {
                 //setSelector(index, 'cameraSelector', true, 5);
 
@@ -1391,6 +1447,7 @@ if (arrowPosition.y === "positive") {
                                 activeIndex={activeIndex}
                                 pieceIsClicked={pieceIsClicked}
                                 timelineWidth={timelineRef}
+                                btnName={btnName}
                             />
                         ))}
 

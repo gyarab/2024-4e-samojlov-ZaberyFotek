@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, {keyframes} from "styled-components";
 
 export const ClipContainer = styled.div`
     display: flex;
@@ -118,6 +118,9 @@ export const DownloadBtn = styled.button`
 `;
 
 export const SubmitBtn = styled.button`
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: white;
     gap: 5px;
     background: #ce2323;
@@ -130,4 +133,28 @@ export const SubmitBtn = styled.button`
     &:hover {
         opacity: 0.8;
     }
+`;
+
+/** Citace, tento kód byl z části převzán z níže uvedeného zdroje:
+ *
+ * https://css-loaders.com/dots/
+ *
+ * **/
+export const l14Animation = keyframes`
+    25%  {background-position:0    50%,50% 0,50% 100%,100% 0,100% 100%}
+    50%  {background-position:100% 50%,0   0,0   100%,50%  0,50%  100%}
+    75%,
+    100% {background-position:100% 50%,0 calc(50% - var(--size-loader)/16),0 calc(50% + var(--size-loader)/16),50% calc(50% - var(--size-loader)/16),50% calc(50% + var(--size-loader)/16)}
+`;
+
+export const Loader = styled.div`
+    width: var(--size-loader);
+    aspect-ratio: 2;
+    background: radial-gradient(farthest-side, var(--color-loader)) 0 50%/25% 50%,
+    radial-gradient(farthest-side at bottom, var(--color-loader)) 50% calc(50% - var(--size-loader) / 16)/25% 25%,
+    radial-gradient(farthest-side at top, var(--color-loader)) 50% calc(50% + var(--size-loader) / 16)/25% 25%,
+    radial-gradient(farthest-side at bottom, var(--color-loader)) 100% calc(50% - var(--size-loader) / 16)/25% 25%,
+    radial-gradient(farthest-side at top, var(--color-loader)) 100% calc(50% + var(--size-loader) / 16)/25% 25%;
+    background-repeat: no-repeat;
+    animation: ${l14Animation} 1.5s infinite;
 `;

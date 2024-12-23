@@ -731,7 +731,8 @@ function Zabery(props) {
                     item.id === id
                         ? {
                             ...item,
-                            cameraSize: cameraSize
+                            transition: transition,
+                            cameraSize: cameraSize,
                         } : item
                 );
             }

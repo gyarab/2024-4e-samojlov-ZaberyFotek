@@ -27,6 +27,9 @@
     --color-blue-7: #3e52e3;
     --color-blue-8: #2137de;
     --color-blue-9: #001fff;
+
+    --size-loader: 50px;
+    --color-loader: #fff 90%, #fff0;
 }
 
 /** Skrytí šipky u vstupu "number" **/

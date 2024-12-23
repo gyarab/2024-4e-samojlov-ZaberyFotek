@@ -1,4 +1,4 @@
-import {CanvasContent, SubmitBtn} from "../TimelineComponents";
+import {CanvasContent, Loader, SubmitBtn} from "../TimelineComponents";
 import {useEffect} from "react";
 
 /** Funkce pro úpravu rozměrů plochy **/
@@ -8,20 +8,22 @@ export const transitionOption = (type, videoRef, canvasSelector, setRatioCanvas,
 
     const canvas = videoRef.current;
 
+    const divStyles = {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        position: 'relative',
+        width: '100%',
+        gap: '10px'
+    }
+
     return (
         <div>
 
             <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    gap: "10px",
-                    position: 'relative',
-                    width: '100%'
-                }}
+                style={divStyles}
             >
 
                 {type.map((item, index) => {
@@ -49,25 +51,38 @@ export const transitionOption = (type, videoRef, canvasSelector, setRatioCanvas,
                 }}
             />
 
+            <div style={divStyles}>
 
-            <SubmitBtn
+                <SubmitBtn
 
-                style={{
-                    width: '75%',
-                    background: '#4000c7',
-                    boxShadow: '0 2px 10px #5960ff',
-                    letterSpacing: '1px'
-                }}
+                    style={{
+                        width: '75%',
+                        background: '#4000c7',
+                        boxShadow: '0 2px 10px #5960ff',
+                        letterSpacing: '1px'
+                    }}
 
-                onClick={() => {
+                    onClick={() => {
 
+                        // Nastavení nápovědy pro uživatele dle aktivity
+                        if (canvasSelector[transitionIndex] === undefined) {
 
-                }}
-            >
-                VYTVOŘIT
-            </SubmitBtn>
+                            console.log("NN", canvasSelector[transitionIndex]);
+                            setBtnName("Vyberte prosím jeden z přechodů");
 
-            <div style={{marginTop: "15px", fontSize: "11px", color: "#ffe564"}}>{btnName}</div>
+                        } else {
+
+                            setBtnName("Zvolte 2 snímky na časové ose");
+                        }
+                    }}
+                >
+                    {btnName === "Zvolte 2 snímky na časové ose" ? <Loader/> : "VYTVOŘIT"}
+
+                </SubmitBtn>
+
+                <div style={{marginTop: "5px", fontSize: "11px", color: "#ffe564"}}>{btnName}</div>
+
+            </div>
 
         </div>);
 };
