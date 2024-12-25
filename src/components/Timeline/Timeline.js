@@ -24,6 +24,7 @@ import {FaCameraRetro, FaDownload} from "react-icons/fa";
 import {resizeCanvasOption} from "./Options/resizeCanvasOption";
 import {cameraOption} from "./Options/cameraOption";
 import {transitionOption} from "./Options/transitionOption";
+import {ToastContainer, toast, Bounce} from 'react-toastify';
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -101,11 +102,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [btnName, setBtnName] = useState("Vyberte prosím jeden z přechodů");
 
     // Aktuální velikost kamery
-    const [transition, setTransition] = useState({idPieces: {}, transitionID: 0});
+    const [transition, setTransition] = useState({idPieces: {}, transitionID: 0, width: 0, left: 0, coordinateRes: 0});
+
+    // Kontrola názvu tlačítka
+    const btnCondition = btnName !== "Vyberte prosím jeden z přechodů";
 
     /** Proměnné pro sekci - KAMERA **/
 
-        // Aktuální směr v rotaci
+    // Aktuální směr v rotaci
     const [currentDirection, setCurrentDirection] = useState("right");
 
     // Výběr poměru v sekci nástroje kamery
@@ -442,14 +446,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         canvas.height
                     );
 
-                    if (btnName !== "Zvolte 2 snímky na časové ose" && btnName !== "HOTOVO") {
+                    if (!btnCondition) {
 
                         handlePieceClick(true);
                     }
 
                     setPieceClicked(true);
 
-                    console.log("TRANSITION", currentPiece?.transition?.idPieces)
+                    console.log("LEFT", currentPiece.left)
 
                     // *************************************************************
 
@@ -458,22 +462,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     if (currentPiece?.id === activeIndex) {
 
-                        //transitionRes = transition.transitionID;
+                        transitionRes = transition.transitionID;
                         cameraRes = cameraSize.currentIndex;
 
                     } else {
-                        //transitionRes = currentPiece?.transition?.transitionID;
+                        transitionRes = currentPiece?.transition?.transitionID;
                         cameraRes = currentPiece?.cameraSize?.currentIndex;
 
                         console.log("CAMERA RES", cameraRes, "WIDTH", currentPiece?.cameraSize?.width)
 
-                        // if (transition.transitionID !== transitionRes) {
-                        //
-                        //     setTransition(prev => ({
-                        //         ...prev,
-                        //         transitionID: transitionRes,
-                        //     }));
-                        // }
+                        if (transition.transitionID !== transitionRes) {
+
+                            setTransition(prev => ({
+                                ...prev,
+                                transitionID: transitionRes,
+                            }));
+                        }
 
                         if (cameraSize.currentIndex !== cameraRes) {
 
@@ -527,11 +531,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     //console.log("AA", transitionRes)
 
-                    // setCanvasSelector(prev => {
-                    //     const updatedArray = [...prev];
-                    //     updatedArray[4] = transitionRes; // currentPiece?.cameraSize?.currentIndex
-                    //     return updatedArray;
-                    // });
+                    setCanvasSelector(prev => {
+                        const updatedArray = [...prev];
+                        updatedArray[4] = transitionRes; // currentPiece?.cameraSize?.currentIndex
+                        return updatedArray;
+                    });
 
                     setCanvasSelector(prev => {
                         const updatedArray = [...prev];
@@ -552,11 +556,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     //setActiveIndex(null);
 
                     // Nastavení výběru na null
-                    // setCanvasSelector(prev => {
-                    //     const updatedArray = [...prev];
-                    //     updatedArray[4] = null;
-                    //     return updatedArray;
-                    // });
+                    setCanvasSelector(prev => {
+                        const updatedArray = [...prev];
+                        updatedArray[4] = null;
+                        return updatedArray;
+                    });
 
                     setCanvasSelector(prev => {
                         const updatedArray = [...prev];
@@ -575,22 +579,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     /** Výběr indexů částic při možnosti sekce - PŘECHODY  **/
     useEffect(() => {
+         //console.log("BTN", btnName, pieceIsClicked, Object.keys(transition?.idPieces).length);
 
-        console.log("BTN", btnName, pieceIsClicked)
+        if (!selectedPieces || selectedPieces.length === 0) {
+            console.error('selectedPieces is empty or null');
+            return;
+        }
 
         if (!pieceIsClicked && Object.keys(transition?.idPieces).length > 0) {
-
             setBtnName("Vyberte prosím jeden z přechodů");
         }
 
-        if (pieceIsClicked && btnName !== "Vyberte prosím jeden z přechodů") {
-
+        if (pieceIsClicked && btnCondition) {
             setTransition(prevState => {
-
                 const isDuplicate = Object.values(prevState.idPieces).includes(activeIndex);
 
                 if (isDuplicate) {
-                    console.log("Duplicate ID detected, skipping addition:", activeIndex);
                     return prevState;
                 }
 
@@ -601,34 +605,66 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 console.log("LELEL", Object.keys(updatedId).length);
 
-                if (Object.keys(updatedId).length === 2) {
+                let coordinateRes = null;
 
+                if (Object.keys(updatedId).length === 2) {
                     console.log("UPDATED", updatedId);
 
-                    setBtnName("HOTOVO");
+                    setTimeout(() => {
+                        setBtnName("Vyberte prosím jeden z přechodů");
+                    }, 750);
 
-                    const piece1 = selectedPieces[0]?.width;
+                    let piece1 = selectedPieces[updatedId[0]];
+                    let piece2 = selectedPieces[updatedId[1]];
 
-                    console.log("WIDHH", transition?.idPieces[0], transition?.idPieces[1], piece1);
+                    if (!piece1 || !piece2) {
+
+                        return prevState;
+                    }
+
+                    if (piece1?.left > piece2?.left) {
+
+                        const temp = piece1;
+                        piece1 = piece2;
+                        piece2 = temp;
+
+                        // if (!toast.isActive("unique-toast-0")) {
+                        //     toast.error("Přechody: Nesprávné pořadí ve výběru", { toastId: "unique-toast-0" });
+                        // }
+                    }
+
+                    // Pokud částice nejsou spojeny
+                    if ((piece1?.width + piece1?.left) !== piece2?.left) {
+                        // console.log("RESS", piece1?.width + piece1?.left, piece2?.left, selectedPieces[2],
+                        //     selectedPieces[updatedId[1]]);
+
+                        if (!toast.isActive("unique-toast-0")) {
+                            toast.error("Přechody: Částice nejsou spojeny", { toastId: "unique-toast-0" });
+                        }
+
+                    } else {
+
+                        coordinateRes = piece2?.left;
+                    }
 
                     // setTimeout(() => {
-                    //     return {
+                    //     setTransition(() => ({
                     //         ...prevState,
                     //         idPieces: {},
                     //         transitionID: 0,
-                    //     };
-                    // }, 2000);
+                    //     }));
+                    // }, 750);
                 }
 
                 return {
                     ...prevState,
                     idPieces: updatedId,
                     transitionID: transition?.transitionID,
+                    coordinateRes: coordinateRes
                 };
             });
         }
-
-    }, [pieceIsClicked, activeIndex, btnName]);
+    },  [pieceIsClicked, activeIndex, btnName, selectedPieces]);
 
     /** Průběžné přidávání času a generování obsahu plochy včetně nástrojů pro úpravu klipu **/
     useEffect(() => {
@@ -1299,7 +1335,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                     btnName,
                                     setCurrentTime,
                                     setBarPosition,
-                                    setTransition)}
+                                    setTransition,
+                                    setPieceClicked,
+                                    handlePieceClick)}
 
                             {clipTools[activeTool].content !== null && activeTool === 5 &&
                                 cameraOption(
@@ -1400,19 +1438,19 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 </div>
 
-                <div style={{display: "flex", alignItems: "center", justifyContent: "flex-start", padding: "20px"}}>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '20px'}}>
 
                     <div
                         style={{
                             width: `${barWidth}px`,
-                            height: "100px",
-                            backgroundColor: "lightgray",
-                            position: "relative",
-                            cursor: "pointer",
-                            borderRadius: "5px",
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "flex-end"
+                            height: '100px',
+                            backgroundColor: 'lightgray',
+                            position: 'relative',
+                            cursor: 'pointer',
+                            borderRadius: '5px',
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'flex-end'
                         }}
                         onClick={handleClick}
                         onMouseMove={handleMouseMove}
@@ -1476,7 +1514,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                 left: `${barPosition}%`,
                                 width: '2px',
                                 height: '100%',
-                                backgroundColor: btnName.trim() !== "Vyberte prosím jeden z přechodů" ? 'transparent' : 'blue',
+                                backgroundColor: btnCondition ? 'transparent' : 'blue',
                                 transform: 'translateX(-50%)',
                                 cursor: 'pointer',
                                 borderRadius: '2px'
@@ -1487,6 +1525,20 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     </div>
                 </div>
             </TimelineContainer>
+
+            <ToastContainer
+                position="bottom-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                transition={Bounce}
+            />
         </div>
     )
 }

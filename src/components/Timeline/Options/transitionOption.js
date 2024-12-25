@@ -1,5 +1,6 @@
 import {CanvasContent, Loader, SubmitBtn} from "../TimelineComponents";
 import {useEffect} from "react";
+import {MdCancel} from "react-icons/md";
 
 /** Funkce pro úpravu rozměrů plochy **/
 export const transitionOption = (type,
@@ -10,11 +11,33 @@ export const transitionOption = (type,
                                  btnName,
                                  setCurrentTime,
                                  setBarPosition,
-                                 setTransition) => {
+                                 setTransition,
+                                 setPieceClicked,
+                                 handlePieceClick,
+) => {
 
     const transitionIndex = 4;
 
     const canvas = videoRef.current;
+
+    // Kontrola názvu tlačítka
+    const btnCondition = btnName === "Zvolte 2 snímky na časové ose";
+
+    // Funkce pro resetování přechodu u vybraných částic uživatelem
+    const transitionReset = () => {
+
+        setCurrentTime(0);
+        setBarPosition(0);
+        setTransition(prev => ({
+            ...prev,
+            idPieces: {},
+            transitionID: prev.transitionID,
+        }));
+
+        setPieceClicked(false);
+        handlePieceClick(false)
+
+    };
 
     const divStyles = {
         display: 'flex',
@@ -59,7 +82,7 @@ export const transitionOption = (type,
                 }}
             />
 
-            <div style={divStyles}>
+            <div style={{...divStyles, flexDirection: 'row'}}>
 
                 <SubmitBtn
 
@@ -72,8 +95,10 @@ export const transitionOption = (type,
 
                     onClick={() => {
 
+                        console.log(canvasSelector[transitionIndex]);
+
                         // Nastavení nápovědy pro uživatele dle aktivity
-                        if (canvasSelector[transitionIndex] === undefined) {
+                        if (canvasSelector[transitionIndex] === null) {
 
                             console.log("NN", canvasSelector[transitionIndex]);
                             setBtnName("Vyberte prosím jeden z přechodů");
@@ -81,23 +106,29 @@ export const transitionOption = (type,
                         } else {
 
                             setBtnName("Zvolte 2 snímky na časové ose");
-                            setCurrentTime(0);
-                            setBarPosition(0);
-                            setTransition(prev => ({
-                                ...prev,
-                                idPieces: {},
-                                transitionID: prev.transitionID,
-                            }));
+                            transitionReset();
                         }
                     }}
                 >
-                    {btnName === "Zvolte 2 snímky na časové ose" ? <Loader/> : "VYTVOŘIT"}
+                    {btnCondition ? <Loader/> : "VYTVOŘIT"}
 
                 </SubmitBtn>
 
-                <div style={{marginTop: "5px", fontSize: "11px", color: "#ffe564"}}>{btnName}</div>
+                {btnCondition &&
+                    <button
+                        onClick={() => {
+
+                            setBtnName("Vyberte prosím jeden z přechodů");
+                            transitionReset();
+                        }}
+                        style={{background: '#9e1a1f', borderRadius: '50%', padding: '5px'}}>
+                        <MdCancel
+                            style={{color: 'white'}}/>
+                    </button>}
 
             </div>
+
+            <div style={{marginTop: "10px", fontSize: "11px", color: "#ffe564"}}>{btnName}</div>
 
         </div>);
 };

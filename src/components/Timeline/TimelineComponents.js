@@ -55,7 +55,6 @@ export const ClipTool = styled.div`
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.46);
-    cursor: pointer;
     transition: all 1s ease-in-out;
     flex-direction: column;
 
@@ -90,6 +89,7 @@ export const CanvasContent = styled.div`
     transition: background-color 0.3s ease-in-out;
     border-radius: 25px;
     padding: 2px 10px 2px 10px;
+    cursor: pointer;
     background: ${({ isClicked, hasError }) =>
             hasError ? '#ff2e2e' : (isClicked ? '#00cc66' : 'var(--color-shadow-7)')
     };

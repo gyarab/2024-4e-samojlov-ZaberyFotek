@@ -1,5 +1,6 @@
 import React, {useState, useRef, useCallback, useEffect, useMemo} from 'react';
 import {MdCancel} from "react-icons/md";
+import {logDOM} from "@testing-library/react";
 
 /** Funkce pro ovládání jednotlivých prvků časové osy **/
 const TimelinePieces = ({
@@ -25,10 +26,6 @@ const TimelinePieces = ({
 
     const containerRef = useRef(null);
 
-    const handleRight = useRef(null);
-
-    const handleLeft = useRef(null);
-
     // Šířka prvku
     const [width, setWidth] = useState(piece.width || 100);
 
@@ -36,7 +33,10 @@ const TimelinePieces = ({
     const [left, setLeft] = useState(piece.left || 0);
 
     // Kontrola názvu tlačítka
-    const btnCondition = btnName.trim() !== "Vyberte prosím jeden z přechodů";
+    const btnCondition = btnName !== "Vyberte prosím jeden z přechodů";
+
+    // Kontrola délky počtu zvolených částic u přechodů
+    const lengthCondition = Object.keys(transition?.idPieces).length === 2;
 
     /** Tah je detekován **/
     const onMouseDown = useCallback((e, direction) => {
@@ -121,12 +121,6 @@ const TimelinePieces = ({
             // Nastavení aktuální šířky a levé odchylky prvku
             containerRef.current.style.width = `${newWidth}px`;
             containerRef.current.style.left = `${newLeft}px`;
-
-            if (Object.keys(transition?.idPieces).length === 2) {
-
-                containerRef.current.style.border = 'none';
-                handleRight.current.style.backgroundColor = 'var(--color-blue-4)'
-            }
         }
 
     }, [isResizing, piecesArray, piece.id]);
@@ -141,8 +135,6 @@ const TimelinePieces = ({
         pieceIsClicked = true;
 
         // console.log("ID", piece.id, piece?.transition?.idPieces);
-
-        console.log("BTNNN", btnName)
 
         if (type === "piece" && cancelClipBtn) {
 
@@ -183,6 +175,8 @@ const TimelinePieces = ({
     useEffect(() => {
 
         if (!piece) return;
+
+        console.log("BTNNN", transition?.coordinateRes, width, left)
 
         // ID prvku
         const pieceID = piecesArray.findIndex(p => p.id === piece.id);
@@ -233,12 +227,11 @@ const TimelinePieces = ({
     // Stanovení stylů pro částici
     const boxStyles = {
 
-        display: 'flex',
         width: `${width}px`,
         height: '50px',
         border: btnCondition
             ? (transition.idPieces &&
-            Object.values(transition.idPieces).some(value => value === piece.id) && pieceIsClicked && btnCondition
+            Object.values(transition.idPieces).some(value => value === piece.id) && pieceIsClicked
                 ? '2px solid #9e1a1f'
                 : 'none')
             : (activeIndex === piece.id && pieceIsClicked
@@ -283,14 +276,12 @@ const TimelinePieces = ({
             onClick={(e) => handleClick("piece", e)}
         >
             <div
-                ref={handleLeft}
                 style={leftHandleStyles}
                 onMouseDown={(e) => onMouseDown(e, 'left')}
             >|
             </div>
 
             <div
-                ref={handleRight}
                 style={rightHandleStyles}
                 onMouseDown={(e) => onMouseDown(e, 'right')}
             >|
@@ -320,6 +311,37 @@ const TimelinePieces = ({
 
                 </div>
             )}
+
+            {transition.coordinateRes && (transition.coordinateRes === left)
+                && (
+
+                    <div
+                        title={'Přechod'}
+                        style={{
+                            position: 'absolute',
+                            bottom: '0',
+                            left: '0',
+                            transform: 'translateY(30px) translateX(-2.5px)',
+                            cursor: 'pointer',
+                            background: 'repeating-linear-gradient(to bottom, #ff5b61, #ff5b61 5px, transparent 5px, transparent 10px)',
+                            width: '5px',
+                            height: '30px'
+                        }}
+                    >
+
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '0px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '50%',
+                            backgroundColor: '#f00'
+                        }}></div>
+
+                    </div>
+                )}
 
         </div>
     );
