@@ -3,24 +3,24 @@ import {CiImageOn} from "react-icons/ci";
 
 /** Funkce pro výběr optimální rozměrů kamery dle uživatele **/
 export const cameraOption = (
-                      type,
-                      videoRef,
-                      canvasSelector,
-                      setRatioCanvas,
-                      setSelectedCounts,
-                      selectedCounts,
-                      setRatioSelection,
-                      ratioSelection,
-                      setCountClicks,
-                      countClicks,
-                      setWidthDecimal,
-                      widthDecimal,
-                      setHeightDecimal,
-                      heightDecimal,
-                      setErrorMessage,
-                      errorMessage,
-                      cameraSize,
-                      pieceIsClicked) => {
+    type,
+    videoRef,
+    canvasSelector,
+    setRatioCanvas,
+    setSelectedCounts,
+    selectedCounts,
+    setRatioSelection,
+    ratioSelection,
+    setCountClicks,
+    countClicks,
+    setWidthDecimal,
+    widthDecimal,
+    setHeightDecimal,
+    heightDecimal,
+    setErrorMessage,
+    errorMessage,
+    cameraSize,
+    pieceIsClicked) => {
 
     // Maximální délka vstupu
     const maxLength = 3;
@@ -81,18 +81,17 @@ export const cameraOption = (
                     <div key={index} style={{
                         display: 'flex',
                         justifyContent: 'center',
+                        alignItems: 'center',
                         width: '100%',
                         gap: '25px',
-                        marginTop: "10px"
+                        marginTop: '10px'
                     }}>
 
                         <CanvasContent
-                            style={{width: "100%"}}
+                            style={{width: '100%'}}
                             key={index}
                             isClicked={index === canvasSelector[cameraIndex] && (ratioSelection.length === 0 || false)}
                             onClick={() => {
-
-                                console.log("RATIO SSS " + ratioSelection.length)
 
                                 setSelectedCounts({});
                                 setRatioSelection([]);
@@ -245,7 +244,7 @@ export const cameraOption = (
                                                     backgroundColor: pieceIsClicked &&
                                                     (index === canvasSelector[cameraIndex] || checkIndices[1] === index)
                                                         ? color
-                                                        : pieceIsClicked && (checkIndices[0] === index && count !== 2 ? stylesWidth.color : "none")
+                                                        : pieceIsClicked && (checkIndices[0] === index && count !== 2 ? stylesWidth.color : 'none')
                                                 }}
                                             />
                                         );
@@ -258,11 +257,11 @@ export const cameraOption = (
 
             </div>
 
-            <div style={{textAlign: 'center', marginTop: "25px", color: "#f7ff63"}}>VLASTNÍ</div>
+            <div style={{textAlign: 'center', marginTop: '25px', color: '#f7ff63'}}>VLASTNÍ</div>
             <hr style={{margin: '10px 0', border: '1px solid #f9ffa6'}}/>
 
             <CanvasContent
-                style={{width: "100%"}}
+                style={{width: '100%'}}
                 key={5}
                 isClicked={5 === canvasSelector[cameraIndex] && (ratioSelection.length === 0 || false)}
 
@@ -288,9 +287,9 @@ export const cameraOption = (
                             width: '100%',
                             padding: '4px',
                             borderRadius: '10px',
-                            textAlign: "center",
-                            background: "transparent",
-                            border: "none"
+                            textAlign: 'center',
+                            background: 'transparent',
+                            border: 'none'
                         }}
                     />
                     <div>px</div>
@@ -306,9 +305,9 @@ export const cameraOption = (
                             width: '100%',
                             padding: '4px',
                             borderRadius: '10px',
-                            textAlign: "center",
-                            background: "transparent",
-                            border: "none"
+                            textAlign: 'center',
+                            background: 'transparent',
+                            border: 'none'
                         }}
                     />
                     <div>px</div>
@@ -316,33 +315,41 @@ export const cameraOption = (
 
             </CanvasContent>
 
-            <div style={{marginTop: "10px", fontSize: "12px", color: "#ffe564"}}>{errorMessage}</div>
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%'
+            }}>
 
-            <SubmitBtn
+                <div style={{marginTop: '10px', fontSize: '12px', color: '#ffe564'}}>{errorMessage}</div>
 
-                style={{marginTop: "5px"}}
+                <SubmitBtn
 
-                onClick={() => {
-                    setSelectedCounts({});
-                    setRatioSelection([]);
-                    setCountClicks(0);
+                    style={{marginTop: '5px'}}
 
-                    setRatioCanvas(videoRef.current, 1, null, cameraIndex);
+                    onClick={() => {
+                        setSelectedCounts({});
+                        setRatioSelection([]);
+                        setCountClicks(0);
 
-                    // // Výchozí možnost výběru
-                    // setTimeout(() => {
-                    //     setCanvasSelector(prev => {
-                    //         const updatedArray = [...prev];
-                    //         updatedArray[5] = 1;
-                    //         return updatedArray;
-                    //     });
-                    // }, 0);
-                    //
-                    // setCameraSize({width: "100 px", height: "100 px", currentIndex: 1});
-                }}
-            >
-                RESET
-            </SubmitBtn>
+                        setRatioCanvas(videoRef.current, 1, null, cameraIndex);
+
+                        // // Výchozí možnost výběru
+                        // setTimeout(() => {
+                        //     setCanvasSelector(prev => {
+                        //         const updatedArray = [...prev];
+                        //         updatedArray[5] = 1;
+                        //         return updatedArray;
+                        //     });
+                        // }, 0);
+                        //
+                        // setCameraSize({width: "100 px", height: "100 px", currentIndex: 1});
+                    }}
+                >
+                    RESET
+                </SubmitBtn>
+            </div>
 
         </div>
     );

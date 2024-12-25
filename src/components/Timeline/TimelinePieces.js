@@ -12,7 +12,8 @@ const TimelinePieces = ({
                             activeIndex,
                             pieceIsClicked,
                             timelineWidth,
-                            btnName
+                            btnName,
+                            transition
                         }) => {
 
     // Změna velikosti prvku
@@ -24,17 +25,18 @@ const TimelinePieces = ({
 
     const containerRef = useRef(null);
 
+    const handleRight = useRef(null);
+
+    const handleLeft = useRef(null);
+
     // Šířka prvku
     const [width, setWidth] = useState(piece.width || 100);
 
     // Levá odchylka prvku
     const [left, setLeft] = useState(piece.left || 0);
 
-    // // Počet stisknutí částice uživatelem
-    // const [clicks, setClicks] = useState(() => (clicks !== undefined ? clicks : 0));
-
-    // // Aktuální velikost kamery
-    // const [transition, setTransition] = useState(piece.transition || {id: {}, transitionID: 0, clicks: 0});
+    // Kontrola názvu tlačítka
+    const btnCondition = btnName.trim() !== "Vyberte prosím jeden z přechodů";
 
     /** Tah je detekován **/
     const onMouseDown = useCallback((e, direction) => {
@@ -119,6 +121,12 @@ const TimelinePieces = ({
             // Nastavení aktuální šířky a levé odchylky prvku
             containerRef.current.style.width = `${newWidth}px`;
             containerRef.current.style.left = `${newLeft}px`;
+
+            if (Object.keys(transition?.idPieces).length === 2) {
+
+                containerRef.current.style.border = 'none';
+                handleRight.current.style.backgroundColor = 'var(--color-blue-4)'
+            }
         }
 
     }, [isResizing, piecesArray, piece.id]);
@@ -131,6 +139,10 @@ const TimelinePieces = ({
     const handleClick = (type) => {
 
         pieceIsClicked = true;
+
+        // console.log("ID", piece.id, piece?.transition?.idPieces);
+
+        console.log("BTNNN", btnName)
 
         if (type === "piece" && cancelClipBtn) {
 
@@ -216,44 +228,36 @@ const TimelinePieces = ({
             document.removeEventListener('mouseup', onMouseUp);
         };
 
-    }, [piece.isSubmitted, width, left, piece.transition, onMouseMove, onMouseUp]);
+    }, [piece.isSubmitted, width, left, onMouseMove, onMouseUp]);
 
     // Stanovení stylů pro částici
-    const boxStyles = useMemo(() => {
+    const boxStyles = {
 
-        console.log("PP", piece?.transition?.idPieces, piece.id, btnName)
-
-        if (piece?.transition?.idPieces) {
-
-            console.log("ZE BY?", Object.values(piece?.transition?.idPieces).some(value => value === piece.id));
-        }
-
-        return {
-            display: 'flex',
-            width: `${width}px`,
-            height: '50px',
-            border: pieceIsClicked &&
-            piece?.transition?.idPieces &&
-            Object.values(piece.transition.idPieces).some(value => value === piece.id)
+        display: 'flex',
+        width: `${width}px`,
+        height: '50px',
+        border: btnCondition
+            ? (transition.idPieces &&
+            Object.values(transition.idPieces).some(value => value === piece.id) && pieceIsClicked && btnCondition
                 ? '2px solid #9e1a1f'
-                : activeIndex === piece.id && pieceIsClicked
-                    ? '2px solid var(--color-blue-8)'
-                    : 'none',
-            position: 'absolute',
-            backgroundImage: `url(${piece.src})`,
-            backgroundSize: 'contain',
-            backgroundRepeat: 'repeat-x',
-            left: `${pieceLeft}px`,
-            justifyContent: 'center'
-        };
-    }, [piece.transition]);
+                : 'none')
+            : (activeIndex === piece.id && pieceIsClicked
+                ? '2px solid var(--color-blue-8)'
+                : 'none'),
+        position: 'absolute',
+        backgroundImage: `url(${piece.src})`,
+        backgroundSize: 'contain',
+        backgroundRepeat: 'repeat-x',
+        left: `${pieceLeft}px`,
+        justifyContent: 'center'
+    };
 
     const handleStyles = {
         position: 'absolute',
         top: 0,
         width: '10px',
         height: '100%',
-        backgroundColor: 'var(--color-blue-4)',
+        backgroundColor: btnCondition ? '#ff5b61' : 'var(--color-blue-4)',
         cursor: 'ew-resize',
         display: 'flex',
         alignItems: 'center',
@@ -279,12 +283,14 @@ const TimelinePieces = ({
             onClick={(e) => handleClick("piece", e)}
         >
             <div
+                ref={handleLeft}
                 style={leftHandleStyles}
                 onMouseDown={(e) => onMouseDown(e, 'left')}
             >|
             </div>
 
             <div
+                ref={handleRight}
                 style={rightHandleStyles}
                 onMouseDown={(e) => onMouseDown(e, 'right')}
             >|

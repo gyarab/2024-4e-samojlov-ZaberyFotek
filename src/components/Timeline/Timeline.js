@@ -52,6 +52,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     // Akutální pozice časomíry
     const [barPosition, setBarPosition] = useState(0);
 
+    // Odkaz na prvek časomíry
+    const barRef = useRef(null);
+
     // Kontrola, zda částice byla uživatelem stisknuta
     const [pieceIsClicked, setPieceClicked] = useState(false);
 
@@ -64,7 +67,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         // Aktivní poměr plochy
     const [activeRatio, setActiveRatio] = useState(() => {
-            return localStorage.getItem('activeRatio') || '1:1';
+            return '1:1';
         });
 
     // Ukládání výběru uživatele v panelu nástroje
@@ -439,9 +442,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         canvas.height
                     );
 
-                    setPieceClicked(true);
+                    if (btnName !== "Zvolte 2 snímky na časové ose" && btnName !== "HOTOVO") {
 
-                    handlePieceClick(true);
+                        handlePieceClick(true);
+                    }
+
+                    setPieceClicked(true);
 
                     console.log("TRANSITION", currentPiece?.transition?.idPieces)
 
@@ -452,22 +458,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     if (currentPiece?.id === activeIndex) {
 
-                        transitionRes = transition.transitionID;
+                        //transitionRes = transition.transitionID;
                         cameraRes = cameraSize.currentIndex;
 
                     } else {
-                        transitionRes = currentPiece?.transition?.transitionID;
+                        //transitionRes = currentPiece?.transition?.transitionID;
                         cameraRes = currentPiece?.cameraSize?.currentIndex;
 
                         console.log("CAMERA RES", cameraRes, "WIDTH", currentPiece?.cameraSize?.width)
 
-                        if (transition.transitionID !== transitionRes) {
-
-                            setTransition(prev => ({
-                                ...prev,
-                                transitionID: transitionRes,
-                            }));
-                        }
+                        // if (transition.transitionID !== transitionRes) {
+                        //
+                        //     setTransition(prev => ({
+                        //         ...prev,
+                        //         transitionID: transitionRes,
+                        //     }));
+                        // }
 
                         if (cameraSize.currentIndex !== cameraRes) {
 
@@ -519,13 +525,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     setActiveIndex(currentPiece.id);
 
-                    console.log("AA", transitionRes)
+                    //console.log("AA", transitionRes)
 
-                    setCanvasSelector(prev => {
-                        const updatedArray = [...prev];
-                        updatedArray[4] = transitionRes; // currentPiece?.cameraSize?.currentIndex
-                        return updatedArray;
-                    });
+                    // setCanvasSelector(prev => {
+                    //     const updatedArray = [...prev];
+                    //     updatedArray[4] = transitionRes; // currentPiece?.cameraSize?.currentIndex
+                    //     return updatedArray;
+                    // });
 
                     setCanvasSelector(prev => {
                         const updatedArray = [...prev];
@@ -545,14 +551,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     //setActiveIndex(null);
 
-                    setBtnName("");
-
                     // Nastavení výběru na null
-                    setCanvasSelector(prev => {
-                        const updatedArray = [...prev];
-                        updatedArray[4] = null;
-                        return updatedArray;
-                    });
+                    // setCanvasSelector(prev => {
+                    //     const updatedArray = [...prev];
+                    //     updatedArray[4] = null;
+                    //     return updatedArray;
+                    // });
 
                     setCanvasSelector(prev => {
                         const updatedArray = [...prev];
@@ -572,31 +576,48 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     /** Výběr indexů částic při možnosti sekce - PŘECHODY  **/
     useEffect(() => {
 
-        // if (btnName === "Zvolte 2 snímky na časové ose") {
-        //
-        //     setBarPosition(0);
-        //     setCurrentTime(0);
-        // }
+        console.log("BTN", btnName, pieceIsClicked)
 
-        if (pieceIsClicked && btnName === "Zvolte 2 snímky na časové ose") {
+        if (!pieceIsClicked && Object.keys(transition?.idPieces).length > 0) {
+
+            setBtnName("Vyberte prosím jeden z přechodů");
+        }
+
+        if (pieceIsClicked && btnName !== "Vyberte prosím jeden z přechodů") {
 
             setTransition(prevState => {
+
+                const isDuplicate = Object.values(prevState.idPieces).includes(activeIndex);
+
+                if (isDuplicate) {
+                    console.log("Duplicate ID detected, skipping addition:", activeIndex);
+                    return prevState;
+                }
 
                 const updatedId = {
                     ...prevState.idPieces,
                     [Object.keys(prevState.idPieces).length]: activeIndex,
                 };
 
+                console.log("LELEL", Object.keys(updatedId).length);
+
                 if (Object.keys(updatedId).length === 2) {
-                    console.log("OFKK", updatedId);
+
+                    console.log("UPDATED", updatedId);
 
                     setBtnName("HOTOVO");
 
-                    // return {
-                    //     ...prevState,
-                    //     idPieces: {},
-                    //     transitionID: 0,
-                    // };
+                    const piece1 = selectedPieces[0]?.width;
+
+                    console.log("WIDHH", transition?.idPieces[0], transition?.idPieces[1], piece1);
+
+                    // setTimeout(() => {
+                    //     return {
+                    //         ...prevState,
+                    //         idPieces: {},
+                    //         transitionID: 0,
+                    //     };
+                    // }, 2000);
                 }
 
                 return {
@@ -947,48 +968,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         return {positionX, positionY};
     }
 
-    /*
-if (arrowPosition.y === "positive") {
-    const quarterDuration = duration / 4;
-
-    if (startClip < quarterDuration) { // Moving right
-        positionX += newSpeedX;
-        positionY = 0; // Stay at the top edge during right movement
-
-        if (positionX >= cameraWidth) {
-            console.log("Reached right edge, changing direction to down");
-            positionX = cameraWidth; // Snap to the right edge
-        }
-
-    } else if (startClip >= quarterDuration && startClip < 2 * quarterDuration) { // Moving down
-        positionY += newSpeedY; // Increment downward
-        console.log(`Moving down - POSITION X: ${positionX} POSITION Y: ${positionY}`);
-
-        if (positionY >= cameraHeight) {
-            console.log("Reached bottom edge, changing direction to left");
-            positionY = cameraHeight; // Snap to the bottom edge
-        }
-
-    } else if (startClip >= 2 * quarterDuration && startClip < 3 * quarterDuration) { // Moving left
-        positionX -= newSpeedX; // Decrement leftward
-        console.log(`Moving left - POSITION X: ${positionX} POSITION Y: ${positionY}`);
-
-        if (positionX <= 0) {
-            console.log("Reached left edge, changing direction to up");
-            positionX = 0; // Snap to the left edge
-        }
-
-    } else if (startClip >= 3 * quarterDuration && startClip < duration) { // Moving up
-        positionY -= newSpeedY; // Decrement upward
-        console.log(`Moving up - POSITION X: ${positionX} POSITION Y: ${positionY}`);
-
-        if (positionY <= 0) {
-            console.log("Reached top edge, changing direction to right");
-            positionY = 0; // Snap to the top edge
-        }
-    }
-*/
-
     const playStyling = {
         fontSize: "35px",
         borderRadius: "50%",
@@ -1168,7 +1147,10 @@ if (arrowPosition.y === "positive") {
 
                 console.log("PRECHOD ", index);
 
-                //setTransition({idPieces: piece?.transition, transitionID: index});
+                setTransition(prev => ({
+                    ...prev,
+                    transitionID: index,
+                }));
 
                 // SEKCE - KAMERA
             } else if (selectedOption === 5 || selectedOption === undefined) {
@@ -1314,7 +1296,10 @@ if (arrowPosition.y === "positive") {
                                     canvasSelector,
                                     setRatioCanvas,
                                     setBtnName,
-                                    btnName)}
+                                    btnName,
+                                    setCurrentTime,
+                                    setBarPosition,
+                                    setTransition)}
 
                             {clipTools[activeTool].content !== null && activeTool === 5 &&
                                 cameraOption(
@@ -1448,6 +1433,7 @@ if (arrowPosition.y === "positive") {
                                 pieceIsClicked={pieceIsClicked}
                                 timelineWidth={timelineRef}
                                 btnName={btnName}
+                                transition={transition}
                             />
                         ))}
 
@@ -1483,13 +1469,14 @@ if (arrowPosition.y === "positive") {
                         ))}
 
                         <div
+                            ref={barRef}
                             style={{
                                 position: 'absolute',
                                 top: '-2.5px',
                                 left: `${barPosition}%`,
                                 width: '2px',
                                 height: '100%',
-                                backgroundColor: 'blue',
+                                backgroundColor: btnName.trim() !== "Vyberte prosím jeden z přechodů" ? 'transparent' : 'blue',
                                 transform: 'translateX(-50%)',
                                 cursor: 'pointer',
                                 borderRadius: '2px'
