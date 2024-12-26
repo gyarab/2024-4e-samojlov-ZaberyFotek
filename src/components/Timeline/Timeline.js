@@ -102,14 +102,27 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [btnName, setBtnName] = useState("Vyberte prosím jeden z přechodů");
 
     // Aktuální velikost kamery
-    const [transition, setTransition] = useState({idPieces: {}, transitionID: 0, width: 0, left: 0, coordinateRes: 0});
+    const [transition, setTransition] = useState({
+        idPieces: {},
+        transitionID: null,
+        coordinateRes: 0
+    });
+
+    // Nastavení výběru uživatele v sekci nástrojů
+    const [transitionRes, setTransitionRes] = useState(null);
+
+    // Nastavení výběru uživatele v sekci nástrojů
+    const [submitBtn, setSubmitBtn] = useState(null);
+
+    // Vytvoření reference pro přístup k tlačítku
+    const submitBtnRef = useRef(null);
 
     // Kontrola názvu tlačítka
     const btnCondition = btnName !== "Vyberte prosím jeden z přechodů";
 
     /** Proměnné pro sekci - KAMERA **/
 
-    // Aktuální směr v rotaci
+        // Aktuální směr v rotaci
     const [currentDirection, setCurrentDirection] = useState("right");
 
     // Výběr poměru v sekci nástroje kamery
@@ -199,6 +212,30 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         }
     };
 
+    /** Funkce pro vytvoření plynulého přechodu (Fade Transition) **/
+    const fadeTransition = (ctx, canvas, cameraWidth, cameraHeight, prevClip, nextClip) => {
+        let fadeAmount = 0;
+
+        const fade = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = fadeAmount;
+            ctx.drawImage(nextClip, 0, 0, canvas.width, canvas.height);
+
+            fadeAmount += 0.01;
+
+
+            if (fadeAmount < 1) {
+                requestAnimationFrame(fade);
+            } else {
+                ctx.globalAlpha = 1;
+            }
+        };
+
+
+        fade();
+    };
+
+
     /** Hlavní funkce pro správu plochy **/
     const handleCanvasContent = () => {
 
@@ -253,6 +290,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 // Aktuálně zvolená částice
                 const currentPiece = selectedPieces[i];
 
+                //console.log("XXX", currentPiece.transition)
+
                 // Pravidelné obnovení změny kamery
                 handlePieceUpdate(
                     activeIndex,
@@ -264,7 +303,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     currentPiece.duration,
                     2,
                     currentPiece.arrowDirection,
-                    transition,
+                    currentPiece.transition,
                     cameraSize
                 );
 
@@ -284,7 +323,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 // Délka klipu
                 const duration = endPiece - startPiece;
 
-                const ratioCanvas = getRatioValues(activeRatio);
+                //const ratioCanvas = getRatioValues(activeRatio);
 
                 const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
 
@@ -387,8 +426,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 setCoordinateX(positionX);
                 setCoordinateY(positionY);
 
-                // Částice obsahující klip
-                if (currentPiece.isSubmitted && pieceTimeConditional) {
+                if (currentPiece?.transition?.transitionID !== null &&
+                    Math.abs(count - endPiece) <= 0.2) {
+
+                    if (currentPiece?.transition?.transitionID === 1) {
+
+                        fadeTransition(ctx, canvas, cameraWidth, cameraHeight, img, img);
+                    } else {
+
+                        console.log("PRECHOD ")
+                    }
+
+                    // Částice obsahující klip
+                } else if (currentPiece.isSubmitted && pieceTimeConditional) {
+
+                    setPieceClicked(false);
+                    handlePieceClick(false);
                     // Funkce pro vytvoření klipu
                     const createClip = () => {
 
@@ -446,38 +499,93 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         canvas.height
                     );
 
+                    setPieceClicked(true);
+
+                    console.log("PIECE", currentPiece?.transition)
+
                     if (!btnCondition) {
 
                         handlePieceClick(true);
+
+                        // if (currentPiece?.transition?.transitionID !== null && currentPiece?.transition !== null) {
+                        //     setTransitionRes(currentPiece.transition.transitionID);
+                        //     setTransition(currentPiece.transition);
+                        // } else {
+                        //     setTransitionRes(null);
+                        // }
+
+                        if (currentPiece?.transition?.transitionID === null || currentPiece?.transition?.transitionID === undefined) {
+
+                            setTransitionRes(null);
+
+                        } else {
+
+                            if (currentPiece?.id === activeIndex) {
+
+                                console.log("AAA", currentPiece?.transition?.transitionID)
+
+                                setTransitionRes(transition.transitionID);
+
+                                handlePieceUpdate(
+                                    activeIndex,
+                                    currentPiece.src,
+                                    currentPiece.width,
+                                    currentPiece.left,
+                                    currentPiece.isSubmitted,
+                                    currentPiece.arrow,
+                                    currentPiece.duration,
+                                    4,
+                                    currentPiece.arrowDirection,
+                                    transition,
+                                    currentPiece.cameraSize
+                                );
+
+                            } else {
+
+
+                                const transitionID = currentPiece?.transition?.transitionID;
+                                setTransitionRes(transitionID);
+
+                                if (transition.transitionID !== transitionID) {
+                                    setTransition(prev => ({
+                                        ...prev,
+                                        transitionID: transitionID,
+                                    }));
+                                }
+
+                                // console.log("AA", transitionRes, "000", currentPiece?.id);
+                            }
+                        }
+
+                        setCanvasSelector(prev => {
+                            const updatedArray = [...prev];
+                            updatedArray[4] = transitionRes;
+                            return updatedArray;
+                        });
                     }
-
-                    setPieceClicked(true);
-
-                    console.log("LEFT", currentPiece.left)
 
                     // *************************************************************
 
-                    let transitionRes;
                     let cameraRes;
 
                     if (currentPiece?.id === activeIndex) {
 
-                        transitionRes = transition.transitionID;
+                        //transitionRes = transition.transitionID;
                         cameraRes = cameraSize.currentIndex;
 
                     } else {
-                        transitionRes = currentPiece?.transition?.transitionID;
+                        //transitionRes = currentPiece?.transition?.transitionID;
                         cameraRes = currentPiece?.cameraSize?.currentIndex;
 
                         console.log("CAMERA RES", cameraRes, "WIDTH", currentPiece?.cameraSize?.width)
 
-                        if (transition.transitionID !== transitionRes) {
-
-                            setTransition(prev => ({
-                                ...prev,
-                                transitionID: transitionRes,
-                            }));
-                        }
+                        // if (transition.transitionID !== transitionRes) {
+                        //
+                        //     setTransition(prev => ({
+                        //         ...prev,
+                        //         transitionID: transitionRes,
+                        //     }));
+                        // }
 
                         if (cameraSize.currentIndex !== cameraRes) {
 
@@ -529,14 +637,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     setActiveIndex(currentPiece.id);
 
-                    //console.log("AA", transitionRes)
-
-                    setCanvasSelector(prev => {
-                        const updatedArray = [...prev];
-                        updatedArray[4] = transitionRes; // currentPiece?.cameraSize?.currentIndex
-                        return updatedArray;
-                    });
-
                     setCanvasSelector(prev => {
                         const updatedArray = [...prev];
                         updatedArray[5] = cameraRes; // currentPiece?.cameraSize?.currentIndex
@@ -556,11 +656,15 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     //setActiveIndex(null);
 
                     // Nastavení výběru na null
-                    setCanvasSelector(prev => {
-                        const updatedArray = [...prev];
-                        updatedArray[4] = null;
-                        return updatedArray;
-                    });
+                    // setCanvasSelector(prev => {
+                    //     const updatedArray = [...prev];
+                    //     updatedArray[4] = null;
+                    //     return updatedArray;
+                    // });
+
+                    // if (submitBtnRef?.current) {
+                    //     submitBtnRef.current.textContent = "VYTVOŘIT";
+                    // }
 
                     setCanvasSelector(prev => {
                         const updatedArray = [...prev];
@@ -579,11 +683,55 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     /** Výběr indexů částic při možnosti sekce - PŘECHODY  **/
     useEffect(() => {
-         //console.log("BTN", btnName, pieceIsClicked, Object.keys(transition?.idPieces).length);
+        //console.log("BTN", btnName, pieceIsClicked, Object.keys(transition?.idPieces).length);
 
-        if (!selectedPieces || selectedPieces.length === 0) {
-            console.error('selectedPieces is empty or null');
-            return;
+        // if (!selectedPieces || selectedPieces.length === 0) {
+        //     console.error('selectedPieces is empty or null');
+        //     return;
+        // }
+
+        if (submitBtnRef?.current) {
+
+            //console.log("YYY", submitBtnRef.current.textContent, Object.keys(transition?.idPieces).length, submitBtn);
+
+            if (submitBtn) {
+
+                console.log("SMAZAT!")
+
+                let piece1 = selectedPieces.find(piece => piece.id === activeIndex);
+
+                handlePieceUpdate(
+                    piece1?.id,
+                    piece1?.src,
+                    piece1?.width,
+                    piece1?.left,
+                    piece1?.isSubmitted,
+                    piece1?.arrow,
+                    piece1?.duration,
+                    4,
+                    piece1?.arrowDirection,
+                    {
+                        idPieces: {},
+                        transitionID: null,
+                        coordinateRes: 0
+                    },
+                    piece1?.cameraSize
+                );
+
+                setTransition({
+                    idPieces: {},
+                    transitionID: null,
+                    coordinateRes: 0
+                });
+
+                setCanvasSelector(prev => {
+                    const updatedArray = [...prev];
+                    updatedArray[4] = null;
+                    return updatedArray;
+                });
+
+                setSubmitBtn(false);
+            }
         }
 
         if (!pieceIsClicked && Object.keys(transition?.idPieces).length > 0) {
@@ -591,6 +739,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         }
 
         if (pieceIsClicked && btnCondition) {
+
             setTransition(prevState => {
                 const isDuplicate = Object.values(prevState.idPieces).includes(activeIndex);
 
@@ -603,49 +752,76 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     [Object.keys(prevState.idPieces).length]: activeIndex,
                 };
 
-                console.log("LELEL", Object.keys(updatedId).length);
-
                 let coordinateRes = null;
 
                 if (Object.keys(updatedId).length === 2) {
+
                     console.log("UPDATED", updatedId);
 
                     setTimeout(() => {
                         setBtnName("Vyberte prosím jeden z přechodů");
                     }, 750);
 
-                    let piece1 = selectedPieces[updatedId[0]];
-                    let piece2 = selectedPieces[updatedId[1]];
+                    console.log("00:", updatedId[0], "11:", updatedId[1], selectedPieces)
 
-                    if (!piece1 || !piece2) {
+                    const id1 = updatedId[0];
+                    const id2 = updatedId[1];
 
-                        return prevState;
-                    }
+                    let piece1 = selectedPieces.find(piece => piece.id === id1);
+                    let piece2 = selectedPieces.find(piece => piece.id === id2);
 
-                    if (piece1?.left > piece2?.left) {
+                    // console.log("TETXT", submitBtnRef?.current?.textContent);
 
-                        const temp = piece1;
-                        piece1 = piece2;
-                        piece2 = temp;
+                    if (piece1?.value > piece2?.value) {
 
-                        // if (!toast.isActive("unique-toast-0")) {
-                        //     toast.error("Přechody: Nesprávné pořadí ve výběru", { toastId: "unique-toast-0" });
-                        // }
-                    }
-
-                    // Pokud částice nejsou spojeny
-                    if ((piece1?.width + piece1?.left) !== piece2?.left) {
-                        // console.log("RESS", piece1?.width + piece1?.left, piece2?.left, selectedPieces[2],
-                        //     selectedPieces[updatedId[1]]);
-
-                        if (!toast.isActive("unique-toast-0")) {
-                            toast.error("Přechody: Částice nejsou spojeny", { toastId: "unique-toast-0" });
+                        if (!toast.isActive("unique-toast-2")) {
+                            toast.error("Přechody: Nesprávné pořadí ve výběru", {toastId: "unique-toast-2"});
                         }
 
                     } else {
 
-                        coordinateRes = piece2?.left;
+                        // Pokud částice nejsou spojeny (včetně odchylky)
+                        if (Math.abs((piece1?.width + piece1?.left) - piece2?.left) > 10) {
+                            // console.log("RESS", piece1?.width + piece1?.left, piece2?.left, selectedPieces[2],
+                            //     selectedPieces[updatedId[1]]);
+
+                            if (!toast.isActive("unique-toast-0")) {
+                                toast.error("Přechody: Částice nejsou spojeny", {toastId: "unique-toast-0"});
+                            }
+
+                        } else {
+
+                            coordinateRes = piece2?.left;
+
+                            console.log("COOOOR", coordinateRes)
+
+                            handlePieceUpdate(
+                                id1,
+                                piece1.src,
+                                piece1.width,
+                                piece1.left,
+                                piece1.isSubmitted,
+                                piece1.arrow,
+                                piece1.duration,
+                                4,
+                                piece1.arrowDirection,
+                                {
+                                    idPieces: updatedId,
+                                    transitionID: transition?.transitionID,
+                                    coordinateRes: coordinateRes
+                                },
+                                piece1.cameraSize
+                            );
+
+                            console.log("TRANSITION", transition, piece1?.transition, updatedId)
+
+                            if (!toast.isActive("unique-toast-1")) {
+                                toast.success("Přechody: Úspěšně vytvořen!", {toastId: "unique-toast-1"});
+                            }
+                        }
                     }
+
+                    console.log("LEFT", piece1?.left, piece1?.width, piece2?.left)
 
                     // setTimeout(() => {
                     //     setTransition(() => ({
@@ -664,7 +840,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 };
             });
         }
-    },  [pieceIsClicked, activeIndex, btnName, selectedPieces]);
+    }, [pieceIsClicked, activeIndex, btnName, selectedPieces, submitBtnRef, transition, submitBtn]);
 
     /** Průběžné přidávání času a generování obsahu plochy včetně nástrojů pro úpravu klipu **/
     useEffect(() => {
@@ -788,7 +964,18 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             }
         };
 
-    }, [videoRef.current, downloadBtn, isPlaying, isDragging, videoLength, currentTime, ratioSelection, activeRatio, cameraSize, transition]);
+    }, [
+        videoRef.current,
+        downloadBtn,
+        isPlaying,
+        isDragging,
+        videoLength,
+        currentTime,
+        ratioSelection,
+        activeRatio,
+        cameraSize,
+        transitionRes
+    ]);
 
     /** Zastavení času **/
     const handlePause = () => setIsPlaying(false);
@@ -1337,7 +1524,10 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                     setBarPosition,
                                     setTransition,
                                     setPieceClicked,
-                                    handlePieceClick)}
+                                    handlePieceClick,
+                                    transitionRes,
+                                    submitBtnRef,
+                                    setSubmitBtn)}
 
                             {clipTools[activeTool].content !== null && activeTool === 5 &&
                                 cameraOption(

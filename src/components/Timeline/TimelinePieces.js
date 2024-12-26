@@ -174,55 +174,59 @@ const TimelinePieces = ({
 
     useEffect(() => {
 
-        if (!piece) return;
+            if (!piece) return;
 
-        console.log("BTNNN", transition?.coordinateRes, width, left)
+            //console.log("PIECE", transition, piece?.transition)
 
-        // ID prvku
-        const pieceID = piecesArray.findIndex(p => p.id === piece.id);
+            // ID prvku
+            const pieceID = piecesArray.findIndex(p => p.id === piece.id);
 
-        // Nejbližší pravý prvek
-        const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
+            // Nejbližší pravý prvek
+            const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
 
-        if (piece.isSubmitted && !isResizing) {
+            if (piece.isSubmitted && !isResizing) {
 
-            setCancelBtn(false);
+                setCancelBtn(false);
 
-            const timelineWidthPX = timelineWidth.current.offsetWidth;
+                const timelineWidthPX = timelineWidth.current.offsetWidth;
 
-            const durationWidth = (timelineWidthPX / 60) * piece.duration;
+                const durationWidth = (timelineWidthPX / 60) * piece.duration;
 
-            if (rightSidePiece !== null && (piece.left + durationWidth) < piecesArray[pieceID + 1].left) {
+                if (rightSidePiece !== null && (piece.left + durationWidth) < piecesArray[pieceID + 1].left) {
 
-                console.log("V PORADKU");
+                    console.log("V PORADKU");
 
-                // Nastavení délky částice z výběru časového úseku
-                setWidth(durationWidth);
+                    // Nastavení délky částice z výběru časového úseku
+                    setWidth(durationWidth);
 
-            } else if (rightSidePiece !== null && (piece.left + durationWidth) > piecesArray[pieceID + 1].left) {
+                } else if (rightSidePiece !== null && (piece.left + durationWidth) > piecesArray[pieceID + 1].left) {
 
-                const maxWidth = piecesArray[pieceID + 1].left - (piece.left);
+                    const maxWidth = piecesArray[pieceID + 1].left - (piece.left);
 
-                console.log(maxWidth);
+                    console.log(maxWidth);
 
-                setWidth(maxWidth);
+                    setWidth(maxWidth);
+                }
+
+                handlePieceUpdate(
+                    piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
+                    piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
+                );
             }
 
-            handlePieceUpdate(
-                piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
-                piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
-            );
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+
+            return () => {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            };
+
         }
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-
-        return () => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-        };
-
-    }, [piece.isSubmitted, width, left, onMouseMove, onMouseUp]);
+        ,
+        [piece.isSubmitted, width, left, onMouseMove, onMouseUp, piece]
+    )
+    ;
 
     // Stanovení stylů pro částici
     const boxStyles = {
@@ -250,7 +254,6 @@ const TimelinePieces = ({
         top: 0,
         width: '10px',
         height: '100%',
-        backgroundColor: btnCondition ? '#ff5b61' : 'var(--color-blue-4)',
         cursor: 'ew-resize',
         display: 'flex',
         alignItems: 'center',
@@ -259,11 +262,31 @@ const TimelinePieces = ({
 
     const leftHandleStyles = {
         ...handleStyles,
+        backgroundColor: btnCondition
+            ? '#ff5b61'
+            : Object.keys(transition?.idPieces || {}).some((key) => {
+
+                return key % 2 !== 0 && transition?.idPieces[key] === piece.id;
+            })
+                ? '#ff5b61'
+                : 'var(--color-blue-4)',
         left: 0,
     };
 
     const rightHandleStyles = {
         ...handleStyles,
+        backgroundColor: btnCondition
+            ? '#ff5b61'
+            : (
+                (piece?.transition?.idPieces && Object.keys(piece.transition.idPieces).some((key) => {
+                    return key % 2 === 0 && piece.transition.idPieces[key] === piece.id;
+                })) ||
+                (transition?.idPieces && Object.keys(transition.idPieces).some((key) => {
+                    return key % 2 === 0 && transition.idPieces[key] === piece.id;
+                }))
+            )
+                ? '#ff5b61'
+                : 'var(--color-blue-4)',
         right: 0,
     };
 
@@ -312,36 +335,35 @@ const TimelinePieces = ({
                 </div>
             )}
 
-            {transition.coordinateRes && (transition.coordinateRes === left)
-                && (
+            {(piece?.transition?.coordinateRes && piece?.transition?.coordinateRes === left) || (transition.coordinateRes && transition.coordinateRes === left) &&
 
-                    <div
-                        title={'Přechod'}
-                        style={{
-                            position: 'absolute',
-                            bottom: '0',
-                            left: '0',
-                            transform: 'translateY(30px) translateX(-2.5px)',
-                            cursor: 'pointer',
-                            background: 'repeating-linear-gradient(to bottom, #ff5b61, #ff5b61 5px, transparent 5px, transparent 10px)',
-                            width: '5px',
-                            height: '30px'
-                        }}
-                    >
+                <div
+                    title={'Přechod'}
+                    style={{
+                        position: 'absolute',
+                        bottom: '0',
+                        left: '0',
+                        transform: 'translateY(30px) translateX(-2.5px)',
+                        cursor: 'pointer',
+                        background: 'repeating-linear-gradient(to bottom, #ff5b61, #ff5b61 5px, transparent 5px, transparent 10px)',
+                        width: '5px',
+                        height: '30px'
+                    }}
+                >
 
-                        <div style={{
-                            position: 'absolute',
-                            bottom: '0px',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '10px',
-                            height: '10px',
-                            borderRadius: '50%',
-                            backgroundColor: '#f00'
-                        }}></div>
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '0px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        backgroundColor: '#f00'
+                    }}></div>
 
-                    </div>
-                )}
+                </div>
+            }
 
         </div>
     );

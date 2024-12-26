@@ -123,7 +123,7 @@ function Zabery(props) {
 
         if (item.includes('arrow') && activeArrow != null) {
 
-            handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue,3, arrowDirection, null);
+            handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue, 3, arrowDirection, null);
             console.log("direction", activeArrow, directions);
 
             setActiveArrow(item);
@@ -715,7 +715,7 @@ function Zabery(props) {
 
         setArrowDirection(arrowDirection);
 
-        console.log("SUBMITTED", cameraSize);
+        //console.log("SUBMITTED", cameraSize);
 
         // Obnovení pole pro částice
         setSelectedPieces(prevItems => {
@@ -725,14 +725,25 @@ function Zabery(props) {
 
             const checkItems = [newWidth, newLeft, isSubmitted, arrow, duration].every(param => param !== null);
 
+            // SEKCE - Kamera
             if (special === 2) {
 
                 return prevItems.map(item =>
                     item.id === id
                         ? {
                             ...item,
-                            transition: transition,
                             cameraSize: cameraSize,
+                        } : item
+                );
+
+            // SEKCE - Přechody
+            } else if (special === 4) {
+
+                return prevItems.map(item =>
+                    item.id === id
+                        ? {
+                            ...item,
+                            transition: transition,
                         } : item
                 );
             }
@@ -1050,25 +1061,31 @@ function Zabery(props) {
                             <ArrowBtn isClicked={activeArrow === 'arrow9'}
                                       onClick={() => handleVisibility('arrow9', setActiveArrow, {x: "zoom", y: "in"})}
                                       title={"Přiblížení"}>
-                                <MdZoomInMap />
+                                <MdZoomInMap/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow10'}
                                       onClick={() => handleVisibility('arrow10', setActiveArrow, {x: "zoom", y: "out"})}
                                       title={"Oddálení"}>
-                                <MdOutlineZoomOutMap />
+                                <MdOutlineZoomOutMap/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow11'}
-                                      onClick={() => handleVisibility('arrow11', setActiveArrow, {x: "rotation", y: "positive"})}
+                                      onClick={() => handleVisibility('arrow11', setActiveArrow, {
+                                          x: "rotation",
+                                          y: "positive"
+                                      })}
                                       title={"Rotace ve směru hodin"}>
-                                <AiOutlineRotateRight />
+                                <AiOutlineRotateRight/>
                             </ArrowBtn>
 
                             <ArrowBtn isClicked={activeArrow === 'arrow12'}
-                                      onClick={() => handleVisibility('arrow12', setActiveArrow, {x: "rotation", y: "negative"})}
+                                      onClick={() => handleVisibility('arrow12', setActiveArrow, {
+                                          x: "rotation",
+                                          y: "negative"
+                                      })}
                                       title={"Rotace proti směru hodin"}>
-                                <AiOutlineRotateLeft />
+                                <AiOutlineRotateLeft/>
                             </ArrowBtn>
 
                         </div>

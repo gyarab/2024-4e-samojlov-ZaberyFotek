@@ -1,5 +1,5 @@
 import {CanvasContent, Loader, SubmitBtn} from "../TimelineComponents";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 import {MdCancel} from "react-icons/md";
 
 /** Funkce pro úpravu rozměrů plochy **/
@@ -14,6 +14,9 @@ export const transitionOption = (type,
                                  setTransition,
                                  setPieceClicked,
                                  handlePieceClick,
+                                 transitionRes,
+                                 submitBtnRef,
+                                 setSubmitBtn
 ) => {
 
     const transitionIndex = 4;
@@ -48,6 +51,23 @@ export const transitionOption = (type,
         position: 'relative',
         width: '100%',
         gap: '10px'
+    }
+
+    if (submitBtnRef?.current) {
+        const textContent = submitBtnRef.current.textContent;
+
+        //console.log("AAAAA", textContent)
+
+        if (
+            textContent === "RESET"
+        ) {
+            submitBtnRef.current.style.background = '#9e1a1f';
+            submitBtnRef.current.style.boxShadow = '0 2px 10px #ff5158';
+
+        } else {
+            submitBtnRef.current.style.background = '#4000c7';
+            submitBtnRef.current.style.boxShadow = '0 2px 10px #5960ff';
+        }
     }
 
     return (
@@ -85,32 +105,38 @@ export const transitionOption = (type,
             <div style={{...divStyles, flexDirection: 'row'}}>
 
                 <SubmitBtn
-
+                    ref={submitBtnRef}
                     style={{
                         width: '75%',
-                        background: '#4000c7',
-                        boxShadow: '0 2px 10px #5960ff',
                         letterSpacing: '1px'
                     }}
 
                     onClick={() => {
 
-                        console.log(canvasSelector[transitionIndex]);
-
                         // Nastavení nápovědy pro uživatele dle aktivity
-                        if (canvasSelector[transitionIndex] === null) {
+                        if (canvasSelector[transitionIndex] === null && submitBtnRef.current.textContent === "VYTVOŘIT") {
 
                             console.log("NN", canvasSelector[transitionIndex]);
                             setBtnName("Vyberte prosím jeden z přechodů");
 
                         } else {
 
-                            setBtnName("Zvolte 2 snímky na časové ose");
-                            transitionReset();
+                            if (submitBtnRef.current.textContent === "RESET") {
+
+                                setSubmitBtn(true);
+
+                                submitBtnRef.current.textContent = "VYTVOŘIT";
+
+                            } else {
+                                setBtnName("Zvolte 2 snímky na časové ose");
+                                transitionReset();
+                            }
+
+                            // transitionReset();
                         }
                     }}
                 >
-                    {btnCondition ? <Loader/> : "VYTVOŘIT"}
+                    {btnCondition ? <Loader/> : (transitionRes !== null && transitionRes >= 0 ? "RESET" : "VYTVOŘIT")}
 
                 </SubmitBtn>
 
