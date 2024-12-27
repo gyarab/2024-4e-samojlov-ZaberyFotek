@@ -1,6 +1,7 @@
 import React, {useState, useRef, useCallback, useEffect, useMemo} from 'react';
 import {MdCancel} from "react-icons/md";
 import {logDOM} from "@testing-library/react";
+import {toast} from "react-toastify";
 
 /** Funkce pro ovládání jednotlivých prvků časové osy **/
 const TimelinePieces = ({
@@ -35,8 +36,11 @@ const TimelinePieces = ({
     // Kontrola názvu tlačítka
     const btnCondition = btnName !== "Vyberte prosím jeden z přechodů";
 
-    // Kontrola délky počtu zvolených částic u přechodů
-    const lengthCondition = Object.keys(transition?.idPieces).length === 2;
+    // Předchozí prvek v časové ose
+    const previousPiece = piecesArray.find(x => (x?.value) === (piece?.value - 1));
+
+    // Následující prvek v časové ose
+    const nextPiece = piecesArray.find(x => (x?.value) === (piece?.value + 1));
 
     /** Tah je detekován **/
     const onMouseDown = useCallback((e, direction) => {
@@ -91,6 +95,16 @@ const TimelinePieces = ({
 
                 }
 
+                if (previousPiece?.transition?.transitionID !== undefined) {
+
+                    if (!toast.isActive("unique-toast-1")) {
+                        toast.info("Přechody: Pro změnu velikosti je třeba resetovat přechod předchozího prvku",
+                            {toastId: "unique-toast-1"});
+                    }
+
+                    return;
+                }
+
                 // Funkce drag-resize je zastavena tak, aby nepřesahovala počátek prvku Timeline
                 if (newLeft <= 0) {
 
@@ -103,6 +117,17 @@ const TimelinePieces = ({
                 if (rightSidePiece && newLeft + newWidth > rightSidePiece.left) {
 
                     // newWidth = rightSidePiece.left - newLeft;
+
+                    return;
+                }
+
+                // Zamezení změny velikosti částice, pokud již obsahuje přechod
+                if (piece?.transition?.transitionID !== undefined) {
+
+                    if (!toast.isActive("unique-toast-2")) {
+                        toast.info("Přechody: Pro změnu velikosti prvku použijte tlačítko RESET",
+                            {toastId: "unique-toast-2"});
+                    }
 
                     return;
                 }
@@ -123,18 +148,60 @@ const TimelinePieces = ({
             containerRef.current.style.left = `${newLeft}px`;
         }
 
-    }, [isResizing, piecesArray, piece.id]);
+    }, [isResizing, piecesArray, piece.id, piece?.transition]);
 
     const [cancelClipBtn, setCancelBtn] = useState(true);
 
     const checkCancel = piece.isSubmitted && !cancelClipBtn;
 
+    useEffect(() => {
+
+        if (!piece) return;
+
+        console.log("ID", piece.id, piece?.transition?.coordinateRes);
+
+        // ID prvku
+        const pieceID = piecesArray.findIndex(p => p.id === piece.id);
+
+        // console.log("PIECE", piece?.id, piece?.transition?.coordinateRes)
+
+        // Nejbližší pravý prvek
+        const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
+
+        if (piece.isSubmitted && !isResizing) {
+
+            setCancelBtn(false);
+
+            const timelineWidthPX = timelineWidth.current.offsetWidth;
+
+            const durationWidth = (timelineWidthPX / 60) * piece.duration;
+
+            if (rightSidePiece !== null && (piece.left + durationWidth) < piecesArray[pieceID + 1].left) {
+
+                // Nastavení délky částice z výběru časového úseku
+                setWidth(durationWidth);
+
+            } else if (rightSidePiece !== null && (piece.left + durationWidth) > piecesArray[pieceID + 1].left) {
+
+                const maxWidth = piecesArray[pieceID + 1].left - (piece.left);
+
+                console.log(maxWidth);
+
+                setWidth(maxWidth);
+            }
+
+            handlePieceUpdate(
+                piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
+                piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
+            );
+        }
+
+    }, [piece.isSubmitted, width, left, piece?.transition]);
+
     /** Funkce spravující kliknutí na částici v Timeline **/
     const handleClick = (type) => {
 
         pieceIsClicked = true;
-
-        // console.log("ID", piece.id, piece?.transition?.idPieces);
 
         if (type === "piece" && cancelClipBtn) {
 
@@ -174,46 +241,6 @@ const TimelinePieces = ({
 
     useEffect(() => {
 
-            if (!piece) return;
-
-            //console.log("PIECE", transition, piece?.transition)
-
-            // ID prvku
-            const pieceID = piecesArray.findIndex(p => p.id === piece.id);
-
-            // Nejbližší pravý prvek
-            const rightSidePiece = pieceID < piecesArray.length - 1 ? piecesArray[pieceID + 1] : null;
-
-            if (piece.isSubmitted && !isResizing) {
-
-                setCancelBtn(false);
-
-                const timelineWidthPX = timelineWidth.current.offsetWidth;
-
-                const durationWidth = (timelineWidthPX / 60) * piece.duration;
-
-                if (rightSidePiece !== null && (piece.left + durationWidth) < piecesArray[pieceID + 1].left) {
-
-                    console.log("V PORADKU");
-
-                    // Nastavení délky částice z výběru časového úseku
-                    setWidth(durationWidth);
-
-                } else if (rightSidePiece !== null && (piece.left + durationWidth) > piecesArray[pieceID + 1].left) {
-
-                    const maxWidth = piecesArray[pieceID + 1].left - (piece.left);
-
-                    console.log(maxWidth);
-
-                    setWidth(maxWidth);
-                }
-
-                handlePieceUpdate(
-                    piece.id, piece.src, width, left, piece.isSubmitted, piece.arrow,
-                    piece.duration, 0, piece.arrowDirection, piece.transition, piece.cameraSize
-                );
-            }
-
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
 
@@ -221,16 +248,14 @@ const TimelinePieces = ({
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
             };
-
         }
         ,
-        [piece.isSubmitted, width, left, onMouseMove, onMouseUp, piece]
-    )
-    ;
+        [onMouseMove, onMouseUp]
+    );
 
     // Stanovení stylů pro částici
     const boxStyles = {
-
+        display: 'flex',
         width: `${width}px`,
         height: '50px',
         border: btnCondition
@@ -264,10 +289,7 @@ const TimelinePieces = ({
         ...handleStyles,
         backgroundColor: btnCondition
             ? '#ff5b61'
-            : Object.keys(transition?.idPieces || {}).some((key) => {
-
-                return key % 2 !== 0 && transition?.idPieces[key] === piece.id;
-            })
+            : previousPiece?.transition?.transitionID !== undefined && previousPiece?.transition?.transitionID !== null
                 ? '#ff5b61'
                 : 'var(--color-blue-4)',
         left: 0,
@@ -277,14 +299,7 @@ const TimelinePieces = ({
         ...handleStyles,
         backgroundColor: btnCondition
             ? '#ff5b61'
-            : (
-                (piece?.transition?.idPieces && Object.keys(piece.transition.idPieces).some((key) => {
-                    return key % 2 === 0 && piece.transition.idPieces[key] === piece.id;
-                })) ||
-                (transition?.idPieces && Object.keys(transition.idPieces).some((key) => {
-                    return key % 2 === 0 && transition.idPieces[key] === piece.id;
-                }))
-            )
+            : piece?.transition?.transitionID !== undefined && piece?.transition?.transitionID !== null && nextPiece
                 ? '#ff5b61'
                 : 'var(--color-blue-4)',
         right: 0,
@@ -327,7 +342,7 @@ const TimelinePieces = ({
                         color: "white",
                         width: "100%",
                         gap: "5px",
-                        maxWidth: "100px"
+                        maxWidth: "75px"
                     }}
                 >
                     <MdCancel/> Zrušit
@@ -335,15 +350,15 @@ const TimelinePieces = ({
                 </div>
             )}
 
-            {(piece?.transition?.coordinateRes && piece?.transition?.coordinateRes === left) || (transition.coordinateRes && transition.coordinateRes === left) &&
+            {(piece?.transition?.coordinateRes !== undefined && piece?.transition?.coordinateRes !== null)  &&
 
                 <div
                     title={'Přechod'}
                     style={{
                         position: 'absolute',
                         bottom: '0',
-                        left: '0',
-                        transform: 'translateY(30px) translateX(-2.5px)',
+                        left: `${piece?.transition?.coordinateRes}px`,
+                        transform: 'translateX(-2px) translateY(30px)',
                         cursor: 'pointer',
                         background: 'repeating-linear-gradient(to bottom, #ff5b61, #ff5b61 5px, transparent 5px, transparent 10px)',
                         width: '5px',

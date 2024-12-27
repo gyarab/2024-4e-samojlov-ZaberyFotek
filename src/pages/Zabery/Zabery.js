@@ -736,7 +736,7 @@ function Zabery(props) {
                         } : item
                 );
 
-            // SEKCE - Přechody
+                // SEKCE - Přechody
             } else if (special === 4) {
 
                 return prevItems.map(item =>
@@ -876,14 +876,26 @@ function Zabery(props) {
 
         // const piece = selectedPieces[timelineItem];
 
-        for (let i = 0; i < selectedPieces.length; i++) {
+        const currentPiece = selectedPieces.find(piece => piece.id === timelineItem);
 
-            const piece = selectedPieces[i];
+        const durationValue =
+            currentPiece?.transition?.transitionID !== null &&
+            currentPiece?.transition?.transitionID !== undefined ? currentPiece?.duration : rangeValue;
 
-            console.log("WIDTH " + piece.width, piece.left)
+        console.log("WIDTH " + currentPiece.width, currentPiece.left)
 
-            handlePieces(timelineItem, piece.src, piece.width, piece.left, true, activeArrow, rangeValue, 3, arrowDirection, piece.cameraSize);
-        }
+        handlePieces(
+            timelineItem,
+            currentPiece?.src,
+            currentPiece?.width,
+            currentPiece?.left,
+            true,
+            activeArrow,
+            durationValue,
+            3,
+            arrowDirection,
+            currentPiece?.transition,
+            currentPiece?.cameraSize);
 
         // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };
         //

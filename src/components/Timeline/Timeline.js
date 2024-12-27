@@ -1,22 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {IoPause, IoPlay, IoPlayBack, IoPlayForward} from "react-icons/io5";
 import TimelinePieces from "./TimelinePieces";
-import {
-    CanvasContent,
-    ClipContainer,
-    ClipTool,
-    DownloadBtn, Loader, SubmitBtn,
-    TimelineContainer,
-    VideoPreview,
-    VideoTools
-} from "./TimelineComponents";
+import {ClipContainer, ClipTool, DownloadBtn, TimelineContainer, VideoPreview, VideoTools} from "./TimelineComponents";
 import {TimelineWidth} from "./TimelineWidth";
 import {RiUploadCloud2Line} from "react-icons/ri";
 import {VscScreenFull} from "react-icons/vsc";
 import {LuLayoutGrid, LuMusic4, LuRectangleHorizontal, LuRectangleVertical, LuSquare} from "react-icons/lu";
 import {RxText} from "react-icons/rx";
 import {TbTransitionRight} from "react-icons/tb";
-import {MdAnimation} from "react-icons/md";
 import {GoArrowLeft} from "react-icons/go";
 import {ArrowBtn} from "../../pages/Zabery/ZaberyComponents";
 import {CgScreenWide} from "react-icons/cg";
@@ -24,7 +15,7 @@ import {FaCameraRetro, FaDownload} from "react-icons/fa";
 import {resizeCanvasOption} from "./Options/resizeCanvasOption";
 import {cameraOption} from "./Options/cameraOption";
 import {transitionOption} from "./Options/transitionOption";
-import {ToastContainer, toast, Bounce} from 'react-toastify';
+import {Bounce, toast, ToastContainer} from 'react-toastify';
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -113,6 +104,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     // Nastavení výběru uživatele v sekci nástrojů
     const [submitBtn, setSubmitBtn] = useState(null);
+
+    const [already, setAlready] = useState(false);
 
     // Vytvoření reference pro přístup k tlačítku
     const submitBtnRef = useRef(null);
@@ -212,30 +205,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         }
     };
 
-    /** Funkce pro vytvoření plynulého přechodu (Fade Transition) **/
-    const fadeTransition = (ctx, canvas, cameraWidth, cameraHeight, prevClip, nextClip) => {
-        let fadeAmount = 0;
-
-        const fade = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.globalAlpha = fadeAmount;
-            ctx.drawImage(nextClip, 0, 0, canvas.width, canvas.height);
-
-            fadeAmount += 0.01;
-
-
-            if (fadeAmount < 1) {
-                requestAnimationFrame(fade);
-            } else {
-                ctx.globalAlpha = 1;
-            }
-        };
-
-
-        fade();
-    };
-
-
     /** Hlavní funkce pro správu plochy **/
     const handleCanvasContent = () => {
 
@@ -266,10 +235,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         }
 
         // Funkce pro vykreslení aktuálního snímku
-        const createClip = (count) => {
+        const createFrame = (count) => {
 
             // Procházení pole částic
             for (let i = 0; i < selectedPieces.length; i++) {
+
+                // Aktuálně zvolená částice
+                let currentPiece = selectedPieces[i];
 
                 // Začáteční bod částice
                 const startPiece = (selectedPieces[i].left * videoLength) / barWidth;
@@ -277,7 +249,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 // Konečný bod částice
                 const endPiece = ((selectedPieces[i].left + selectedPieces[i].width) * videoLength) / barWidth;
 
-                // Proměnná pro zjištění zda další částice je na ploše
+                // Proměnná pro zjištění zda další částice je na časové ose
                 const nextPiece = selectedPieces[i + 1]
                     ? (selectedPieces[i + 1].left * videoLength) / barWidth
                     : null;
@@ -286,9 +258,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 const beforeFirstCheck = count < startPiece;
                 const middleCheck = count > endPiece && nextPiece && count < nextPiece;
                 const lastEndCheck = count > endPiece && !nextPiece;
-
-                // Aktuálně zvolená částice
-                const currentPiece = selectedPieces[i];
 
                 //console.log("XXX", currentPiece.transition)
 
@@ -426,22 +395,17 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 setCoordinateX(positionX);
                 setCoordinateY(positionY);
 
-                if (currentPiece?.transition?.transitionID !== null &&
-                    Math.abs(count - endPiece) <= 0.2) {
+                //console.log("COUNT", Math.abs(endPiece - count).toFixed(1))
 
-                    if (currentPiece?.transition?.transitionID === 1) {
 
-                        fadeTransition(ctx, canvas, cameraWidth, cameraHeight, img, img);
-                    } else {
+                // Částice obsahující klip
+                if (currentPiece.isSubmitted && pieceTimeConditional) {
 
-                        console.log("PRECHOD ")
-                    }
-
-                    // Částice obsahující klip
-                } else if (currentPiece.isSubmitted && pieceTimeConditional) {
+                    //console.log("COORDINATE X", coordinateX, coordinateY)
 
                     setPieceClicked(false);
                     handlePieceClick(false);
+
                     // Funkce pro vytvoření klipu
                     const createClip = () => {
 
@@ -465,7 +429,38 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     // Přehrání klipu
                     if (isPlaying && pieceTimeConditional) {
-                        requestAnimationFrame(createClip);
+
+                        if (currentPiece?.transition?.transitionID !== null && count < endPiece
+                            && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
+                                && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))) {
+
+                            const nextPiece = selectedPieces.find(x => x?.value === currentPiece?.value + 1);
+
+                            if (currentPiece?.transition?.transitionID === 1) {
+
+                                setAlready(true);
+
+                                fadeTransition(ctx, canvas, cameraWidth, cameraHeight, currentPiece,
+                                    nextPiece, count, endPiece, coordinateX, coordinateY, 1500, () => {
+
+                                        setAlready(false);
+
+                                        requestAnimationFrame(createClip);
+                                    });
+
+                                console.log("ALREADY", already)
+
+                            } else {
+                                console.log("PRECHOD ");
+                            }
+
+                            console.log("ALREADY 2", already, currentPiece?.transition)
+                        } else if (!already) {
+
+                            console.log("NEW", coordinateX, coordinateY)
+                            requestAnimationFrame(createClip);
+                        }
+
                     } else {
                         // Vykreslení aktuálního snímku klipu
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -487,21 +482,45 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     // Častice neobsahující klip
                 } else if (!currentPiece.isSubmitted && pieceTimeConditional) {
 
-                    // Vyčistění plochy
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    if (currentPiece?.transition?.transitionID !== null && count < endPiece
+                        && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
+                            && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))) {
 
-                    // Vykreslení částice
-                    ctx.drawImage(
-                        img,
-                        0,
-                        0,
-                        canvas.width,
-                        canvas.height
-                    );
+                        const nextPiece = selectedPieces.find(x => x?.value === currentPiece?.value + 1);
+
+                        if (currentPiece?.transition?.transitionID === 1) {
+
+                            fadeTransition(ctx, canvas, cameraWidth, cameraHeight, currentPiece,
+                                nextPiece, count, endPiece, coordinateX, coordinateY, 1500, null);
+
+                            console.log("ALREADY", already)
+
+                            return;
+
+                        } else {
+                            console.log("PRECHOD ");
+                        }
+
+
+                    } else {
+
+                        // Vyčistění plochy
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        // Vykreslení částice
+                        ctx.drawImage(
+                            img,
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        );
+                    }
+
 
                     setPieceClicked(true);
 
-                    console.log("PIECE", currentPiece?.transition)
+                    //console.log("PIECE", currentPiece?.transition)
 
                     if (!btnCondition) {
 
@@ -522,9 +541,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                             if (currentPiece?.id === activeIndex) {
 
-                                console.log("AAA", currentPiece?.transition?.transitionID)
+                                // console.log("AAA", currentPiece?.transition?.transitionID)
 
                                 setTransitionRes(transition.transitionID);
+
+                                console.log("CCCCC", transition)
+
+                                const currentPiece = selectedPieces.find(piece => piece.id === activeIndex);
 
                                 handlePieceUpdate(
                                     activeIndex,
@@ -536,7 +559,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                     currentPiece.duration,
                                     4,
                                     currentPiece.arrowDirection,
-                                    transition,
+                                    currentPiece?.transition?.coordinateRes !== undefined && currentPiece?.transition?.coordinateRes !== null ?
+                                        {
+                                            idPieces: currentPiece?.transition?.idPieces,
+                                            transitionID: transition?.transitionID,
+                                            coordinateRes: currentPiece?.transition?.coordinateRes
+                                        } : transition,
                                     currentPiece.cameraSize
                                 );
 
@@ -678,7 +706,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             }
         };
 
-        return createClip;
+        return createFrame;
     };
 
     /** Výběr indexů částic při možnosti sekce - PŘECHODY  **/
@@ -713,7 +741,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     {
                         idPieces: {},
                         transitionID: null,
-                        coordinateRes: 0
+                        coordinateRes: null
                     },
                     piece1?.cameraSize
                 );
@@ -721,7 +749,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 setTransition({
                     idPieces: {},
                     transitionID: null,
-                    coordinateRes: 0
+                    coordinateRes: null
                 });
 
                 setCanvasSelector(prev => {
@@ -791,9 +819,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                         } else {
 
-                            coordinateRes = piece2?.left;
+                            coordinateRes = piece1?.width;
 
-                            console.log("COOOOR", coordinateRes)
+                            console.log("XXXXXXXX000", coordinateRes)
 
                             handlePieceUpdate(
                                 id1,
@@ -816,18 +844,20 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                             console.log("TRANSITION", transition, piece1?.transition, updatedId)
 
                             if (!toast.isActive("unique-toast-1")) {
-                                toast.success("Přechody: Úspěšně vytvořen!", {toastId: "unique-toast-1"});
+                                toast.success("Přechody: Úspěšně vytvořen", {toastId: "unique-toast-1"});
                             }
                         }
                     }
 
                     console.log("LEFT", piece1?.left, piece1?.width, piece2?.left)
 
+                    // Resetování stavu aktivního přechodu po 750 ms
                     // setTimeout(() => {
                     //     setTransition(() => ({
                     //         ...prevState,
                     //         idPieces: {},
                     //         transitionID: 0,
+                    //         coordinateRes: 0
                     //     }));
                     // }, 750);
                 }
@@ -894,7 +924,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         return videoLength;
                     }
 
-                    return prevTime + 0.15;
+                    return prevTime + 0.1;
                 });
 
                 setBarPosition((prevPosition) => prevPosition + 0.25);
@@ -974,7 +1004,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         ratioSelection,
         activeRatio,
         cameraSize,
-        transitionRes
+        transitionRes,
+        already
     ]);
 
     /** Zastavení času **/
@@ -1227,6 +1258,115 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         checkPoints.push(i);
     }
+
+    /** Funkce pro vytvoření plynulého přechodu (Fade Transition) **/
+    const fadeTransition = (
+        ctx,
+        canvas,
+        cameraWidth,
+        cameraHeight,
+        currentPiece,
+        nextPiece,
+        count,
+        endPiece,
+        coordinateX,
+        coordinateY,
+        totalDuration,
+        onComplete
+    ) => {
+        let fadeAmount = 0;
+        const frameDuration = 1000 / 60;
+        const fadeStep = frameDuration / (totalDuration / 2);
+
+        const img = new Image();
+        const nextImg = new Image();
+
+        img.src = currentPiece.src;
+        nextImg.src = nextPiece.src;
+
+        const sizeCurrent = currentPiece?.isSubmitted
+            ? {x: cameraWidth, y: cameraHeight}
+            : {x: img.width, y: img.height};
+        const sizeNext = nextPiece?.isSubmitted
+            ? {x: cameraWidth, y: cameraHeight}
+            : {x: nextImg.width, y: nextImg.height};
+
+        const coordinateCurrent = currentPiece?.isSubmitted
+            ? {x: coordinateX, y: coordinateY}
+            : {x: 0, y: 0};
+
+        const coordinateNext = nextPiece?.isSubmitted
+            ? {x: coordinateX, y: coordinateY}
+            : {x: 0, y: 0};
+
+
+        let imagesLoaded = 0;
+        const checkImagesLoaded = () => {
+            imagesLoaded++;
+            if (imagesLoaded === 2) fadeOut();
+        };
+
+        img.onload = checkImagesLoaded;
+        nextImg.onload = checkImagesLoaded;
+
+        const fadeOut = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 1 - fadeAmount;
+
+            ctx.drawImage(
+                img,
+                coordinateCurrent.x,
+                coordinateCurrent.y,
+                sizeCurrent.x,
+                sizeCurrent.y,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+            fadeAmount += fadeStep;
+
+            if (fadeAmount < 1) {
+                requestAnimationFrame(fadeOut);
+            } else {
+                fadeAmount = 0;
+                requestAnimationFrame(fadeIn);
+            }
+        };
+
+        const fadeIn = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = fadeAmount;
+
+            ctx.drawImage(
+                nextImg,
+                coordinateNext.x,
+                coordinateNext.y,
+                sizeNext.x,
+                sizeNext.y,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            fadeAmount += fadeStep;
+
+            if (fadeAmount < 1) {
+                requestAnimationFrame(fadeIn);
+            } else {
+                ctx.globalAlpha = 1;
+
+                if (onComplete) {
+                    onComplete();
+
+                    // problém: zobrazí konec částice, potřebujeme začátek
+
+                    console.log("COORDINATES", coordinateX, coordinateY)
+                }
+            }
+        };
+    };
 
     /** Nastavení aktuálního indexu částice **/
     const handlePieceUpdate = (id, src, width, left, isSubmitted, arrow, duration, special, arrowDirection, transition, cameraSizeObject) => {
@@ -1716,19 +1856,25 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 </div>
             </TimelineContainer>
 
-            <ToastContainer
-                position="bottom-center"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick={false}
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-                transition={Bounce}
-            />
+            <div style={{width: '100%'}}>
+
+                <ToastContainer
+                    position="bottom-center"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick={false}
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                    transition={Bounce}
+
+                />
+
+            </div>
+
         </div>
     )
 }

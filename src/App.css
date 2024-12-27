@@ -28,8 +28,13 @@
     --color-blue-8: #2137de;
     --color-blue-9: #001fff;
 
+    /** Parametry pro načítání při výběru přechodu **/
     --size-loader: 50px;
     --color-loader: #fff 90%, #fff0;
+
+    /** Nastavení velikosti notifikací typu Toast **/
+    --toastify-toast-width: 'fit-content';
+
 }
 
 /** Skrytí šipky u vstupu "number" **/
