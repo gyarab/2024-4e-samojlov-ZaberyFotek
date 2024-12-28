@@ -16,6 +16,7 @@ import {resizeCanvasOption} from "./Options/resizeCanvasOption";
 import {cameraOption} from "./Options/cameraOption";
 import {transitionOption} from "./Options/transitionOption";
 import {Bounce, toast, ToastContainer} from 'react-toastify';
+import {Transitions} from "../Transitions/Transitions";
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -71,8 +72,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [coordinateX, setCoordinateX] = useState(0);
 
     // Výpočet pozice Y obrázku
-    const [coordinateY, setCoordinateY] = useState(0)
-
+    const [coordinateY, setCoordinateY] = useState(0);
 
     /** Proměnné pro sekci - STAHOVÁNÍ KLIPU **/
 
@@ -261,21 +261,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 //console.log("XXX", currentPiece.transition)
 
-                // Pravidelné obnovení změny kamery
-                handlePieceUpdate(
-                    activeIndex,
-                    currentPiece.src,
-                    currentPiece.width,
-                    currentPiece.left,
-                    currentPiece.isSubmitted,
-                    currentPiece.arrow,
-                    currentPiece.duration,
-                    2,
-                    currentPiece.arrowDirection,
-                    currentPiece.transition,
-                    cameraSize
-                );
-
                 const img = new Image();
 
                 // Obsah obrázku
@@ -307,17 +292,20 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 let cameraHeight = parseInt(cameraSize?.height) || 100;
 
                 // Výpočet rychlostí dle souřadnic
-                let speedX = arrowPosition.x === "rotate"
-                    ? ((img.width - cameraWidth) / 2) / (duration)
+                let speedX = arrowPosition.x === "rotation"
+                    ? ((img.width - cameraWidth) / 4) / (duration)
                     : ((img.width - cameraWidth) / duration);
 
-                let speedY = arrowPosition.x === "rotate"
-                    ? ((img.height - cameraHeight) / 2) / (duration)
+                let speedY = arrowPosition.x === "rotation"
+                    ? ((img.height - cameraHeight) / 4) / (duration)
                     : ((img.height - cameraHeight)) / (duration);
 
                 // Výpočet pozice kamery
                 let positionX = speedX * startClip;
                 let positionY = speedY * startClip;
+
+                // Další prvek na časové ose
+                const nextValue = selectedPieces[i + 1];
 
                 // Funkce pro určení správného směru pozice na základě směru pohybu
                 const arrowSetUp = (arrow, positionClip, maxDimension, cameraDimension) => {
@@ -349,25 +337,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 } else if (arrowPosition.x === "rotation") {
 
-                    // console.log("TIME " + count + " " + startPiece);
-
-                    // console.log("DIRECTION: " + currentDirection)
-
-                    // Pokud se začátek částice rovná aktuálnímu času
-                    // if (Math.round(startPiece * 10) === Math.round(count * 10)) {
-                    //
-                    //     setCoordinateX(0);
-                    //     setCoordinateY(0);
-                    //     positionX = 0;
-                    //     positionY = 0;
-                    //     setCurrentDirection("right");
-                    // }
-                    //
-                    // if (coordinateX === 0 && coordinateY === 0) {
-                    //
-                    //     setCurrentDirection("right");
-                    // }
-
                     const squareRotation = getSquareRotation(
                         arrowPosition,
                         positionX,
@@ -395,8 +364,25 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 setCoordinateX(positionX);
                 setCoordinateY(positionY);
 
-                //console.log("COUNT", Math.abs(endPiece - count).toFixed(1))
+                // Jednotlivé metody vytvářející dané přechody
+                const { fadeTransition, slideTransitionRight } = Transitions(
+                    ctx,
+                    canvas,
+                    cameraWidth,
+                    cameraHeight,
+                    currentPiece,
+                    nextValue,
+                    count,
+                    coordinateX,
+                    coordinateY,
+                    videoLength,
+                    barWidth,
+                    getSquareRotation,
+                    setCoordinateX,
+                    setCoordinateY
+                );
 
+                //console.log("COUNT", Math.abs(endPiece - count).toFixed(1))
 
                 // Částice obsahující klip
                 if (currentPiece.isSubmitted && pieceTimeConditional) {
@@ -425,7 +411,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                             canvas.width,
                             canvas.height
                         );
-                    };
+                    }
 
                     // Přehrání klipu
                     if (isPlaying && pieceTimeConditional) {
@@ -434,30 +420,46 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                             && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
                                 && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))) {
 
-                            const nextPiece = selectedPieces.find(x => x?.value === currentPiece?.value + 1);
+                            setAlready(true);
 
                             if (currentPiece?.transition?.transitionID === 1) {
 
-                                setAlready(true);
+                                fadeTransition(1500, () => {
 
-                                fadeTransition(ctx, canvas, cameraWidth, cameraHeight, currentPiece,
-                                    nextPiece, count, endPiece, coordinateX, coordinateY, 1500, () => {
+                                    setAlready(false);
 
-                                        setAlready(false);
+                                }, arrowSetUp);
 
-                                        requestAnimationFrame(createClip);
-                                    });
+                                // fadeTransition(ctx, canvas,
+                                //     cameraWidth,
+                                //     cameraHeight,
+                                //     currentPiece,
+                                //     nextValue,
+                                //     count,
+                                //     coordinateX,
+                                //     coordinateY,
+                                //     1500, () => {
+                                //
+                                //     setAlready(false);
+                                //
+                                // }, arrowSetUp,
+                                //     videoLength,
+                                //     barWidth,
+                                //     getSquareRotation, setCoordinateX, setCoordinateY);
 
-                                console.log("ALREADY", already)
-
-                            } else {
-                                console.log("PRECHOD ");
                             }
+                            else if (currentPiece?.transition?.transitionID === 2) {
 
-                            console.log("ALREADY 2", already, currentPiece?.transition)
-                        } else if (!already) {
+                                slideTransitionRight(1500, () => {
 
-                            console.log("NEW", coordinateX, coordinateY)
+                                    setAlready(false);
+
+                                }, arrowSetUp);
+                            }
+                        }
+
+                        else if (!already) {
+
                             requestAnimationFrame(createClip);
                         }
 
@@ -486,21 +488,15 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
                             && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))) {
 
-                        const nextPiece = selectedPieces.find(x => x?.value === currentPiece?.value + 1);
-
                         if (currentPiece?.transition?.transitionID === 1) {
 
-                            fadeTransition(ctx, canvas, cameraWidth, cameraHeight, currentPiece,
-                                nextPiece, count, endPiece, coordinateX, coordinateY, 1500, null);
-
-                            console.log("ALREADY", already)
-
-                            return;
-
-                        } else {
-                            console.log("PRECHOD ");
+                            fadeTransition(1500, null, null);
                         }
 
+                        else if (currentPiece?.transition?.transitionID === 2) {
+
+                            slideTransitionRight(1500, null, null);
+                        }
 
                     } else {
 
@@ -516,7 +512,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                             canvas.height
                         );
                     }
-
 
                     setPieceClicked(true);
 
@@ -545,7 +540,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                                 setTransitionRes(transition.transitionID);
 
-                                console.log("CCCCC", transition)
+                                // console.log("CCCCC", transition)
 
                                 const currentPiece = selectedPieces.find(piece => piece.id === activeIndex);
 
@@ -897,7 +892,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         let intervalId = null;
 
-        console.log("Count: ", currentTime, "s");
+        // console.log("Count: ", currentTime, "s");
 
         // Pokud uživatel klikne na tlačítko 'Stáhnout video'
         if (downloadBtn) {
@@ -1245,128 +1240,19 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         userSelect: "none"
     };
 
-    // Body na časové ose
+// Body na časové ose
     const checkPoints = [];
 
-    // Vzdálenost mezi body
+// Vzdálenost mezi body
     const spacingPoints = 2;
 
-    // Výpočet měřítka
+// Výpočet měřítka
     const pixelsPerSecond = barWidth / videoLength;
 
     for (let i = 0; i <= videoLength; i += spacingPoints) {
 
         checkPoints.push(i);
     }
-
-    /** Funkce pro vytvoření plynulého přechodu (Fade Transition) **/
-    const fadeTransition = (
-        ctx,
-        canvas,
-        cameraWidth,
-        cameraHeight,
-        currentPiece,
-        nextPiece,
-        count,
-        endPiece,
-        coordinateX,
-        coordinateY,
-        totalDuration,
-        onComplete
-    ) => {
-        let fadeAmount = 0;
-        const frameDuration = 1000 / 60;
-        const fadeStep = frameDuration / (totalDuration / 2);
-
-        const img = new Image();
-        const nextImg = new Image();
-
-        img.src = currentPiece.src;
-        nextImg.src = nextPiece.src;
-
-        const sizeCurrent = currentPiece?.isSubmitted
-            ? {x: cameraWidth, y: cameraHeight}
-            : {x: img.width, y: img.height};
-        const sizeNext = nextPiece?.isSubmitted
-            ? {x: cameraWidth, y: cameraHeight}
-            : {x: nextImg.width, y: nextImg.height};
-
-        const coordinateCurrent = currentPiece?.isSubmitted
-            ? {x: coordinateX, y: coordinateY}
-            : {x: 0, y: 0};
-
-        const coordinateNext = nextPiece?.isSubmitted
-            ? {x: coordinateX, y: coordinateY}
-            : {x: 0, y: 0};
-
-
-        let imagesLoaded = 0;
-        const checkImagesLoaded = () => {
-            imagesLoaded++;
-            if (imagesLoaded === 2) fadeOut();
-        };
-
-        img.onload = checkImagesLoaded;
-        nextImg.onload = checkImagesLoaded;
-
-        const fadeOut = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.globalAlpha = 1 - fadeAmount;
-
-            ctx.drawImage(
-                img,
-                coordinateCurrent.x,
-                coordinateCurrent.y,
-                sizeCurrent.x,
-                sizeCurrent.y,
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-            fadeAmount += fadeStep;
-
-            if (fadeAmount < 1) {
-                requestAnimationFrame(fadeOut);
-            } else {
-                fadeAmount = 0;
-                requestAnimationFrame(fadeIn);
-            }
-        };
-
-        const fadeIn = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.globalAlpha = fadeAmount;
-
-            ctx.drawImage(
-                nextImg,
-                coordinateNext.x,
-                coordinateNext.y,
-                sizeNext.x,
-                sizeNext.y,
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-            fadeAmount += fadeStep;
-
-            if (fadeAmount < 1) {
-                requestAnimationFrame(fadeIn);
-            } else {
-                ctx.globalAlpha = 1;
-
-                if (onComplete) {
-                    onComplete();
-
-                    // problém: zobrazí konec částice, potřebujeme začátek
-
-                    console.log("COORDINATES", coordinateX, coordinateY)
-                }
-            }
-        };
-    };
 
     /** Nastavení aktuálního indexu částice **/
     const handlePieceUpdate = (id, src, width, left, isSubmitted, arrow, duration, special, arrowDirection, transition, cameraSizeObject) => {
@@ -1389,7 +1275,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     const [isFlexStart, setIsFlexStart] = useState(false);
 
-    // Data pro výběr rozměrů velikosti plochy
+// Data pro výběr rozměrů velikosti plochy
     const canvasTypes = [
 
         {icon: <LuRectangleHorizontal/>, ratio: '4:3', name: 'Na šířku'},
@@ -1402,7 +1288,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {icon: <CgScreenWide/>, ratio: '21:9', name: 'Ultra širokoúhlý'}
     ];
 
-    // Data pro výběr přechodů mezi snímky
+// Data pro výběr přechodů mezi snímky
     const transitionTypes = [
 
         {name: 'Prolnout'},
@@ -1414,7 +1300,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {name: 'Galerie'}
     ];
 
-    // Data pro výběr rozměrů kamery
+// Data pro výběr rozměrů kamery
     const cameraTypes = [
 
         {sizeX: "50 px", sizeY: "50 px"},
@@ -1556,7 +1442,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         //}
     };
 
-    // Nástroje pro správu klipu
+// Nástroje pro správu klipu
     const clipTools = [
         {icon: <RiUploadCloud2Line/>, label: 'Média'},
         {icon: <VscScreenFull/>, label: 'Plátno', content: resizeCanvasOption},
@@ -1566,12 +1452,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         {icon: <FaCameraRetro/>, label: 'Kamera', content: cameraOption}
     ];
 
-    // Aktivní nástroj zvolený uživatelem
+// Aktivní nástroj zvolený uživatelem
     const [activeTool, setActiveTool] = useState(null);
 
     const [index, setIndex] = useState(0);
 
-    // Aktivní nástroj a index pro správu klipu
+// Aktivní nástroj a index pro správu klipu
     const handleToolClick = (index) => {
 
         setActiveTool(index);

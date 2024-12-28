@@ -158,7 +158,7 @@ const TimelinePieces = ({
 
         if (!piece) return;
 
-        console.log("ID", piece.id, piece?.transition?.coordinateRes);
+        //console.log("ID", piece.id, piece?.transition?.coordinateRes);
 
         // ID prvku
         const pieceID = piecesArray.findIndex(p => p.id === piece.id);

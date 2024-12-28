@@ -877,7 +877,7 @@ function Zabery(props) {
         // const piece = selectedPieces[timelineItem];
 
         const currentPiece = selectedPieces.find(piece => piece.id === timelineItem);
-
+        //
         const durationValue =
             currentPiece?.transition?.transitionID !== null &&
             currentPiece?.transition?.transitionID !== undefined ? currentPiece?.duration : rangeValue;
