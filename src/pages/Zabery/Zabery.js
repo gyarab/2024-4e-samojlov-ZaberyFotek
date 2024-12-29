@@ -886,9 +886,9 @@ function Zabery(props) {
 
         handlePieces(
             timelineItem,
-            currentPiece?.src,
-            currentPiece?.width,
-            currentPiece?.left,
+            null,
+            null,
+            null,
             true,
             activeArrow,
             durationValue,

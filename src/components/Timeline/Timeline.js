@@ -105,6 +105,10 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     // Nastavení výběru uživatele v sekci nástrojů
     const [submitBtn, setSubmitBtn] = useState(null);
 
+    // Spuštění přechodu pouze jedenkrát za časový úsek
+    const [once, setOnce] = useState(false);
+
+    // Oddělení vykreslování obrazu od přechodu
     const [already, setAlready] = useState(false);
 
     // Vytvoření reference pro přístup k tlačítku
@@ -365,7 +369,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 setCoordinateY(positionY);
 
                 // Jednotlivé metody vytvářející dané přechody
-                const { fadeTransition, slideTransitionRight } = Transitions(
+                const {fadeTransition, slideTransitionRight, flipTransition, pullInTransition} = Transitions(
                     ctx,
                     canvas,
                     cameraWidth,
@@ -378,8 +382,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     videoLength,
                     barWidth,
                     getSquareRotation,
-                    setCoordinateX,
-                    setCoordinateY
+                    arrowSetUp
                 );
 
                 //console.log("COUNT", Math.abs(endPiece - count).toFixed(1))
@@ -418,9 +421,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                         if (currentPiece?.transition?.transitionID !== null && count < endPiece
                             && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
-                                && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))) {
+                            && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
+                            && once) {
 
                             setAlready(true);
+
+                            setOnce(false);
 
                             if (currentPiece?.transition?.transitionID === 1) {
 
@@ -428,39 +434,37 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                                     setAlready(false);
 
-                                }, arrowSetUp);
+                                });
 
-                                // fadeTransition(ctx, canvas,
-                                //     cameraWidth,
-                                //     cameraHeight,
-                                //     currentPiece,
-                                //     nextValue,
-                                //     count,
-                                //     coordinateX,
-                                //     coordinateY,
-                                //     1500, () => {
-                                //
-                                //     setAlready(false);
-                                //
-                                // }, arrowSetUp,
-                                //     videoLength,
-                                //     barWidth,
-                                //     getSquareRotation, setCoordinateX, setCoordinateY);
-
-                            }
-                            else if (currentPiece?.transition?.transitionID === 2) {
+                            } else if (currentPiece?.transition?.transitionID === 2) {
 
                                 slideTransitionRight(1500, () => {
 
                                     setAlready(false);
 
-                                }, arrowSetUp);
-                            }
-                        }
+                                }, "right");
 
-                        else if (!already) {
+                            } else if (currentPiece?.transition?.transitionID === 3) {
+
+                                slideTransitionRight(1500, () => {
+
+                                    setAlready(false);
+
+                                }, "left");
+
+                            } else if (currentPiece?.transition?.transitionID === 4) {
+
+                                flipTransition(1500, () => {
+
+                                    setAlready(false);
+
+                                });
+                            }
+
+                        } else if (!already) {
 
                             requestAnimationFrame(createClip);
+                            setOnce(true);
                         }
 
                     } else {
@@ -477,6 +481,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                             canvas.width,
                             canvas.height
                         );
+
+                        setOnce(true);
                     }
 
                     break;
@@ -486,19 +492,35 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     if (currentPiece?.transition?.transitionID !== null && count < endPiece
                         && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
-                            && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))) {
+                        && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
+                        && once) {
+
+                        setOnce(false);
 
                         if (currentPiece?.transition?.transitionID === 1) {
 
-                            fadeTransition(1500, null, null);
-                        }
+                            fadeTransition(1500, null);
 
-                        else if (currentPiece?.transition?.transitionID === 2) {
+                        } else if (currentPiece?.transition?.transitionID === 2) {
 
-                            slideTransitionRight(1500, null, null);
+                            slideTransitionRight(1500, null, "right");
+
+                        } else if (currentPiece?.transition?.transitionID === 3) {
+
+                            slideTransitionRight(1500, null, "left");
+
+                        } else if (currentPiece?.transition?.transitionID === 4) {
+
+                            flipTransition(1500, null);
+
+                        } else if (currentPiece?.transition?.transitionID === 5) {
+
+                            pullInTransition(500, null);
                         }
 
                     } else {
+
+                        setOnce(true);
 
                         // Vyčistění plochy
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
