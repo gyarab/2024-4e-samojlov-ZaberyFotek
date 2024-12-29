@@ -123,7 +123,25 @@ function Zabery(props) {
 
         if (item.includes('arrow') && activeArrow != null) {
 
-            handlePieces(timelineItem, null, null, null, false, activeArrow, rangeValue, 3, arrowDirection, null);
+            const currentPiece = selectedPieces.find(piece => piece.id === timelineItem);
+
+            const durationValue =
+                currentPiece?.transition?.transitionID !== null &&
+                currentPiece?.transition?.transitionID !== undefined ? currentPiece?.duration : rangeValue;
+
+            handlePieces(
+                timelineItem,
+                currentPiece?.src,
+                currentPiece?.width,
+                currentPiece?.left,
+                true,
+                activeArrow,
+                durationValue,
+                3,
+                arrowDirection,
+                currentPiece?.transition,
+                currentPiece?.cameraSize);
+
             console.log("direction", activeArrow, directions);
 
             setActiveArrow(item);
@@ -882,13 +900,13 @@ function Zabery(props) {
             currentPiece?.transition?.transitionID !== null &&
             currentPiece?.transition?.transitionID !== undefined ? currentPiece?.duration : rangeValue;
 
-        console.log("WIDTH " + currentPiece.width, currentPiece.left)
+        console.log("WIDTH " + currentPiece.duration, rangeValue, currentPiece.left)
 
         handlePieces(
             timelineItem,
-            null,
-            null,
-            null,
+            currentPiece?.src,
+            currentPiece?.width,
+            currentPiece?.left,
             true,
             activeArrow,
             durationValue,

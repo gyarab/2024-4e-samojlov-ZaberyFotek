@@ -369,7 +369,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 setCoordinateY(positionY);
 
                 // Jednotlivé metody vytvářející dané přechody
-                const {fadeTransition, slideTransitionRight, flipTransition, pullInTransition} = Transitions(
+                const {
+                    blinkTransition,
+                    fadeTransition,
+                    slideTransition,
+                    flipTransition,
+                    pullInTransition,
+                    blurTransition
+                } = Transitions(
                     ctx,
                     canvas,
                     cameraWidth,
@@ -384,6 +391,17 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     getSquareRotation,
                     arrowSetUp
                 );
+
+                // Mapování přechodů na funkce a jejich trvání
+                const transitionsMap = {
+                    0: {func: blinkTransition, duration: 1500},
+                    1: {func: fadeTransition, duration: 1500},
+                    2: {func: slideTransition, duration: 1500},
+                    3: {func: slideTransition, duration: 1500},
+                    4: {func: flipTransition, duration: 1500},
+                    5: {func: pullInTransition, duration: 1500},
+                    6: {func: blurTransition, duration: 1500}
+                };
 
                 //console.log("COUNT", Math.abs(endPiece - count).toFixed(1))
 
@@ -421,44 +439,27 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                         if (currentPiece?.transition?.transitionID !== null && count < endPiece
                             && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
-                            && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
+                                && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
                             && once) {
 
                             setAlready(true);
 
                             setOnce(false);
 
-                            if (currentPiece?.transition?.transitionID === 1) {
+                            // Získání ID přechodu a volání příslušné funkce
+                            const transitionID = currentPiece?.transition?.transitionID;
+                            const transition = transitionsMap[transitionID];
 
-                                fadeTransition(1500, () => {
+                            if (transition) {
 
-                                    setAlready(false);
-
-                                });
-
-                            } else if (currentPiece?.transition?.transitionID === 2) {
-
-                                slideTransitionRight(1500, () => {
-
-                                    setAlready(false);
-
-                                }, "right");
-
-                            } else if (currentPiece?.transition?.transitionID === 3) {
-
-                                slideTransitionRight(1500, () => {
-
-                                    setAlready(false);
-
-                                }, "left");
-
-                            } else if (currentPiece?.transition?.transitionID === 4) {
-
-                                flipTransition(1500, () => {
-
-                                    setAlready(false);
-
-                                });
+                                // Pro slideTransitionRight přidání směru
+                                if (transitionID === 2 || transitionID === 3) {
+                                    const direction = transitionID === 2 ? "right" : "left";
+                                    transition.func(transition.duration, () => setAlready(false), direction);
+                                } else {
+                                    // Zavolání funkce přechodu
+                                    transition.func(transition.duration, () => setAlready(false));
+                                }
                             }
 
                         } else if (!already) {
@@ -492,30 +493,25 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     if (currentPiece?.transition?.transitionID !== null && count < endPiece
                         && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
-                        && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
+                            && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
                         && once) {
 
                         setOnce(false);
 
-                        if (currentPiece?.transition?.transitionID === 1) {
+                        // Získání ID přechodu a volání příslušné funkce
+                        const transitionID = currentPiece?.transition?.transitionID;
+                        const transition = transitionsMap[transitionID];
 
-                            fadeTransition(1500, null);
+                        if (transition) {
 
-                        } else if (currentPiece?.transition?.transitionID === 2) {
-
-                            slideTransitionRight(1500, null, "right");
-
-                        } else if (currentPiece?.transition?.transitionID === 3) {
-
-                            slideTransitionRight(1500, null, "left");
-
-                        } else if (currentPiece?.transition?.transitionID === 4) {
-
-                            flipTransition(1500, null);
-
-                        } else if (currentPiece?.transition?.transitionID === 5) {
-
-                            pullInTransition(500, null);
+                            // Pro slideTransitionRight přidání směru
+                            if (transitionID === 2 || transitionID === 3) {
+                                const direction = transitionID === 2 ? "right" : "left";
+                                transition.func(transition.duration, null, direction);
+                            } else {
+                                // Zavolání funkce přechodu
+                                transition.func(transition.duration, null);
+                            }
                         }
 
                     } else {
@@ -1313,13 +1309,13 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 // Data pro výběr přechodů mezi snímky
     const transitionTypes = [
 
-        {name: 'Prolnout'},
+        {name: 'Záblesk'},
         {name: 'Plynule zesílit'},
         {name: 'Snímek zprava'},
         {name: 'Snímek zleva'},
         {name: 'Překlopit'},
-        {name: 'Krychle'},
-        {name: 'Galerie'}
+        {name: 'Vtáhnout'},
+        {name: 'Rozmazat'}
     ];
 
 // Data pro výběr rozměrů kamery
