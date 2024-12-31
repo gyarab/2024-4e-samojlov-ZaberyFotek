@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "../../backend/node_modules/.bin/nodemon index.js",
+    "client": "npm run start --prefix ..",
+    "dev": "../../backend/node_modules/.bin/concurrently --kill-others-on-fail=true \\\"npm run server\\\" \\\"npm run client\\\""
+  },
+  "proxy": "http://localhost:4000/",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "body-parser": "^1.20.3",
+    "concurrently": "^8.2.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
