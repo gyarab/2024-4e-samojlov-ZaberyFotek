@@ -14,7 +14,7 @@ export const Container = styled.div`
 export const FormWrapper = styled.div`
     background: white;
     border-radius: 16px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 20px 0 #d6aaff;
     padding: 40px 32px;
     width: 400px;
 `;
@@ -23,12 +23,9 @@ export const Title = styled.h1`
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 8px;
-`;
-
-export const Subtitle = styled.p`
-    font-size: 16px;
-    color: #555;
-    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `;
 
 export const InputWrapper = styled.div`
@@ -37,7 +34,8 @@ export const InputWrapper = styled.div`
 
 export const Label = styled.label`
     font-size: 14px;
-    color: #555;
+    font-weight: 400;
+    color: var(--color-shadow-8);
     display: block;
     margin-bottom: 8px;
 `;
@@ -52,7 +50,7 @@ export const Input = styled.input`
   &:focus {
     outline: none;
     border-color: #0073e6;
-    box-shadow: 0px 0px 4px rgba(0, 115, 230, 0.4);
+    box-shadow: 0 0 4px rgba(0, 115, 230, 0.4);
   }
 `;
 
@@ -60,6 +58,8 @@ export const ErrorMessage = styled.p`
   color: red;
   font-size: 14px;
   margin-bottom: 16px;
+  margin-left: 8px;
+  margin-top: 2px;
 `;
 
 export const ForgotPassword = styled.a`
@@ -77,18 +77,45 @@ export const ForgotPassword = styled.a`
 `;
 
 export const Button = styled.button`
-  width: 100%;
-  padding: 12px;
-  background-color: #0073e6;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    background-color: #0073e6;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 
-  &:hover {
-    background-color: #005bb5;
-  }
+    &:hover {
+        background-color: #005bb5;
+    }
+
+    p {
+        transition: 0.1s ease-in;
+    }
+
+    &:hover p {
+        transform: translateX(50%);
+    }
+`;
+
+export const SignUpLink = styled.a`
+    display: block;
+    font-size: 14px;
+    color: var(--color-shadow-8);
+    text-align: center;
+    margin-top: 20px;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+        text-decoration-color: var(--color-shadow-4);
+    }
 `;

@@ -491,6 +491,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     // Častice neobsahující klip
                 } else if (!currentPiece.isSubmitted && pieceTimeConditional) {
 
+                    console.log("HAFFF")
+
+                    handlePieceUpdate(
+                        currentPiece?.id,
+                        currentPiece.src,
+                        currentPiece.width,
+                        currentPiece.left,
+                        currentPiece.isSubmitted,
+                        currentPiece.arrow,
+                        currentPiece.duration,
+                        0,
+                        currentPiece.arrowDirection,
+                        currentPiece?.transition,
+                        currentPiece.cameraSize
+                    );
+
                     if (currentPiece?.transition?.transitionID !== null && count < endPiece
                         && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
                             && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
@@ -593,8 +609,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                                         transitionID: transitionID,
                                     }));
                                 }
-
-                                // console.log("AA", transitionRes, "000", currentPiece?.id);
                             }
                         }
 
@@ -1675,6 +1689,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', padding: '20px'}}>
 
                     <div
+                        key={index}
                         style={{
                             width: `${barWidth}px`,
                             height: '100px',

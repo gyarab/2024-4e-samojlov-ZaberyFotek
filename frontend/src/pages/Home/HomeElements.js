@@ -51,7 +51,9 @@ export const HeadDescription = styled.p`
     margin-right: 25px;
 `;
 
-export const ImageArea = styled.div`
+export const ImageArea = styled.div.withConfig({
+    shouldForwardProp: (prop) => !['backgroundIsVisible', 'imageHeight', 'imageWidth', 'maxHeight', 'isClicked'].includes(prop),
+})`
     display: ${({ isClicked }) => (isClicked ? 'flex' : 'grid')};
     justify-items: center;
     height: ${({ isClicked, imageHeight }) =>
@@ -131,7 +133,7 @@ export const DefaultBtn = styled.button`
     
 `;
 
-export const TextDesc = styled.text`
+export const TextDesc = styled.p`
     color: black;
     font-weight: 700;
     font-size: 1.5rem;

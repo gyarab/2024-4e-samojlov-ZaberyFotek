@@ -8,7 +8,9 @@ export const ClipContainer = styled.div`
     padding-top: 15px;
 `;
 
-export const VideoTools = styled.div`
+export const VideoTools = styled.div.withConfig({
+    shouldForwardProp: (prop) => !['isFlexStart'].includes(prop),
+})`
     background: linear-gradient(to right, var(--color-blue-2), var(--color-blue-8));
     flex: 1;
     display: flex;
@@ -40,7 +42,9 @@ export const TimelineContainer = styled.div`
     width: calc(100vw * 0.75);
 `;
 
-export const ClipTool = styled.div`
+export const ClipTool = styled.div.withConfig({
+    shouldForwardProp: (prop) => !['isActive', 'fadeOut'].includes(prop),
+})`
     display: flex;
     justify-content: center;
     align-items: center;
@@ -79,7 +83,9 @@ export const ClipTool = styled.div`
   `}
 `;
 
-export const CanvasContent = styled.div`
+export const CanvasContent = styled.div.withConfig({
+    shouldForwardProp: (prop) => !['isClicked', 'hasError'].includes(prop),
+})`
     display: flex;
     flex-direction: row;
     justify-content: space-between;

@@ -4,34 +4,47 @@ import {
     Button,
     Container,
     ErrorMessage,
-    ForgotPassword,
     FormWrapper,
     Input,
     InputWrapper,
-    Label, SignUpLink,
+    Label,
+    SignUpLink,
     Title
-} from "./LoginComponents";
+} from "../Prihlaseni/LoginComponents";
 import {Bounce, toast, ToastContainer} from "react-toastify";
 
-/** Hlavní komponenta Login formuláře **/
-function Login() {
+/** Hlavní komponenta Registration formuláře **/
+function SignUp() {
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [usernameError, setUsernameError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    /** Resetování chybových hlášení **/
+    /** Resetování chybových hlášení při změně hodnoty polí **/
     useEffect(() => {
+        if (username) setUsernameError('');
         if (email) setEmailError('');
         if (password) setPasswordError('');
-    }, [email, password]);
+    }, [username, email, password]);
 
-    /** Funkce pro zpracování přihlášení **/
-    const handleLogin = (e) => {
+    /** Funkce pro zpracování registrace **/
+    const handleSignUp = (e) => {
         e.preventDefault();
 
+        // Vymazání chybových hlášení, pokud nějaké existují
+        setUsernameError('');
         setEmailError('');
         setPasswordError('');
+
+        // Počet slov ve vstupu Username
+        const usernameWords = username.trim().split(/\s+/);
+
+        if (!username || usernameWords < 2) {
+            setUsernameError('Uživatelské jméno musí obsahovat jméno a příjmení');
+            return;
+        }
 
         // Validace emailu při submitu
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,40 +53,49 @@ function Login() {
             return;
         }
 
-        // Kontrola hesla
         if (!password) {
             setPasswordError('Heslo je povinné');
             return;
         }
 
-        if (!emailError && !passwordError) {
-            toast.success("Přihlášení proběhlo úspěšně!");
+        if (!usernameError && !emailError && !passwordError) {
+
+            toast.success("Registrace proběhla úspěšně!");
         }
 
-        // API volání pro validaci přihlašovacích údajů
-        axios.post('http://localhost:4000/validatePassword', { email, password })
-            .then(res => {
-                if (res.status === 200) {
-                    alert('Your password is correct, Thank you for your service');
-                } else {
-                    alert('Your password is not correct. Please try again');
-                }
-            })
-            .catch(err => {
-                console.error("There was an error with the request", err);
-                if (err.response && err.response.status === 401) {
-                    alert('Invalid username or password');
-                } else {
-                    alert('An error occurred. Please try again later.');
-                }
-            });
+
+        // API volání pro registraci uživatele (odkomentujte po testování)
+        // axios.post('http://localhost:4000/register', { username, email, password })
+        //     .then(res => {
+        //         if (res.status === 200) {
+        //             alert('Registrace byla úspěšná!');
+        //         } else {
+        //             alert('Nastala chyba při registraci');
+        //         }
+        //     })
+        //     .catch(err => {
+        //         console.username("There was an username with the request", err);
+        //         alert('Došlo k chybě. Zkuste to znovu později.');
+        //     });
     };
 
     return (
         <Container>
             <FormWrapper>
-                <Title>Přihlášení</Title>
-                <form onSubmit={handleLogin}>
+                <Title>Registrace</Title>
+                <form onSubmit={handleSignUp}>
+                    <InputWrapper>
+                        <Label>Uživatelské jméno</Label>
+                        <Input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Např: Pan X"
+                        />
+
+                        {usernameError && <ErrorMessage>{usernameError}</ErrorMessage>}
+                    </InputWrapper>
+
                     <InputWrapper>
                         <Label>Email</Label>
                         <Input
@@ -93,12 +115,13 @@ function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Např: aBc#12x"
                         />
+
                         {passwordError && <ErrorMessage>{passwordError}</ErrorMessage>}
                     </InputWrapper>
 
-                    <ForgotPassword href="/zapomenute-heslo">Zapomněli jste heslo?</ForgotPassword>
-                    <Button type="submit">Přihlásit se <p>→</p></Button>
-                    <SignUpLink href="/registrace">Nemáte zatím účet? <b>Zaregistrujte se </b></SignUpLink>
+                    <Button type="submit">Zaregistrovat se<p>→</p></Button>
+
+                    <SignUpLink href="/prihlaseni">Máte již účet? <b>Přihlaste se</b></SignUpLink>
                 </form>
             </FormWrapper>
 
@@ -120,4 +143,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default SignUp;

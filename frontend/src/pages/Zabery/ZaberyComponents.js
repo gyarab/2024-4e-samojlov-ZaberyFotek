@@ -33,7 +33,9 @@ export const ZaberySidebarContainer = styled.nav`
 `;
 
 
-export const ZaberySidebarItem = styled.div`
+export const ZaberySidebarItem = styled.div.withConfig({
+    shouldForwardProp: (prop) => !['isClicked'].includes(prop),
+})`
     padding: 15px;
     border-radius: 25px;
     color: ${({isClicked}) => (isClicked ? '#00cc66' : 'white')};
@@ -83,7 +85,9 @@ export const Foto = styled.div`
     }
 `;
 
-export const SubmitBtn = styled.div`
+export const SubmitBtn = styled.div.withConfig({
+    shouldForwardProp: (prop) => !['isMarked'].includes(prop),
+})`
     height: 50px;
     padding: 15px;
     margin-top: 10px;
@@ -201,7 +205,9 @@ export const PieceImages = styled.div`
     }
 `;
 
-export const ArrowBtn = styled.button`
+export const ArrowBtn = styled.button.withConfig({
+    shouldForwardProp: (prop) => !['isClicked'].includes(prop),
+})`
     cursor: pointer;
     color: ${({isClicked}) => (isClicked ? '#00cc66' : 'white')};
     display: flex;

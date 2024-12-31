@@ -9,7 +9,7 @@ import {
 
 } from './NavbarComponents'
 
-
+/** Funkce zobrazující navigační panel **/
 function Navbar({toggle}) {
 
     /** Zdroj: https://github.com/cyrus8050/yt-react-navbar-transition/blob/master/src/Navbar.js **/

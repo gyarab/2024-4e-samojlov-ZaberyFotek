@@ -31,6 +31,7 @@ import {IoIosCheckmarkCircleOutline} from "react-icons/io";
 import {MdOutlineZoomOutMap, MdZoomInMap} from "react-icons/md";
 import {AiOutlineRotateLeft, AiOutlineRotateRight} from "react-icons/ai";
 
+/** Hlavní funkce obsahující veškeré nástroje a komponenty k vytvoření daného klipu **/
 function Zabery(props) {
 
     let {timelineRef, barWidth} = TimelineWidth();
@@ -55,6 +56,9 @@ function Zabery(props) {
 
     // Přidávání jednotlivých linií
     const [items, setItems] = useState([]);
+
+    // Zobrazení směrů šipek a délky částice v časové ose Timeline
+    const [pieceStatus, setPieceStatus] = useState(false);
 
     /** Funkce pro přidání nové linie **/
     const addItem = (array, newItem) => {
@@ -107,9 +111,13 @@ function Zabery(props) {
 
         setFunction(prevActiveItem => {
 
+            console.log("PREVITEM", prevActiveItem)
+
             const newActiveItem = (prevActiveItem === item ? null : item);
 
-            if (newActiveItem === 'item4' || (newActiveItem && newActiveItem.includes('arrow'))) {
+            console.log("NEW", newActiveItem)
+
+            if (newActiveItem === 'item4' || (prevActiveItem && prevActiveItem.includes('arrow'))) {
 
                 setPieceStatus(true);
 
@@ -123,32 +131,19 @@ function Zabery(props) {
 
         if (item.includes('arrow') && activeArrow != null) {
 
-            const currentPiece = selectedPieces.find(piece => piece.id === timelineItem);
-
-            const durationValue =
-                currentPiece?.transition?.transitionID !== null &&
-                currentPiece?.transition?.transitionID !== undefined ? currentPiece?.duration : rangeValue;
-
-            handlePieces(
-                timelineItem,
-                currentPiece?.src,
-                currentPiece?.width,
-                currentPiece?.left,
-                true,
-                activeArrow,
-                durationValue,
-                3,
-                arrowDirection,
-                currentPiece?.transition,
-                currentPiece?.cameraSize);
-
-            console.log("direction", activeArrow, directions);
+            handleClickMark(false);
 
             setActiveArrow(item);
 
             setArrowDirection(directions);
         }
     };
+
+    useEffect(() => {
+
+        handleClickMark(false);
+
+    }, [activeArrow, arrowDirection]);
 
     // Počet aktuálních sloupců a řádků v paneli nástrojů
     const [row, setAsRows] = useState(0);
@@ -725,6 +720,7 @@ function Zabery(props) {
             (newWidth == null || newLeft == null) &&
             cameraSize !== null;
 
+
         setTimelineItem(id);
 
         setActiveArrow(arrow);
@@ -867,47 +863,46 @@ function Zabery(props) {
     };
 
 
-    // Neustálý cyklus pro správnou funkčnost responzivity částic
-    useEffect(() => {
-
-        setSelectedPieces(prevPieces => {
-
-            const pieceWidth = 100;
-
-            return prevPieces.map((piece, index) => {
-                const gap = (barWidth - (prevPieces.length * pieceWidth)) / (prevPieces.length + 1);
-                const left = gap + index * (pieceWidth + gap);
-                return {...piece, left};
-            });
-        });
-
-    }, [barWidth]);
+    // // Neustálý cyklus pro správnou funkčnost responzivity částic
+    // useEffect(() => {
+    //
+    //     setSelectedPieces(prevPieces => {
+    //
+    //         const pieceWidth = 100;
+    //
+    //         return prevPieces.map((piece, index) => {
+    //             const gap = (barWidth - (prevPieces.length * pieceWidth)) / (prevPieces.length + 1);
+    //             const left = gap + index * (pieceWidth + gap);
+    //             return {...piece, left};
+    //         });
+    //     });
+    //
+    // }, [barWidth]);
 
     const [isMarked, setIsMarked] = useState(false);
 
     /** Funkce pro zobrazení efektů tlačítka **/
-    const handleClickMark = () => {
+    const handleClickMark = (isMarked) => {
 
-        // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };
-        //
-        // console.log("CAMERA fkeofkowe " + cameraSizeObject.currentIndex)
-
-        // const piece = selectedPieces[timelineItem];
-
+        // Aktuálně zvolený prvek
         const currentPiece = selectedPieces.find(piece => piece.id === timelineItem);
-        //
-        const durationValue =
-            currentPiece?.transition?.transitionID !== null &&
-            currentPiece?.transition?.transitionID !== undefined ? currentPiece?.duration : rangeValue;
 
-        console.log("WIDTH " + currentPiece.duration, rangeValue, currentPiece.left)
+        // Předchozí prvek v časové ose
+        const previousPiece = selectedPieces.find(x => (x?.value) === (currentPiece?.value - 1));
+
+        const durationValue =
+            (currentPiece?.transition?.transitionID !== null &&
+            currentPiece?.transition?.transitionID !== undefined) ||
+            (previousPiece?.transition?.transitionID !== null &&
+            previousPiece?.transition?.transitionID !== undefined) ||
+            !isMarked ? currentPiece?.duration : rangeValue;
 
         handlePieces(
             timelineItem,
             currentPiece?.src,
             currentPiece?.width,
             currentPiece?.left,
-            true,
+            isMarked,
             activeArrow,
             durationValue,
             3,
@@ -915,25 +910,23 @@ function Zabery(props) {
             currentPiece?.transition,
             currentPiece?.cameraSize);
 
-        // const cameraSizeObject = selectedPieces[timelineItem]?.cameraSize || { width: "100 px", height: "100 px", currentIndex: 1 };
-        //
-        // console.log("CAMERA fkeofkowe " + cameraSizeObject.currentIndex)
+        if (isMarked) {
 
-        setIsMarked(true);
+            setIsMarked(true);
 
-        // po jedné sekundě se tlačítko vrátí do původního stavu
-        setTimeout(() => {
-            setIsMarked(false);
-        }, 1000);
+            // po jedné sekundě se tlačítko vrátí do původního stavu
+            setTimeout(() => {
+                setIsMarked(false);
+            }, 1000);
+        }
     };
-
-    const [pieceStatus, setPieceStatus] = useState(false);
 
     /** Kliknutí na prvek v Timeline **/
     const handlePieceClick = (status) => {
 
         if (activeItem === 'item4') {
 
+            console.log("STATUS", status)
             setPieceStatus(status);
         }
     };
@@ -1018,7 +1011,7 @@ function Zabery(props) {
 
                 <ZaberySidebarItem isClicked={activeItem === 'item4'}
                                    onClick={() => handleVisibility('item4', setActiveItem)}
-                                   pieceStatus={pieceStatus}>
+                                   >
 
                     <PiNumberCircleFour style={{height: "35px", width: "35px"}}/> Vytvořit klipy
 
@@ -1145,7 +1138,7 @@ function Zabery(props) {
                         }}>
 
                             <SubmitBtn isMarked={isMarked}
-                                       onClick={handleClickMark}>
+                                       onClick={() => handleClickMark(true)}>
 
                                 <CheckmarkIcon>
                                     {isMarked ? <IoIosCheckmarkCircleOutline style={{

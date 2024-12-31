@@ -6,8 +6,7 @@ import {
     HeadingContainer,
     HomeContainer,
     ImageArea,
-    LoadedImage,
-    PlusIcon, ResizeImage, RowBtn,
+    PlusIcon,
     TextDesc,
     TextElements,
 } from "./HomeElements";
@@ -102,6 +101,7 @@ function Home(props) {
                         style={{
                             background: "linear-gradient(176deg, #001fff, #d3d7f8)",
                             backgroundClip: "text",
+                            WebkitBackgroundClip: "text",
                             WebkitTextFillColor: "transparent",
                             WebkitBoxDecorationBreak: "clone",
                             boxDecorationBreak: "clone",

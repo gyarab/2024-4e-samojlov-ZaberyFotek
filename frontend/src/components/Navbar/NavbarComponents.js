@@ -2,7 +2,9 @@ import styled from 'styled-components';
 import {Link} from "react-router-dom";
 import {FaBars} from "react-icons/fa";
 
-export const Nav = styled.nav`
+export const Nav = styled.div.withConfig({
+    shouldForwardProp: (prop) => !['show'].includes(prop),
+})`
     height: 80px;
     width: 100%;
     display: flex;
@@ -16,7 +18,6 @@ export const Nav = styled.nav`
     opacity: ${({ show }) => (show ? '1' : '0')};
     z-index: 100;
 `;
-
 
 export const NavLink = styled(Link)`
     color: black;

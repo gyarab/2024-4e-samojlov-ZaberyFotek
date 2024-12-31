@@ -1,7 +1,13 @@
 const express = require('express');
+
 const cors = require('cors');
+
 const sqlite3 = require('sqlite3').verbose();
+
+//const bcrypt = require('bcrypt');
+
 const bodyParser = require('body-parser');
+
 const app = express();
 
 // Povolení požadavků z jiných domén
@@ -11,7 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 // Inicializace SQLite databáze
-let db = new sqlite3.Database('credentials.db', (err) => {
+let db = new sqlite3.Database('users.db', (err) => {
     if (err) {
         console.error('Chyba při otevírání databáze: ', err.message); // Zalogování chyb při připojení k databázi
     } else {
@@ -19,31 +25,37 @@ let db = new sqlite3.Database('credentials.db', (err) => {
     }
 });
 
-// POST routa pro ověření hesla
+// POST routa pro ověření uživatele pomocí emailu
 app.post('/validatePassword', (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // Kontrola, zda jsou poskytnuty uživatelské jméno a heslo
-    if (!username || !password) {
-        return res.status(400).json({ validation: false, message: 'Uživatelské jméno a heslo jsou povinné.' });
+    // Kontrola, zda byly poskytnuty email a heslo
+    if (!email || !password) {
+        return res.status(400).json({ validation: false, message: 'Email a heslo jsou povinné' });
     }
 
-    // Dotaz na ověření přihlašovacích údajů v databázi
-    db.get('SELECT * FROM credentials WHERE username = ? AND password = ?', [username, password], (err, row) => {
+    // Validace formátu emailu
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ validation: false, message: 'Neplatný formát emailu' });
+    }
+
+    // Dotaz na databázi, zda jsou přihlašovací údaje platné
+    db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
         if (err) {
-            console.error('Chyba databáze: ', err.message);
+            console.error('Chyba databáze:', err.message);
             return res.status(500).json({ validation: false, message: 'Chyba databáze' });
         }
 
-        if (row) {
-            // Odeslání odpovědi při úspěšném ověření
-            res.status(200).json({ validation: true, message: 'Uživatel ověřen' });
+        // Kontrola, zda uživatel existuje a heslo odpovídá
+        if (row && row.password === password) {
+            return res.status(200).json({ validation: true, message: 'Uživatel ověřen' });
         } else {
-            // Odeslání odpovědi při neúspěšném ověření
-            res.status(401).json({ validation: false, message: 'Neplatné uživatelské jméno nebo heslo' });
+            return res.status(401).json({ validation: false, message: 'Neplatný email nebo heslo' });
         }
     });
 });
+
 
 // Spuštění serveru na portu 4000
 app.listen(4000, () => {

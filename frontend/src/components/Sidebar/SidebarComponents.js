@@ -3,7 +3,9 @@ import {FaTimes} from "react-icons/fa";
 import {Link as LinkR} from "react-router-dom";
 import {Link} from "react-router-dom";
 
-export const SidebarContainer = styled.aside`
+export const SidebarContainer = styled.aside.withConfig({
+        shouldForwardProp: (prop) => !['isOpen'].includes(prop),
+    })`
     position: fixed;
     z-index: 999;
     height: 100%;
