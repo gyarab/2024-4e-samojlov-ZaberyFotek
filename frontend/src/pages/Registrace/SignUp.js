@@ -34,7 +34,7 @@ function SignUp() {
         // Odstranění volného místa za posledním znakem
         const trimmedEmail = email.trim();
 
-        axios.post('http://localhost:4000/addUser', {
+        axios.post('http://localhost:4000/auth/register', {
             username: username,
             email: trimmedEmail,
             password: password

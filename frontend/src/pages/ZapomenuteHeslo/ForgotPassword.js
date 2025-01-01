@@ -31,21 +31,33 @@ function ForgotPassword() {
         // Odstranění volného místa za posledním znakem
         const trimmedEmail = email.trim();
 
-        axios.post('http://localhost:4000/validateForgotPassword', { email: trimmedEmail })
+        // API volání pro validaci přihlašovacích údajů
+        axios.post('http://localhost:4000/auth/validateForgotPassword', {
+            email: trimmedEmail,
+        })
             .then(res => {
-
                 if (res.data.validation) {
-
-                    toast.success("Zpráva s odkazem pro obnovení hesla byla právě odeslána na váš email");
+                    toast.success(res.data.message);
                 }
-
             })
             .catch(err => {
+                if (err.response && err.response.data && err.response.data.errors) {
 
-                if (err.response) {
-                    setEmailError(err.response.data.message || 'Nastala chyba. Zkuste to znovu později');
+                    const errors = err.response.data.errors;
+
+                    errors.forEach(error => {
+                        if (error.field === 'email') {
+                            setEmailError(error.message);
+                        }
+                    });
+                } else if (err.response?.status === 409){
+
+                    // Neplatné údaje
+                    setEmailError(err.response.data.message);
+
                 } else {
-                    setEmailError('Nelze se připojit k serveru. Zkontrolujte své připojení');
+
+                    toast.error(err.response?.data?.message || 'Nastala chyba. Zkuste to znovu později');
                 }
             });
     };

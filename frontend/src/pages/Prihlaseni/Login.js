@@ -33,38 +33,38 @@ function Login() {
         setEmailError('');
         setPasswordError('');
 
-        // Validace emailu při submitu
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email || !emailRegex.test(email)) {
-            setEmailError('Prosím, zadejte platnou emailovou adresu');
-            return;
-        }
-
-        // Kontrola hesla
-        if (!password) {
-            setPasswordError('Heslo je povinné');
-            return;
-        }
-
-        if (!emailError && !passwordError) {
-            toast.success("Přihlášení proběhlo úspěšně!");
-        }
+        // Odstranění volného místa za posledním znakem
+        const trimmedEmail = email.trim();
 
         // API volání pro validaci přihlašovacích údajů
-        axios.post('http://localhost:4000/validatePassword', { email, password })
+        axios.post('http://localhost:4000/auth/loginUser', {
+            email: trimmedEmail,
+            password: password
+        })
             .then(res => {
-                if (res.status === 200) {
-                    alert('Your password is correct, Thank you for your service');
-                } else {
-                    alert('Your password is not correct. Please try again');
+                if (res.data.validation) {
+                    toast.success(res.data.message);
                 }
             })
             .catch(err => {
-                console.error("There was an error with the request", err);
-                if (err.response && err.response.status === 401) {
-                    alert('Invalid username or password');
+                if (err.response && err.response.data && err.response.data.errors) {
+
+                    const errors = err.response.data.errors;
+
+                    errors.forEach(error => {
+                        if (error.field === 'email') {
+                            setEmailError(error.message);
+                        } else if (error.field === 'password') {
+                            setPasswordError(error.message);
+                        }
+                    });
+                } else if (err.response.status === 401){
+
+                    // Neplatné údaje
+                    toast.error(err.response.data.message);
+
                 } else {
-                    alert('An error occurred. Please try again later.');
+                    toast.error('Nastala chyba. Zkuste to znovu později');
                 }
             });
     };
