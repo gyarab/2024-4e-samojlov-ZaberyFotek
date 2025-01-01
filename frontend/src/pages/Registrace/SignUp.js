@@ -41,7 +41,7 @@ function SignUp() {
         })
             .then(res => {
                 if (res.data.validation) {
-                    toast.success(res.data.message);  // Show success message
+                    toast.success(res.data.message);
                 }
             })
             .catch(err => {
