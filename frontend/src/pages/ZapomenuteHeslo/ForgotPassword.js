@@ -10,6 +10,7 @@ import {
     Label, SignUpLink,
     Title
 } from "../Prihlaseni/LoginComponents";
+import {Bounce, toast, ToastContainer} from "react-toastify";
 
 /** Hlavní komponenta Login formuláře **/
 function ForgotPassword() {
@@ -27,30 +28,26 @@ function ForgotPassword() {
 
         setEmailError('');
 
-        // Validace emailu při submitu
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // Odstranění volného místa za posledním znakem
+        const trimmedEmail = email.trim();
 
-        if (!email || !emailRegex.test(email)) {
-            setEmailError('Prosím, zadejte platnou emailovou adresu');
-        }
+        axios.post('http://localhost:4000/validateForgotPassword', { email: trimmedEmail })
+            .then(res => {
 
-        // // API volání pro validaci přihlašovacích údajů
-        // axios.post('http://localhost:4000/validatePassword', { username: email, password })
-        //     .then(res => {
-        //         if (res.status === 200) {
-        //             alert('Your password is correct, Thank you for your service');
-        //         } else {
-        //             alert('Your password is not correct. Please try again');
-        //         }
-        //     })
-        //     .catch(err => {
-        //         console.error("There was an error with the request", err);
-        //         if (err.response && err.response.status === 401) {
-        //             alert('Invalid username or password');
-        //         } else {
-        //             alert('An error occurred. Please try again later.');
-        //         }
-        //     });
+                if (res.data.validation) {
+
+                    toast.success("Zpráva s odkazem pro obnovení hesla byla právě odeslána na váš email");
+                }
+
+            })
+            .catch(err => {
+
+                if (err.response) {
+                    setEmailError(err.response.data.message || 'Nastala chyba. Zkuste to znovu později');
+                } else {
+                    setEmailError('Nelze se připojit k serveru. Zkontrolujte své připojení');
+                }
+            });
     };
 
     return (
@@ -58,7 +55,8 @@ function ForgotPassword() {
             <FormWrapper>
                 <Title>Zapomenuté heslo</Title>
                 <form onSubmit={handleLogin}>
-                    <SignUpLink>Pro obnovení hesla vyplňte email, na který obdržíte odkaz pro obnovení hesla</SignUpLink>
+                    <SignUpLink>Pro obnovení hesla vyplňte email, na který obdržíte odkaz pro obnovení
+                        hesla</SignUpLink>
                     <InputWrapper>
                         <Label>Email</Label>
                         <Input
@@ -74,6 +72,21 @@ function ForgotPassword() {
                     <SignUpLink href="/registrace">Nemáte zatím účet? <b>Zaregistrujte se </b></SignUpLink>
                 </form>
             </FormWrapper>
+
+            <ToastContainer
+                position="bottom-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                transition={Bounce}
+
+            />
         </Container>
     );
 }

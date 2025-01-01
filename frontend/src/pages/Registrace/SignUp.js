@@ -22,13 +22,6 @@ function SignUp() {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    /** Resetování chybových hlášení při změně hodnoty polí **/
-    useEffect(() => {
-        if (username) setUsernameError('');
-        if (email) setEmailError('');
-        if (password) setPasswordError('');
-    }, [username, email, password]);
-
     /** Funkce pro zpracování registrace **/
     const handleSignUp = (e) => {
         e.preventDefault();
@@ -38,47 +31,43 @@ function SignUp() {
         setEmailError('');
         setPasswordError('');
 
-        // Počet slov ve vstupu Username
-        const usernameWords = username.trim().split(/\s+/);
+        // Odstranění volného místa za posledním znakem
+        const trimmedEmail = email.trim();
 
-        if (!username || usernameWords < 2) {
-            setUsernameError('Uživatelské jméno musí obsahovat jméno a příjmení');
-            return;
-        }
+        axios.post('http://localhost:4000/addUser', {
+            username: username,
+            email: trimmedEmail,
+            password: password
+        })
+            .then(res => {
+                if (res.data.validation) {
+                    toast.success(res.data.message);  // Show success message
+                }
+            })
+            .catch(err => {
+                if (err.response && err.response.data && err.response.data.errors) {
 
-        // Validace emailu při submitu
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email || !emailRegex.test(email)) {
-            setEmailError('Prosím, zadejte platnou emailovou adresu');
-            return;
-        }
+                    const errors = err.response.data.errors;
 
-        if (!password) {
-            setPasswordError('Heslo je povinné');
-            return;
-        }
+                    errors.forEach(error => {
+                        if (error.field === 'username') {
+                            setUsernameError(error.message);
+                        } else if (error.field === 'email') {
+                            setEmailError(error.message);
+                        } else if (error.field === 'password') {
+                            setPasswordError(error.message);
+                        }
+                    });
+                } else if (err.response.status === 409){
 
-        if (!usernameError && !emailError && !passwordError) {
+                    // Email již existuje
+                    setEmailError(err.response.data.message);
 
-            toast.success("Registrace proběhla úspěšně!");
-        }
-
-
-        // API volání pro registraci uživatele (odkomentujte po testování)
-        // axios.post('http://localhost:4000/register', { username, email, password })
-        //     .then(res => {
-        //         if (res.status === 200) {
-        //             alert('Registrace byla úspěšná!');
-        //         } else {
-        //             alert('Nastala chyba při registraci');
-        //         }
-        //     })
-        //     .catch(err => {
-        //         console.username("There was an username with the request", err);
-        //         alert('Došlo k chybě. Zkuste to znovu později.');
-        //     });
+                } else {
+                    toast.error('Nastala chyba. Zkuste to znovu později');
+                }
+            });
     };
-
     return (
         <Container>
             <FormWrapper>
@@ -89,7 +78,10 @@ function SignUp() {
                         <Input
                             type="text"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={(e) => {
+                                setUsernameError('');
+                                setUsername(e.target.value);
+                            }}
                             placeholder="Např: Pan X"
                         />
 
@@ -101,7 +93,10 @@ function SignUp() {
                         <Input
                             type="text"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmailError('');
+                                setEmail(e.target.value);
+                            }}
                             placeholder="Např: example@email.cz"
                         />
                         {emailError && <ErrorMessage>{emailError}</ErrorMessage>}
@@ -112,8 +107,11 @@ function SignUp() {
                         <Input
                             type="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Např: aBc#12x"
+                            onChange={(e) => {
+                                setPasswordError('');
+                                setPassword(e.target.value);
+                            }}
+                            placeholder="Např: aBc#0xYz"
                         />
 
                         {passwordError && <ErrorMessage>{passwordError}</ErrorMessage>}

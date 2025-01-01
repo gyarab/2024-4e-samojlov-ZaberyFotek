@@ -91,7 +91,7 @@ function Login() {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Např: aBc#12x"
+                            placeholder="Např: aBc#0xYz"
                         />
                         {passwordError && <ErrorMessage>{passwordError}</ErrorMessage>}
                     </InputWrapper>

@@ -34,6 +34,7 @@
 
     /** Nastavení velikosti notifikací typu Toast **/
     --toastify-toast-width: 'fit-content';
+    --toastify-toast-min-height: 75px;
 
 }
 
