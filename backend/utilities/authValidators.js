@@ -1,4 +1,8 @@
 const db = require('../utilities/db');
+const NodeCache = require("node-cache");
+const otpCache = new NodeCache({ stdTTL: 300, checkperiod: 310 });
+
+let emailStore = '';
 
 // Kontrola, zda email již existuje
 const sqlEmailCheck = 'SELECT * FROM users WHERE email = ?';
@@ -47,6 +51,48 @@ const checkData = (type, dataType, res, validationErrors) => {
                 message: 'Heslo je povinné pole'
             });
         }
+
+    } else if (type === "otp") {
+
+        if (!dataType || dataType.length < 6) {
+
+            validationErrors.push({
+                field: 'otp',
+                message: 'Chybně zadané OTP'
+            });
+        }
+    }
+}
+
+/** Ověření, zda se email již nachází v databázi **/
+const otpVerification = (db, username, email, password, otpPrev, res) => {
+
+    if (email !== null) {
+
+        emailStore = email;
+    }
+
+    const otpKey = `otp_${emailStore}`;
+
+    if (!otpPrev) {
+        const generatedOtp = generateOTP();
+        otpCache.set(otpKey, generatedOtp);
+        resetPasswordMessage(email, res, generatedOtp);
+    }
+
+    if (otpPrev !== null) {
+
+        const storedOtp = otpCache.get(otpKey);
+
+        if (!storedOtp) {
+            return res.status(409).json({ validation: false, message: "OTP nebylo nalezeno" });
+        }
+        if (parseInt(otpPrev) !== parseInt(storedOtp.toString())) {
+            return res.status(409).json({ validation: false, message: "Chybně zadané OTP" });
+        }
+
+        // Obnovení hesla uživatele v DB
+        updatePasswordInDb(emailStore, password, res);
     }
 }
 
@@ -76,7 +122,8 @@ const emailCheck = (db, username, email, password, res) => {
                 if (!row) {
                     return res.status(409).json({validation: false, message: 'Tento email není zaregistrovaný'});
                 }
-                resetPasswordMessage(email, res, 1468);
+
+                otpVerification(db, username, email, password, null, res);
 
                 // Endpoint: /register
             } else {
@@ -90,7 +137,10 @@ const emailCheck = (db, username, email, password, res) => {
     });
 }
 
-/** Příslušné metody k Endpointu **/
+/**
+ * Příslušné metody k Endpointu
+ *
+ **/
 
 /** Metoda pro přidání uživatele do tabulky USERS **/
 const addUserDB = (username, email, password, res) => {
@@ -106,11 +156,35 @@ const addUserDB = (username, email, password, res) => {
     });
 }
 
+/** Změna hesla uživatele v databázi **/
+const updatePasswordInDb = (email, newPassword, res) => {
+
+    db.run("UPDATE users SET password = ? WHERE email = ?", [newPassword, email], function (err) {
+        if (err) {
+            return res.status(500).json({ validation: false, message: 'Chyba při aktualizaci hesla' });
+        }
+        return res.status(200).json({ validation: true, message: 'Heslo bylo úspěšně aktualizováno' });
+    });
+};
+
 /** Odeslání zpráva s odkazem pro obnovení hesla **/
 const resetPasswordMessage = (email, res, OTP) => {
 
     // Knihovna pro odesílání e-mailů
     const nodemailer = require('nodemailer');
+
+    const path = require('path');
+    const fs = require('fs');
+
+    const projectRoot = path.resolve(__dirname, '..');
+    const filePath = path.join(projectRoot, '../frontend/src/pages/ZapomenuteHeslo/resetPasswordMessage.html');
+
+    // Načtení HTML zprávy ze složky frontend
+    let HTMLtemplate = fs.readFileSync(filePath, 'utf8');
+
+    console.log("OTP", OTP);
+
+    HTMLtemplate = HTMLtemplate.replace('${OTP}', OTP);
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -121,54 +195,39 @@ const resetPasswordMessage = (email, res, OTP) => {
             user: process.env.PERSONAL_EMAIL,
             pass: process.env.PERSONAL_PASSWORD,
         },
+        tls: {
+            rejectUnauthorized: false
+        }
     });
-
-    console.log("Email:", process.env.PERSONAL_EMAIL);
-    console.log("Password:", process.env.PERSONAL_PASSWORD);
 
     const emailConfig = {
         from: process.env.PERSONAL_EMAIL,
         to: email,
         subject: "Resetování hesla",
-        html:
-
-            `<!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>Resetování hesla</title>
-</head>
-<body>
-<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
-  <div style="margin:50px auto;width:70%;padding:20px 0">
-    <div style="border-bottom:1px solid #eee">
-      <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Vladimír Samojlov</a>
-    </div>
-    <p style="font-size:1.1em">Dobrý den,</p>
-    <p>Použijte následující OTP k dokončení procesu obnovení hesla. OTP je platné po dobu 5 minut.</p>
-    <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${OTP}</h2>
-    <p style="font-size:0.9em;">S pozdravem,<br />Vladimír Samojlov</p>
-    <hr style="border:none;border-top:1px solid #eee" />
-    <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
-   
-    </div>
-  </div>
-</div>
-
-</body>
-</html>`,
+        html: HTMLtemplate,
     };
 
     transporter.sendMail(emailConfig, function (error, info) {
         if (error) {
-            console.error("Email sending error:", error);  // Log the error
-            return res.status(500).json({ validation: false, message: 'Chyba při odeslání zprávy', error: error.message });
+            console.error("Email sending error:", error);
+            return res.status(500).json({
+                validation: false,
+                message: 'Chyba při odeslání zprávy',
+                error: error.message
+            });
         }
-        return res.status(200).json({validation: true, message: 'Email byl úspěšně odeslán'});
+        return res.status(200).json({validation: true, message: 'Email byl úspěšně odeslán', otp: OTP});
     });
 }
 
+/** Funkce pro generování jednorázového kódu **/
+const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000);
+};
+
+
 module.exports = {
     checkData,
-    emailCheck
+    emailCheck,
+    otpVerification
 };

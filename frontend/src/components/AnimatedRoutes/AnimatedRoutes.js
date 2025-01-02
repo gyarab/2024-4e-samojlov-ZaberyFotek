@@ -8,12 +8,13 @@ import Zabery from "../../pages/Zabery/Zabery";
 import Login from "../../pages/Prihlaseni/Login";
 import SignUp from "../../pages/Registrace/SignUp";
 import ForgotPassword from "../../pages/ZapomenuteHeslo/ForgotPassword";
+import ResetPassword from "../../pages/ZapomenuteHeslo/ResetPassword";
 
 function AnimatedRoutes(props) {
 
     const location = useLocation();
 
-    const [image, setImage] = useState(null)
+    const [image, setImage] = useState(null);
 
     return (
 
@@ -27,6 +28,7 @@ function AnimatedRoutes(props) {
                 <Route path="prihlaseni" element={<Login />}/>
                 <Route path="registrace" element={<SignUp />}/>
                 <Route path="zapomenute-heslo" element={<ForgotPassword />}/>
+                <Route path="zapomenute-heslo/reset" element={<ResetPassword />}/>
 
             </Routes>
 

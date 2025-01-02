@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, validateForgotPassword, loginUser} = require('../controllers/authControllers');
+const { registerUser, validateForgotPassword, loginUser, resetPassword} = require('../controllers/authControllers');
 
 // Vytvoření nového routeru
 const router = express.Router();
@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/loginUser', loginUser);
 router.post('/register', registerUser);
 router.post('/validateForgotPassword', validateForgotPassword);
+router.post('/resetPassword', resetPassword);
 
 // Export routeru pro použití v jiných souborech
 module.exports = router;

@@ -12,6 +12,7 @@ import {
     Title
 } from "./LoginComponents";
 import {Bounce, toast, ToastContainer} from "react-toastify";
+import {useLocation} from "react-router-dom";
 
 /** Hlavní komponenta Login formuláře **/
 function Login() {
@@ -20,11 +21,15 @@ function Login() {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
+    const location = useLocation();
+
     /** Resetování chybových hlášení **/
     useEffect(() => {
-        if (email) setEmailError('');
-        if (password) setPasswordError('');
-    }, [email, password]);
+
+        if (location.state?.successMessage) {
+            toast.success(location.state.successMessage);
+        }
+    }, [location.state]);
 
     /** Funkce pro zpracování přihlášení **/
     const handleLogin = (e) => {
@@ -79,7 +84,9 @@ function Login() {
                         <Input
                             type="text"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmailError('')
+                                setEmail(e.target.value)}}
                             placeholder="Např: example@email.cz"
                         />
                         {emailError && <ErrorMessage>{emailError}</ErrorMessage>}
@@ -90,7 +97,9 @@ function Login() {
                         <Input
                             type="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) =>  {
+                                setPasswordError('')
+                                setPassword(e.target.value)}}
                             placeholder="Např: aBc#0xYz"
                         />
                         {passwordError && <ErrorMessage>{passwordError}</ErrorMessage>}

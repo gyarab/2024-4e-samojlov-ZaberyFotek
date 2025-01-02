@@ -11,22 +11,21 @@ import {
     Title
 } from "../Prihlaseni/LoginComponents";
 import {Bounce, toast, ToastContainer} from "react-toastify";
+import {useNavigate} from "react-router-dom";
 
 /** Hlavní komponenta Login formuláře **/
 function ForgotPassword() {
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
 
-    /** Resetování chybových hlášení **/
-    useEffect(() => {
-        if (email) setEmailError('');
-    }, [email]);
+    const navigate = useNavigate();
 
     /** Funkce pro zpracování přihlášení **/
-    const handleLogin = (e) => {
+    const handleForgotPassword = (e) => {
         e.preventDefault();
 
         setEmailError('');
+        //setOTPcodeError('');
 
         // Odstranění volného místa za posledním znakem
         const trimmedEmail = email.trim();
@@ -37,7 +36,10 @@ function ForgotPassword() {
         })
             .then(res => {
                 if (res.data.validation) {
-                    toast.success(res.data.message);
+
+                    navigate('/zapomenute-heslo/reset', {
+                        state: { successMessage: res.data.message },
+                    });
                 }
             })
             .catch(err => {
@@ -50,7 +52,7 @@ function ForgotPassword() {
                             setEmailError(error.message);
                         }
                     });
-                } else if (err.response?.status === 409){
+                } else if (err.response?.status === 409) {
 
                     // Neplatné údaje
                     setEmailError(err.response.data.message);
@@ -60,27 +62,94 @@ function ForgotPassword() {
                     toast.error(err.response?.data?.message || 'Nastala chyba. Zkuste to znovu později');
                 }
             });
+
+        // if (emailSent && originalOTP !== parseInt(OTPcode)) {
+        //
+        //     console.log(originalOTP, OTPcode)
+        //     setOTPcodeError('Váš zadaný kód je nesprávný');
+        // }
+        //
+        // const passwordCheck = emailSent && (password !== newPassword);
+        //
+        // if (passwordCheck) {
+        //
+        //     toast.error('Zadaná hesla nejsou shodná');
+        // }
+        //
+        // if (OTPcodeError && !passwordCheck) {
+        //
+        //     toast.success('Vaše heslo bylo úspěšně změněno');
+        //     navigate("/prihlaseni");
+        // }
     };
 
     return (
         <Container>
             <FormWrapper>
                 <Title>Zapomenuté heslo</Title>
-                <form onSubmit={handleLogin}>
-                    <SignUpLink>Pro obnovení hesla vyplňte email, na který obdržíte odkaz pro obnovení
-                        hesla</SignUpLink>
+                <form onSubmit={handleForgotPassword}>
+                    <SignUpLink>{
+
+                        "Pro obnovení hesla vyplňte email, na který obdržíte odkaz pro obnovení hesla"}
+                    </SignUpLink>
+
                     <InputWrapper>
                         <Label>Email</Label>
                         <Input
                             type="text"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmailError('');
+                                setEmail(e.target.value)
+                            }}
                             placeholder="Např: example@email.cz"
                         />
                         {emailError && <ErrorMessage>{emailError}</ErrorMessage>}
                     </InputWrapper>
 
-                    <Button type="submit">Odeslat <p>→</p></Button>
+                    {/*{emailSent &&*/}
+
+                    {/*        <InputWrapper style={{marginTop: '15px'}}>*/}
+                    {/*            <Label>Kód z e-mailu</Label>*/}
+                    {/*            <Input*/}
+                    {/*                type="text"*/}
+                    {/*                value={OTPcode}*/}
+                    {/*                onChange={(e) => {*/}
+                    {/*                    setOTPcodeError('');*/}
+                    {/*                    setOTPcode(e.target.value);*/}
+                    {/*                }}*/}
+                    {/*                placeholder="Např: 123456"*/}
+                    {/*            />*/}
+                    {/*            {OTPcodeError && <ErrorMessage>{OTPcodeError}</ErrorMessage>}*/}
+                    {/*        </InputWrapper>*/}
+
+                    {/*        <InputWrapper>*/}
+                    {/*            <Label>Nové heslo</Label>*/}
+                    {/*            <Input*/}
+                    {/*                type="password"*/}
+                    {/*                value={password}*/}
+                    {/*                onChange={(e) => {*/}
+                    {/*                    setPassword(e.target.value)*/}
+                    {/*                }}*/}
+                    {/*                placeholder="Např: aBc#0xYz"*/}
+                    {/*            />*/}
+                    {/*        </InputWrapper>*/}
+
+                    {/*        <InputWrapper>*/}
+                    {/*            <Label>Opakujte nové heslo</Label>*/}
+                    {/*            <Input*/}
+                    {/*                type="password"*/}
+                    {/*                value={newPassword}*/}
+                    {/*                onChange={(e) => {*/}
+                    {/*                    setNewPassword(e.target.value)*/}
+                    {/*                }}*/}
+                    {/*                placeholder="Opakujte heslo zadané výše"*/}
+                    {/*            />*/}
+                    {/*        </InputWrapper>*/}
+
+                    {/*}*/}
+
+                    <Button type="submit">{"Odeslat"} <p>→</p></Button>
                     <SignUpLink href="/registrace">Nemáte zatím účet? <b>Zaregistrujte se </b></SignUpLink>
                 </form>
             </FormWrapper>
