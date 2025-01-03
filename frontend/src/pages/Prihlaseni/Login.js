@@ -91,8 +91,6 @@ function Login() {
     const handleDefaultLogin = (e) => {
         e.preventDefault();
 
-        console.log("AHAHAHA")
-
         setEmailError('');
         setPasswordError('');
 
