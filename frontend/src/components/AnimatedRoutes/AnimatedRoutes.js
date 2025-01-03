@@ -9,6 +9,7 @@ import Login from "../../pages/Prihlaseni/Login";
 import SignUp from "../../pages/Registrace/SignUp";
 import ForgotPassword from "../../pages/ZapomenuteHeslo/ForgotPassword";
 import ResetPassword from "../../pages/ZapomenuteHeslo/ResetPassword";
+import Account from "../../pages/Account/Account";
 
 function AnimatedRoutes(props) {
 
@@ -29,6 +30,7 @@ function AnimatedRoutes(props) {
                 <Route path="registrace" element={<SignUp />}/>
                 <Route path="zapomenute-heslo" element={<ForgotPassword />}/>
                 <Route path="zapomenute-heslo/reset" element={<ResetPassword />}/>
+                <Route path="ucet" element={<Account />}/>
 
             </Routes>
 

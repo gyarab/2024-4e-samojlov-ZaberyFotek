@@ -119,3 +119,55 @@ export const SignUpLink = styled.a`
         text-decoration-color: var(--color-shadow-4);
     }
 `;
+
+export const Divider = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 20px 0;
+  color: #757575;
+  font-size: 14px;
+  text-transform: uppercase;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: #ddd;
+    margin: 0 10px;
+  }
+`;
+
+export const GoogleButton = styled.button`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    background-color: white;
+    color: var(--color-shadow-8);
+    font-size: 16px;
+    font-weight: 600;
+    border: 1px solid var(--color-shadow-3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity ease-in-out 0.3s;
+    position: relative;
+
+    &:before {
+        content: "";
+        background-image: url('https://www.cdnlogo.com/logos/g/35/google-icon.svg');
+        background-size: contain;
+        background-repeat: no-repeat;
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        left: 12px;
+    }
+
+  &:hover {
+    opacity: 0.7;
+  }
+`;

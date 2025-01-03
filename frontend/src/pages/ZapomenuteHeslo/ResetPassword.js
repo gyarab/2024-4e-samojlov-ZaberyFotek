@@ -68,7 +68,7 @@ function ResetPassword() {
 
                 } else {
 
-                    toast.error(err.response?.data?.message || 'Nastala chyba. Zkuste to znovu později');
+                    toast.error(err.response.data.message || 'Nastala chyba. Zkuste to znovu později');
                 }
             });
     };
@@ -81,22 +81,6 @@ function ResetPassword() {
                     <SignUpLink>{
                         "Prosím, zkontrolujte si svoji e-mailovou schránku"}
                     </SignUpLink>
-
-                    {/*{!emailSent &&*/}
-                    {/*    <InputWrapper>*/}
-                    {/*        <Label>Email</Label>*/}
-                    {/*        <Input*/}
-                    {/*            type="text"*/}
-                    {/*            value={email}*/}
-                    {/*            onChange={(e) => {*/}
-                    {/*                setEmailError('');*/}
-                    {/*                setEmail(e.target.value)*/}
-                    {/*            }}*/}
-                    {/*            placeholder="Např: example@email.cz"*/}
-                    {/*        />*/}
-                    {/*        {emailError && <ErrorMessage>{emailError}</ErrorMessage>}*/}
-                    {/*    </InputWrapper>*/}
-                    {/*}*/}
 
                             <InputWrapper style={{marginTop: '15px'}}>
                                 <Label>Kód z e-mailu</Label>

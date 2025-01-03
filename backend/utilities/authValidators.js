@@ -69,12 +69,15 @@ const otpVerification = (db, username, email, password, otpPrev, res) => {
 
     if (email !== null) {
 
+        // Uložení e-mailu, pokud je poskytnut
         emailStore = email;
     }
 
+    // Klíč pro OTP v cache
     const otpKey = `otp_${emailStore}`;
 
     if (!otpPrev) {
+        // Vygenerování nového OTP
         const generatedOtp = generateOTP();
         otpCache.set(otpKey, generatedOtp);
         resetPasswordMessage(email, res, generatedOtp);
@@ -82,6 +85,7 @@ const otpVerification = (db, username, email, password, otpPrev, res) => {
 
     if (otpPrev !== null) {
 
+        // Načtení uloženého OTP z cache
         const storedOtp = otpCache.get(otpKey);
 
         if (!storedOtp) {
@@ -131,7 +135,11 @@ const emailCheck = (db, username, email, password, res) => {
                 if (row) {
                     return res.status(409).json({validation: false, message: 'Tento email je již zaregistrovaný'});
                 }
-                addUserDB(username, email, password, res);
+
+                if (username.length !== 0 && password.length !== 0) {
+
+                    addUserDB(username, email, password, res);
+                }
             }
         }
     });
@@ -158,12 +166,31 @@ const addUserDB = (username, email, password, res) => {
 
 /** Změna hesla uživatele v databázi **/
 const updatePasswordInDb = (email, newPassword, res) => {
+    const duplicateCheck = 'SELECT password FROM users WHERE email = ?';
 
-    db.run("UPDATE users SET password = ? WHERE email = ?", [newPassword, email], function (err) {
+    // Kontrola stávajícího hesla uživatele v databázi
+    db.get(duplicateCheck, [email], (err, row) => {
         if (err) {
-            return res.status(500).json({ validation: false, message: 'Chyba při aktualizaci hesla' });
+            // Chyba při přístupu k databázi
+            return res.status(500).json({ validation: false, message: 'Chyba databáze' });
+        } else if (!row) {
+            // Uživatel nebyl nalezen
+            return res.status(404).json({ validation: false, message: 'Uživatel nebyl nalezen' });
+        } else if (row.password === newPassword) {
+            // Nové heslo je stejné jako původní
+            return res.status(401).json({ validation: false, message: 'Nové heslo nesmí být shodné s původním' });
         }
-        return res.status(200).json({ validation: true, message: 'Heslo bylo úspěšně aktualizováno' });
+
+        // Aktualizace hesla, pokud všechny předchozí podmínky projdou
+        db.run("UPDATE users SET password = ? WHERE email = ?", [newPassword, email], function (err) {
+            if (err) {
+                // Chyba při aktualizaci hesla v databázi
+                return res.status(500).json({ validation: false, message: 'Chyba při aktualizaci hesla' });
+            }
+
+            // Heslo bylo úspěšně aktualizováno
+            return res.status(200).json({ validation: true, message: 'Heslo bylo úspěšně aktualizováno' });
+        });
     });
 };
 
@@ -209,7 +236,7 @@ const resetPasswordMessage = (email, res, OTP) => {
 
     transporter.sendMail(emailConfig, function (error, info) {
         if (error) {
-            console.error("Email sending error:", error);
+            console.error("Chyba při posílání:", error);
             return res.status(500).json({
                 validation: false,
                 message: 'Chyba při odeslání zprávy',
