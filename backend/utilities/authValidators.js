@@ -1,11 +1,11 @@
 const db = require('../utilities/db');
 const NodeCache = require("node-cache");
-const otpCache = new NodeCache({ stdTTL: 300, checkperiod: 310 });
+const otpCache = new NodeCache({stdTTL: 300, checkperiod: 310});
 
 let emailStore = '';
 
 // Kontrola, zda email již existuje
-const sqlEmailCheck = 'SELECT * FROM users WHERE email = ?';
+const sqlEmailCheck = 'SELECT * FROM user WHERE email = ?';
 
 /** Metoda pro zkontrolování příslušných údajů **/
 const checkData = (type, dataType, res, validationErrors) => {
@@ -89,10 +89,10 @@ const otpVerification = (db, username, email, password, otpPrev, res) => {
         const storedOtp = otpCache.get(otpKey);
 
         if (!storedOtp) {
-            return res.status(409).json({ validation: false, message: "OTP nebylo nalezeno" });
+            return res.status(409).json({validation: false, message: "OTP nebylo nalezeno"});
         }
         if (parseInt(otpPrev) !== parseInt(storedOtp.toString())) {
-            return res.status(409).json({ validation: false, message: "Chybně zadané OTP" });
+            return res.status(409).json({validation: false, message: "Chybně zadané OTP"});
         }
 
         // Obnovení hesla uživatele v DB
@@ -101,7 +101,7 @@ const otpVerification = (db, username, email, password, otpPrev, res) => {
 }
 
 /** Ověření, zda se email již nachází v databázi **/
-const emailCheck = (db, username, email, password, res) => {
+const emailCheck = (db, username, email, password, type, image, res) => {
 
     db.get(sqlEmailCheck, [email], (err, row) => {
 
@@ -109,11 +109,25 @@ const emailCheck = (db, username, email, password, res) => {
             return res.status(500).json({validation: false, message: 'Chyba databáze'});
         }
 
+        let newType = type;
+        let newImage = image;
+
+        if (row) {
+
+            if (type === null) {
+                newType = row.type;
+            }
+            if (image === null) {
+                newImage = row.image; 
+            }
+        }
+
         // Endpoint: /loginUser
         if (username === null) {
 
             // Kontrola, zda uživatel existuje a heslo odpovídá
             if (row && row.password === password) {
+
                 return res.status(200).json({validation: true, message: 'Přihlášení proběhlo úspěšně'});
             } else {
                 return res.status(401).json({validation: false, message: 'Neplatný email nebo heslo'});
@@ -127,18 +141,27 @@ const emailCheck = (db, username, email, password, res) => {
                     return res.status(409).json({validation: false, message: 'Tento email není zaregistrovaný'});
                 }
 
+                // Pro typ účtu Google není požadováno žádné heslo
+                if (row.type === 'google') {
+
+                    return res.status(409).json({validation: false, message: 'Tento email je spojený s účtem Google'});
+                }
+
                 otpVerification(db, username, email, password, null, res);
 
                 // Endpoint: /register
             } else {
 
-                if (row) {
+                if (row && row.type !== 'google') {
                     return res.status(409).json({validation: false, message: 'Tento email je již zaregistrovaný'});
                 }
 
-                if (username.length !== 0 && password.length !== 0) {
+                if (password === '-1') {
 
-                    addUserDB(username, email, password, res);
+                    checkBeforeAdd(username, email, password, newType, newImage, row, res)
+                } else {
+
+                    checkBeforeAdd(username, email, password, newType, newImage, row, res);
                 }
             }
         }
@@ -150,11 +173,24 @@ const emailCheck = (db, username, email, password, res) => {
  *
  **/
 
-/** Metoda pro přidání uživatele do tabulky USERS **/
-const addUserDB = (username, email, password, res) => {
+/** Ověření, zda v DB se již nachází tento uživatel **/
+const checkBeforeAdd = (username, email, password, newType, newImage, row, res) => {
 
-    const sqlInsert = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-    db.run(sqlInsert, [username, email, password], function (err) {
+    if (row.username.length > 0) {
+
+        return res.status(200).json({validation: true, message: 'Přihlášení proběhlo úspěšně'});
+
+    } else {
+
+        addUserDB(username, email, password, newType, newImage, res);
+    }
+}
+
+/** Metoda pro přidání uživatele do tabulky USER **/
+const addUserDB = (username, email, password, type, image, res) => {
+
+    const sqlInsert = 'INSERT INTO user (username, email, password, type, image) VALUES (?, ?, ?, ?, ?)';
+    db.run(sqlInsert, [username, email, password, type, image], function (err) {
 
         if (err) {
             return res.status(500).json({validation: false, message: 'Chyba při přidávání uživatele do databáze'});
@@ -166,30 +202,30 @@ const addUserDB = (username, email, password, res) => {
 
 /** Změna hesla uživatele v databázi **/
 const updatePasswordInDb = (email, newPassword, res) => {
-    const duplicateCheck = 'SELECT password FROM users WHERE email = ?';
+    const duplicateCheck = 'SELECT password FROM user WHERE email = ?';
 
     // Kontrola stávajícího hesla uživatele v databázi
     db.get(duplicateCheck, [email], (err, row) => {
         if (err) {
             // Chyba při přístupu k databázi
-            return res.status(500).json({ validation: false, message: 'Chyba databáze' });
+            return res.status(500).json({validation: false, message: 'Chyba databáze'});
         } else if (!row) {
             // Uživatel nebyl nalezen
-            return res.status(404).json({ validation: false, message: 'Uživatel nebyl nalezen' });
+            return res.status(404).json({validation: false, message: 'Uživatel nebyl nalezen'});
         } else if (row.password === newPassword) {
             // Nové heslo je stejné jako původní
-            return res.status(401).json({ validation: false, message: 'Nové heslo nesmí být shodné s původním' });
+            return res.status(401).json({validation: false, message: 'Nové heslo nesmí být shodné s původním'});
         }
 
         // Aktualizace hesla, pokud všechny předchozí podmínky projdou
-        db.run("UPDATE users SET password = ? WHERE email = ?", [newPassword, email], function (err) {
+        db.run("UPDATE user SET password = ? WHERE email = ?", [newPassword, email], function (err) {
             if (err) {
                 // Chyba při aktualizaci hesla v databázi
-                return res.status(500).json({ validation: false, message: 'Chyba při aktualizaci hesla' });
+                return res.status(500).json({validation: false, message: 'Chyba při aktualizaci hesla'});
             }
 
             // Heslo bylo úspěšně aktualizováno
-            return res.status(200).json({ validation: true, message: 'Heslo bylo úspěšně aktualizováno' });
+            return res.status(200).json({validation: true, message: 'Heslo bylo úspěšně aktualizováno'});
         });
     });
 };

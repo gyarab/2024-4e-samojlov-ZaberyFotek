@@ -48,7 +48,15 @@ function Navbar({toggle}) {
 
             <NavLink to={"/"}>
 
-                <div>Logo</div>
+                <img
+                    style={{
+                        width: "75px",
+                        height: "75px"
+                    }}
+                    src={"zaberyLogo.png"}
+                    alt={"Logo - Záběry Fotek"}/>
+
+                <p style={{marginLeft: "15px"}}>Záběry</p>
 
             </NavLink>
 

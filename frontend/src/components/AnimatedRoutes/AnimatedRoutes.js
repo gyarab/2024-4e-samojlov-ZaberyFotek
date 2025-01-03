@@ -1,9 +1,8 @@
 import {Route, Routes, useLocation} from "react-router-dom";
-import Transition from "../../Transition";
 import Home from "../../pages/Home/Home";
 import Oprojektu from "../../pages/O projektu/Oprojektu";
 import {AnimatePresence} from "framer-motion";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Zabery from "../../pages/Zabery/Zabery";
 import Login from "../../pages/Prihlaseni/Login";
 import SignUp from "../../pages/Registrace/SignUp";

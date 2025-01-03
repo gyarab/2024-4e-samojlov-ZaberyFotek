@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Definování POST rout
 router.post('/loginUser', loginUser);
-router.post('/register', registerUser);
+router.post('/registerUser', registerUser);
 router.post('/validateForgotPassword', validateForgotPassword);
 router.post('/resetPassword', resetPassword);
 

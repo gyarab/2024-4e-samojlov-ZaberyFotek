@@ -54,7 +54,7 @@ function ForgotPassword() {
                     });
                 } else if (err.response?.status === 409) {
 
-                    // Neplatné údaje
+                    // Email není registrovaný
                     setEmailError(err.response.data.message);
 
                 } else {

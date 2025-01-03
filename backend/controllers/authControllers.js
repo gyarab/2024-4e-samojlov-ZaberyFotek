@@ -22,7 +22,7 @@ const loginUser = (req, res) => {
         });
     } else {
 
-        emailCheck(db, null, email, password, res)
+        emailCheck(db, null, email, password, null, null, res)
     }
 };
 
@@ -33,21 +33,28 @@ const loginUser = (req, res) => {
  */
 const registerUser = (req, res) => {
 
-    const { username, email, password } = req.body;
+    const { username, email, password, type, image } = req.body;
     let validationErrors = [];
 
-    checkData("username",username, res, validationErrors);
-    checkData("email",email, res, validationErrors);
-    checkData("password",password, res, validationErrors);
+    // Speciální případ - Google OAuth
+    if (password === '-1') {
 
-    if (validationErrors.length > 0) {
-        return res.status(400).json({
-            validation: false,
-            errors: validationErrors
-        });
+        emailCheck(db, username, email, password, type, image, res);
     } else {
 
-        emailCheck(db, username, email, password, res)
+        checkData("username",username, res, validationErrors);
+        checkData("email",email, res, validationErrors);
+        checkData("password",password, res, validationErrors);
+
+        if (validationErrors.length > 0) {
+            return res.status(400).json({
+                validation: false,
+                errors: validationErrors
+            });
+        } else {
+
+            emailCheck(db, username, email, password, type, image, res)
+        }
     }
 };
 
@@ -69,7 +76,7 @@ const validateForgotPassword = (req, res) => {
         });
     } else {
 
-        emailCheck(db, undefined, email, undefined, res);
+        emailCheck(db, undefined, email, undefined, null, null, res);
     }
 };
 

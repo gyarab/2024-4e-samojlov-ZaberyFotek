@@ -12,6 +12,7 @@ import {
     Title
 } from "../Prihlaseni/LoginComponents";
 import {Bounce, toast, ToastContainer} from "react-toastify";
+import {useNavigate} from "react-router-dom";
 
 /** Hlavní komponenta Registration formuláře **/
 function SignUp() {
@@ -21,6 +22,8 @@ function SignUp() {
     const [usernameError, setUsernameError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+
+    const navigate = useNavigate();
 
     /** Funkce pro zpracování registrace **/
     const handleSignUp = (e) => {
@@ -34,14 +37,18 @@ function SignUp() {
         // Odstranění volného místa za posledním znakem
         const trimmedEmail = email.trim();
 
-        axios.post('http://localhost:4000/auth/register', {
+        axios.post('http://localhost:4000/auth/registerUser', {
             username: username,
             email: trimmedEmail,
-            password: password
+            password: password,
+            type: 'default',
+            image: null
         })
             .then(res => {
                 if (res.data.validation) {
-                    toast.success(res.data.message);
+                    navigate('/prihlaseni', {
+                        state: { successMessage: res.data.message },
+                    });
                 }
             })
             .catch(err => {
@@ -58,7 +65,7 @@ function SignUp() {
                             setPasswordError(error.message);
                         }
                     });
-                } else if (err.response.status === 409){
+                } else if (err.response?.status === 409){
 
                     // Email již existuje
                     setEmailError(err.response.data.message);

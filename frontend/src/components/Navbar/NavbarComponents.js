@@ -11,12 +11,25 @@ export const Nav = styled.div.withConfig({
     justify-content: space-between;
     padding: 0.5rem calc((100vw - 1000px) / 2);
     background: var(--color-shadow-1);
-    box-shadow: 0 8px 32px 0 rgba( 0, 0, 0, 0.18 );
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.18);
     backdrop-filter: blur(50px);
     position: fixed;
     transition: opacity 0.5s ease-in-out;
-    opacity: ${({ show }) => (show ? '1' : '0')};
+    opacity: ${({show}) => (show ? '1' : '0')};
     z-index: 100;
+
+    & > :first-child {
+        position: absolute;
+        left: 0;
+        top: 0;
+        
+        p {
+            font-family: "Dancing Script", serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 45px;
+        }
+    }
 `;
 
 export const NavLink = styled(Link)`
@@ -24,13 +37,13 @@ export const NavLink = styled(Link)`
     font-size: 20px;
     display: flex;
     align-items: center;
+    justify-content: center;
     text-decoration: none;
     padding: 0 1.2rem;
     height: 100%;
     cursor: pointer;
 
     &:active {
-
         color: var(--color-blue-4);
     }
 `;

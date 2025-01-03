@@ -12,7 +12,7 @@ import {
     Title
 } from "./LoginComponents";
 import {Bounce, toast, ToastContainer} from "react-toastify";
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {useGoogleLogin} from "@react-oauth/google";
 
 /** Hlavní komponenta Login formuláře **/
@@ -22,19 +22,24 @@ function Login() {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    // Google OAuth
-    //const [user, setUser] = useState([]);
-    const [profile, setProfile] = useState([]);
+    // Uchování přihlášeného uživatele
+    const [user, setUser] = useState(null);
 
+    // Přesměrování uživatele
+    const navigate = useNavigate();
+
+    // Aktuální route
     const location = useLocation();
 
     let trimmedEmail;
 
-    const  signIn = useGoogleLogin({
+    // Inicializace přihlášení přes Google
+    const signIn = useGoogleLogin({
         onSuccess: (codeResponse) => {
-            console.log("Google login successful");
-            const accessToken = codeResponse.access_token;
+            console.log("Přihlášení přes Google bylo úspěšné");
+            const accessToken = codeResponse.access_token; // Získání přístupového tokenu
 
+            // Získání informací o uživateli z Google API
             axios
                 .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${accessToken}`, {
                     headers: {
@@ -43,49 +48,61 @@ function Login() {
                     },
                 })
                 .then((res) => {
-                    console.log('User profile fetched from Google:', res.data);
-                    const googleEmail = res.data.email;
-                    setEmail(googleEmail);
-                    setProfile(res.data);
-                    toast.success('Google login successful!');
+                    const googleData = res.data;
+
+                    // Ověření uživatele nebo jeho registrace na backendu
+                    axios
+                        .post(`http://localhost:4000/auth/registerUser`, {
+                            username: googleData.name,
+                            email: googleData.email,
+                            password: '-1',
+                            type: 'google',
+                            image: res.data.picture
+
+                        })
+                        .then((res) => {
+                            if (res.data.validation) {
+                                setUser(googleData);
+                                // Serializace dat uživatele
+                                localStorage.setItem('user', JSON.stringify(googleData));
+
+                                navigate('/ucet', {
+                                    state: { successMessage: res.data.message },
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            // Zobrazení chyby, pokud nastane problém na backendu
+                            toast.error(err.response?.data?.message || 'Nastala chyba. Zkuste to znovu později');
+                        });
                 })
                 .catch((err) => {
-                    console.log('Error fetching Google profile:', err);
-                    toast.error('Failed to fetch Google profile');
+                    // Zpráva o selhání
+                    toast.error('Nepodařilo se načíst profil z Google');
                 });
         },
         onError: (error) => {
-            console.log('Login Failed:', error);
-            toast.error('Login failed. Please try again.');
+            toast.error('Přihlášení se nezdařilo. Zkuste to prosím znovu.');
         },
     });
 
-    /** Resetování chybových hlášení **/
+    /** Zobrazení oznámení **/
     useEffect(() => {
         if (location.state?.successMessage) {
             toast.success(location.state.successMessage);
         }
 
-        if (email) {
-            trimmedEmail = email.trim();
-
-            axios
-                .get(`http://localhost:4000/auth/register`, {
-                    username: '',
-                    email: trimmedEmail,
-                    password: ''
-                })
-                .then((res) => {
-                    if (res.data.validation) {
-                        console.log("VŠECHNO DOBRY")
-                    }
-                })
-                .catch(err => {
-
-                    toast.error(err.response.data.message || 'Nastala chyba. Zkuste to znovu později');
-                });
+        const loggedInUser = localStorage.getItem("user");
+        if (loggedInUser) {
+            try {
+                const foundUser = JSON.parse(loggedInUser); // Deserializace dat uživatele
+                setUser(foundUser);
+            } catch (e) {
+                console.error("Chyba při parsování uživatelských dat z localStorage:", e);
+            }
         }
-    }, [location.state, email]);
+
+    }, [location.state]);
 
     /** Funkce pro zpracování běžného přihlášení **/
     const handleDefaultLogin = (e) => {
@@ -96,13 +113,19 @@ function Login() {
 
         trimmedEmail = email.trim();
 
+        // Výchozí přihlášení
         axios.post('http://localhost:4000/auth/loginUser', {
             email: trimmedEmail,
             password: password
         })
             .then(res => {
                 if (res.data.validation) {
-                    toast.success(res.data.message);
+                    setUser(res.data);
+                    localStorage.setItem('user', JSON.stringify(res.data)); // Serializace dat uživatele
+
+                    navigate('/ucet', {
+                        state: { successMessage: res.data.message },
+                    });
                 }
             })
             .catch(err => {
@@ -123,6 +146,7 @@ function Login() {
                 }
             });
     };
+
 
     return (
         <Container>
@@ -162,9 +186,7 @@ function Login() {
 
                 </form>
                 <Divider>NEBO</Divider>
-                <GoogleButton onClick={
-
-                    signIn}>
+                <GoogleButton onClick={signIn}>
                     Pokračovat přes Google
                 </GoogleButton>
 

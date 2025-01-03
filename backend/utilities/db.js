@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 // Inicializace SQLite databáze
-let db = new sqlite3.Database('users.db', (err) => {
+let db = new sqlite3.Database('user.db', (err) => {
     if (err) {
         console.error('Chyba při otevírání databáze: ', err.message);
     } else {

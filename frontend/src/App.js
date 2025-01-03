@@ -1,12 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
-import {BrowserRouter as Router, Route, Routes, useLocation} from 'react-router-dom';
-import Home from './pages/Home/Home';
-import Oprojektu from "./pages/O projektu/Oprojektu";
+import {BrowserRouter as Router} from 'react-router-dom';
 import Navbar from "./components/Navbar/Nav";
 import Sidebar from "./components/Sidebar";
-import {AnimatePresence} from "framer-motion";
-import Transition from "./Transition";
 import AnimatedRoutes from "./components/AnimatedRoutes/AnimatedRoutes";
 
 function App() {
