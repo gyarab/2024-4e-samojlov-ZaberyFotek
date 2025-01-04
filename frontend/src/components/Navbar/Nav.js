@@ -5,7 +5,7 @@ import {
     Bars,
     NavMenu,
     NavBtn,
-    NavBtnLink
+    NavBtnLink, UserProfile
 
 } from './NavbarComponents'
 
@@ -28,6 +28,16 @@ function Navbar({toggle}) {
             setShow(true)
         }
     }
+
+    const loggedInUser = localStorage.getItem("user");
+
+    const data = JSON.parse(loggedInUser);
+
+    const firstLetter = data.name.charAt(0);
+
+    const icon = data.picture;
+
+    console.log("icon", icon);
 
     useEffect(() => {
 
@@ -69,13 +79,26 @@ function Navbar({toggle}) {
                 <NavLink to={"o-projektu"}>O projektu</NavLink>
                 <NavLink to={"sluzby"}>Služby</NavLink>
                 <NavLink to={"kontakt"}>Kontakt</NavLink>
-                <NavLink to={"prihlaseni"}>Přihlášení</NavLink>
+                <NavLink to={""}>Vyzkoušet nyní</NavLink>
 
             </NavMenu>
 
             <NavBtn>
 
-                <NavBtnLink to={""}>Vyzkoušet nyní</NavBtnLink>
+                {loggedInUser ?
+
+                    (icon ?
+                        <UserProfile to={"ucet"}
+                            style={{
+                                backgroundImage: `url(${icon})`,
+                                backgroundSize: 'cover',
+                                cursor: 'pointer'}}/> :
+                        <UserProfile to={"ucet"}>{firstLetter}</UserProfile>) :
+
+                    <div>
+                        <NavLink to={"prihlaseni"}>Přihlášení</NavLink>
+                        <NavBtnLink to={"registrace"}>Registrace</NavBtnLink>
+                    </div>}
 
             </NavBtn>
 

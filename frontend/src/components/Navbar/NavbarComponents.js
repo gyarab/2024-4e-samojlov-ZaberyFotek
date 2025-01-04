@@ -8,7 +8,7 @@ export const Nav = styled.div.withConfig({
     height: 80px;
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     padding: 0.5rem calc((100vw - 1000px) / 2);
     background: var(--color-shadow-1);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.18);
@@ -34,7 +34,6 @@ export const Nav = styled.div.withConfig({
 
 export const NavLink = styled(Link)`
     color: black;
-    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -42,6 +41,7 @@ export const NavLink = styled(Link)`
     padding: 0 1.2rem;
     height: 100%;
     cursor: pointer;
+    font-size: 20px;
 
     &:active {
         color: var(--color-blue-4);
@@ -52,7 +52,7 @@ export const Bars = styled(FaBars)`
     display: none;
     color: var(--color-blue-6);
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 1000px) {
         display: block;
         position: absolute;
         right: 0;
@@ -68,7 +68,7 @@ export const NavMenu = styled.div`
     align-items: center;
     margin-right: -15px;
     
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 1000px) {
         display: none;
     }
 `;
@@ -76,15 +76,20 @@ export const NavMenu = styled.div`
 export const NavBtn = styled.div`
     display: flex;
     align-items: center;
-    margin-right: 24px;
+    justify-content:  center;
+    position: absolute;
+    right: 0; 
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 25px;
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 1000px) {
         display: none;
     }
 `;
 
 export const NavBtnLink = styled(Link)`
-    border-radius: 4px;
+    border-radius: 9999px;
     background: var(--color-blue-7);
     padding: 10px 22px;
     color: #fff;
@@ -93,9 +98,24 @@ export const NavBtnLink = styled(Link)`
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     text-decoration: none;
+    font-size: 17px;
 
     &:hover {
         transition: all 0.2s ease-in-out;
-        background: #fff;
-        color: #010606;
+        background: var(--color-blue-5);
     }`;
+
+export const UserProfile = styled(Link)`
+    align-items: center;
+    background: #fc555f;
+    border-radius: 36px;
+    box-shadow: inset 0 0 1px 0 rgba(0, 0, 0, .3);
+    color: #fff;
+    display: flex;
+    font-size: 13px;
+    font-weight: 600;
+    height: 36px;
+    justify-content: center;
+    line-height: 24px;
+    width: 36px;
+`;
