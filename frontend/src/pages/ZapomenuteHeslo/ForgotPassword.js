@@ -62,25 +62,6 @@ function ForgotPassword() {
                     toast.error(err.response?.data?.message || 'Nastala chyba. Zkuste to znovu později');
                 }
             });
-
-        // if (emailSent && originalOTP !== parseInt(OTPcode)) {
-        //
-        //     console.log(originalOTP, OTPcode)
-        //     setOTPcodeError('Váš zadaný kód je nesprávný');
-        // }
-        //
-        // const passwordCheck = emailSent && (password !== newPassword);
-        //
-        // if (passwordCheck) {
-        //
-        //     toast.error('Zadaná hesla nejsou shodná');
-        // }
-        //
-        // if (OTPcodeError && !passwordCheck) {
-        //
-        //     toast.success('Vaše heslo bylo úspěšně změněno');
-        //     navigate("/prihlaseni");
-        // }
     };
 
     return (
@@ -106,48 +87,6 @@ function ForgotPassword() {
                         />
                         {emailError && <ErrorMessage>{emailError}</ErrorMessage>}
                     </InputWrapper>
-
-                    {/*{emailSent &&*/}
-
-                    {/*        <InputWrapper style={{marginTop: '15px'}}>*/}
-                    {/*            <Label>Kód z e-mailu</Label>*/}
-                    {/*            <Input*/}
-                    {/*                type="text"*/}
-                    {/*                value={OTPcode}*/}
-                    {/*                onChange={(e) => {*/}
-                    {/*                    setOTPcodeError('');*/}
-                    {/*                    setOTPcode(e.target.value);*/}
-                    {/*                }}*/}
-                    {/*                placeholder="Např: 123456"*/}
-                    {/*            />*/}
-                    {/*            {OTPcodeError && <ErrorMessage>{OTPcodeError}</ErrorMessage>}*/}
-                    {/*        </InputWrapper>*/}
-
-                    {/*        <InputWrapper>*/}
-                    {/*            <Label>Nové heslo</Label>*/}
-                    {/*            <Input*/}
-                    {/*                type="password"*/}
-                    {/*                value={password}*/}
-                    {/*                onChange={(e) => {*/}
-                    {/*                    setPassword(e.target.value)*/}
-                    {/*                }}*/}
-                    {/*                placeholder="Např: aBc#0xYz"*/}
-                    {/*            />*/}
-                    {/*        </InputWrapper>*/}
-
-                    {/*        <InputWrapper>*/}
-                    {/*            <Label>Opakujte nové heslo</Label>*/}
-                    {/*            <Input*/}
-                    {/*                type="password"*/}
-                    {/*                value={newPassword}*/}
-                    {/*                onChange={(e) => {*/}
-                    {/*                    setNewPassword(e.target.value)*/}
-                    {/*                }}*/}
-                    {/*                placeholder="Opakujte heslo zadané výše"*/}
-                    {/*            />*/}
-                    {/*        </InputWrapper>*/}
-
-                    {/*}*/}
 
                     <Button type="submit">{"Odeslat"} <p>→</p></Button>
                     <SignUpLink href="/registrace">Nemáte zatím účet? <b>Zaregistrujte se </b></SignUpLink>

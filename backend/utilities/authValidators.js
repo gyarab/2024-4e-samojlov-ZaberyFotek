@@ -118,7 +118,7 @@ const emailCheck = (db, username, email, password, type, image, res) => {
                 newType = row.type;
             }
             if (image === null) {
-                newImage = row.image; 
+                newImage = row.image;
             }
         }
 
@@ -128,7 +128,7 @@ const emailCheck = (db, username, email, password, type, image, res) => {
             // Kontrola, zda uživatel existuje a heslo odpovídá
             if (row && row.password === password) {
 
-                return res.status(200).json({validation: true, message: 'Přihlášení proběhlo úspěšně'});
+                return res.status(200).json({validation: true, message: 'Přihlášení proběhlo úspěšně', user: row});
             } else {
                 return res.status(401).json({validation: false, message: 'Neplatný email nebo heslo'});
             }
@@ -143,7 +143,6 @@ const emailCheck = (db, username, email, password, type, image, res) => {
 
                 // Pro typ účtu Google není požadováno žádné heslo
                 if (row.type === 'google') {
-
                     return res.status(409).json({validation: false, message: 'Tento email je spojený s účtem Google'});
                 }
 
@@ -168,6 +167,56 @@ const emailCheck = (db, username, email, password, type, image, res) => {
     });
 }
 
+/** Aktualizace dat uživatele na základě vybraného typu **/
+/** Ověření, zda se email již nachází v databázi **/
+const updateUserData = (db, type, username, email, inputData, res) => {
+
+    db.get(sqlEmailCheck, [email], (err, row) => {
+        if (err) {
+            return res.status(500).json({validation: false, message: 'Database error during email check'});
+        }
+
+        let updateType = '';
+        let queryParams = [];
+
+        if (type === 'username') {
+
+            updateType = "UPDATE user SET username = ? WHERE email = ?";
+            queryParams = [inputData, email];
+
+        } else if (type === 'email') {
+
+            if (row?.type === 'google') {
+                return res.status(409).json({validation: false, message: 'Typ účtu Google nelze změnit'});
+            }
+            updateType = "UPDATE user SET email = ? WHERE email = ?";
+            queryParams = [inputData, email];
+
+        } else if (type === 'deleteAccount') {
+
+            updateType = "DELETE FROM user WHERE email = ?";
+            queryParams = [email];
+
+            // Smazání účtu uživatele
+            return db.run(updateType, queryParams, (err) => {
+
+                if (err) {
+                    return res.status(500).json({validation: false, message: 'Chyba databáze'});
+                }
+                return res.status(200).json({validation: true, message: 'Váš účet byl úspěšně smazán'});
+            });
+        }
+
+        // Aktualizace dat uživatele
+        db.run(updateType, queryParams, (err) => {
+            if (err) {
+                return res.status(500).json({validation: false, message: 'Chyba databáze'});
+            }
+            return res.status(200).json({validation: true, message: 'Údaje byly úspěšně změněny', user: row});
+        });
+    });
+}
+
 /**
  * Příslušné metody k Endpointu
  *
@@ -176,9 +225,9 @@ const emailCheck = (db, username, email, password, type, image, res) => {
 /** Ověření, zda v DB se již nachází tento uživatel **/
 const checkBeforeAdd = (username, email, password, newType, newImage, row, res) => {
 
-    if (row.username.length > 0) {
+    if (row?.username?.length > 0) {
 
-        return res.status(200).json({validation: true, message: 'Přihlášení proběhlo úspěšně'});
+        return res.status(200).json({validation: true, message: 'Přihlášení proběhlo úspěšně', user: row});
 
     } else {
 
@@ -196,7 +245,15 @@ const addUserDB = (username, email, password, type, image, res) => {
             return res.status(500).json({validation: false, message: 'Chyba při přidávání uživatele do databáze'});
         }
 
-        return res.status(200).json({validation: true, message: 'Registrace probíhla úspěšně'});
+        return res.status(200).json({
+            validation: true, message: 'Registrace probíhla úspěšně', user: {
+                username: username,
+                email: email,
+                password: password,
+                image: image,
+                type: type
+            }
+        });
     });
 }
 
@@ -225,7 +282,7 @@ const updatePasswordInDb = (email, newPassword, res) => {
             }
 
             // Heslo bylo úspěšně aktualizováno
-            return res.status(200).json({validation: true, message: 'Heslo bylo úspěšně aktualizováno'});
+            return res.status(200).json({validation: true, message: 'Heslo bylo úspěšně aktualizováno', user: row});
         });
     });
 };
@@ -292,5 +349,6 @@ const generateOTP = () => {
 module.exports = {
     checkData,
     emailCheck,
-    otpVerification
+    otpVerification,
+    updateUserData
 };

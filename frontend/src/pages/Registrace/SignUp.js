@@ -46,6 +46,9 @@ function SignUp() {
         })
             .then(res => {
                 if (res.data.validation) {
+
+                    localStorage.setItem('user', JSON.stringify(res.data?.user));
+
                     navigate('/prihlaseni', {
                         state: { successMessage: res.data.message },
                     });

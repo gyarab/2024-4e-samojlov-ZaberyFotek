@@ -63,11 +63,19 @@ function Login() {
                         .then((res) => {
                             if (res.data.validation) {
                                 setUser(googleData);
-                                // Serializace dat uživatele
-                                localStorage.setItem('user', JSON.stringify(googleData));
+
+                                // // Serializace dat uživatele
+                                localStorage.setItem('user', JSON.stringify(res.data?.user));
+                                // localStorage.setItem('user', JSON.stringify({
+                                //     username: googleData.name,
+                                //     email: trimmedEmail,
+                                //     password: '-1',
+                                //     image: res.data.picture,
+                                //     type: 'google'
+                                // }));
 
                                 navigate('/ucet', {
-                                    state: { successMessage: res.data.message },
+                                    state: {successMessage: res.data.message},
                                 });
                             }
                         })
@@ -86,8 +94,11 @@ function Login() {
         },
     });
 
+
+
     /** Zobrazení oznámení **/
     useEffect(() => {
+
         if (location.state?.successMessage) {
             toast.success(location.state.successMessage);
         }
@@ -95,7 +106,8 @@ function Login() {
         const loggedInUser = localStorage.getItem("user");
         if (loggedInUser) {
             try {
-                const foundUser = JSON.parse(loggedInUser); // Deserializace dat uživatele
+                // Deserializace dat uživatele
+                const foundUser = JSON.parse(loggedInUser);
                 setUser(foundUser);
             } catch (e) {
                 console.error("Chyba při parsování uživatelských dat z localStorage:", e);
@@ -121,10 +133,18 @@ function Login() {
             .then(res => {
                 if (res.data.validation) {
                     setUser(res.data);
-                    localStorage.setItem('user', JSON.stringify(res.data)); // Serializace dat uživatele
+                    // Serializace dat uživatele
+                    localStorage.setItem('user', JSON.stringify(res.data?.user));
+                    // localStorage.setItem("user", JSON.stringify({
+                    //     username: '',
+                    //     email: trimmedEmail,
+                    //     password: password,
+                    //     image: '',
+                    //     type: 'default'
+                    // }));
 
                     navigate('/ucet', {
-                        state: { successMessage: res.data.message },
+                        state: {successMessage: res.data.message},
                     });
                 }
             })
@@ -181,7 +201,7 @@ function Login() {
                         {passwordError && <ErrorMessage>{passwordError}</ErrorMessage>}
                     </InputWrapper>
 
-                    <ForgotPassword href="/zapomenute-heslo">Zapomněli jste heslo?</ForgotPassword>
+                    <ForgotPassword href="zapomenute-heslo">Zapomněli jste heslo?</ForgotPassword>
                     <Button type="submit">Přihlásit se <p>→</p></Button>
 
                 </form>
@@ -190,7 +210,7 @@ function Login() {
                     Pokračovat přes Google
                 </GoogleButton>
 
-                <SignUpLink href="/registrace">Nemáte zatím účet? <b>Zaregistrujte se </b></SignUpLink>
+                <SignUpLink href="registrace">Nemáte zatím účet? <b>Zaregistrujte se </b></SignUpLink>
             </FormWrapper>
 
             <ToastContainer

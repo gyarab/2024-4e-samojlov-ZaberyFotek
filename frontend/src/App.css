@@ -28,6 +28,9 @@
     --color-blue-8: #2137de;
     --color-blue-9: #001fff;
 
+    --home-blue-light: #0073e6;
+    --home-blue-dark: #005bb5;
+
     /** Parametry pro načítání při výběru přechodu **/
     --size-loader: 50px;
     --color-loader: #fff 90%, #fff0;

@@ -8,6 +8,7 @@ import {
     NavBtnLink, UserProfile
 
 } from './NavbarComponents'
+import {useNavigate} from "react-router-dom";
 
 /** Funkce zobrazující navigační panel **/
 function Navbar({toggle}) {
@@ -29,13 +30,20 @@ function Navbar({toggle}) {
         }
     }
 
+    // Přesměrování uživatele
+    const navigate = useNavigate();
+
     const loggedInUser = localStorage.getItem("user");
+
+    console.log(loggedInUser);
+
+    // localStorage.clear();
 
     const data = JSON.parse(loggedInUser);
 
-    const firstLetter = data.name.charAt(0);
+    const firstLetter = data?.name?.charAt(0);
 
-    const icon = data.picture;
+    const icon = data?.image;
 
     console.log("icon", icon);
 
@@ -43,13 +51,18 @@ function Navbar({toggle}) {
 
         controlNavbar();
 
-        window.addEventListener('scroll', controlNavbar)
+        window.addEventListener('scroll', controlNavbar);
+
+        // Pokud uživatel není zaregistrovaný, dojde k přesměrování na adresu přihlášení
+        if (!loggedInUser) {
+            navigate('/prihlaseni');
+        }
 
         return () => {
             window.removeEventListener('scroll', controlNavbar)
         }
 
-    }, []);
+    }, [loggedInUser]);
 
 
     return (
@@ -95,10 +108,10 @@ function Navbar({toggle}) {
                                 cursor: 'pointer'}}/> :
                         <UserProfile to={"ucet"}>{firstLetter}</UserProfile>) :
 
-                    <div>
+                    <NavBtn>
                         <NavLink to={"prihlaseni"}>Přihlášení</NavLink>
                         <NavBtnLink to={"registrace"}>Registrace</NavBtnLink>
-                    </div>}
+                    </NavBtn>}
 
             </NavBtn>
 

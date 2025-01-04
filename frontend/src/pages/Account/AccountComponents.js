@@ -159,14 +159,14 @@ export const EditIcon = styled.button`
     border: none;
     cursor: pointer;
     font-size: 16px;
-    color: #0073e6;
+    color: var(--home-blue-light);
     position: absolute;
     right: 20px;
     top: 50%;
     transform: translateY(-50%); 
 
     &:hover {
-        color: #005bb5;
+        color: var(--home-blue-dark);
     }
 `;
 
@@ -187,15 +187,10 @@ export const OptionRow = styled.div`
     border-radius: 8px;
 `;
 
-export const OptionLabel = styled.div`
+export const OptionIcon = styled.div`
     display: flex;
     align-items: center;
     gap: 10px;
-
-    img {
-        width: 24px;
-        height: 24px;
-    }
 
     span {
         font-size: 16px;
@@ -204,11 +199,12 @@ export const OptionLabel = styled.div`
     }
 `;
 
-export const OptionButton = styled.button`
+export const OptionLabel = styled.label.withConfig({
+    shouldForwardProp: (prop) => !['connected'].includes(prop)})`
     padding: 5px 15px;
     font-size: 14px;
     background-color: ${({ connected }) =>
-    connected ? "#e0e0e0" : "#0073e6"};
+    connected ? "#e0e0e0" : "var(--home-blue-light)"};
     color: ${({ connected }) => (connected ? "#666" : "#fff")};
     border: none;
     border-radius: 4px;
@@ -216,24 +212,55 @@ export const OptionButton = styled.button`
 
     &:hover {
         background-color: ${({ connected }) =>
-    connected ? "#c0c0c0" : "#005bb5"};
+    connected ? "#c0c0c0" : "var(--home-blue-dark)"};
     }
 `;
 
-export const DeleteAccountButton = styled.button`
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 14px;
-    color: #d9534f;
-    background-color: transparent;
-    border: 1px solid #d9534f;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 50%;
+export const ChangeContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+`;
 
-    &:hover {
-        background-color: #f2dede;
-    }
+export const Section = styled.div`
+  flex: 1;
+  padding: 15px;
+  border: 1px solid var(--color-shadow-3);
+  border-radius: 8px;
+  background-color: #fff;
+`;
+
+export const SectionParagraph = styled.p`
+  color: var(--color-shadow-7);
+  line-height: 1.5;
+  font-size: 16px;
+`;
+
+export const ButtonContainer = styled.div`
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+export const AccountButton = styled.button`
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 14px;
+  color: ${({ color }) => color || '#d9534f'};
+  background-color: transparent;
+  border: 1px solid ${({ color }) => color || '#d9534f'};
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in;
+  font-weight: 700;
+  width: 100%;
+
+  &:hover {
+    background-color: ${({ color }) => color || '#d9534f'};
+    color: white;
+  }
 `;
 
 export const Footer = styled.div`
@@ -245,23 +272,11 @@ export const Footer = styled.div`
     color: #999;
 
     a {
-        color: #0073e6;
+        color: var(--home-blue-light);
         text-decoration: none;
 
         &:hover {
             text-decoration: underline;
         }
-    }
-`;
-
-export const LanguageSelect = styled.select`
-    padding: 5px 10px;
-    font-size: 12px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    cursor: pointer;
-
-    &:hover {
-        border-color: #0073e6;
     }
 `;

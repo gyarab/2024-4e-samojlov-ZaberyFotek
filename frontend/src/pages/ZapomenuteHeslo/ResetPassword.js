@@ -46,6 +46,10 @@ function ResetPassword() {
             .then(res => {
                 if (res.data.validation) {
 
+                    console.log(res.data?.user);
+
+                    localStorage.setItem('user', JSON.stringify(res.data?.user));
+
                     navigate('/prihlaseni', {
                         state: { successMessage: res.data.message },
                     });
