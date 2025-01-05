@@ -179,5 +179,4 @@ module.exports = {
     validateForgotPassword,
     resetPassword,
     changePersonalData,
-    // selectUserData
 };

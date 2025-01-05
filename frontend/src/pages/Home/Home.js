@@ -54,8 +54,8 @@ function Home(props) {
             changeAreaDisplay(!isChanged);
             setIsUploadBtnVisible(false);
 
-            // Reset úložiště
-            localStorage.clear();
+            // // Reset úložiště
+            // localStorage.clear();
 
             // Nastavení fotky jako nově vytvořené url souboru obrázku
             props.setImage(URL.createObjectURL(file));

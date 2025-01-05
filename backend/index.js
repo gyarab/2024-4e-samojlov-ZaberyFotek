@@ -10,6 +10,9 @@ const cors = require('cors');
 // Import rout pro autentifikaci z authRoutes
 const authRoutes = require('./routes/authRoutes');
 
+// pieceRoutes
+const pieceRoutes = require('./routes/pieceRoutes');
+
 // Inicializace aplikace Express
 const app = express();
 
@@ -23,6 +26,8 @@ const env = require('dotenv').config();
 
 // Použití rout pro autentifikaci uživatele
 app.use('/auth', authRoutes);
+
+app.use('/data', pieceRoutes);
 
 // Spuštění serveru na portu 4000
 app.listen(4000, () => {

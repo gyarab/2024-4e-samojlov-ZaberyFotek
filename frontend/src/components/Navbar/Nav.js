@@ -41,11 +41,11 @@ function Navbar({toggle}) {
 
     const data = JSON.parse(loggedInUser);
 
-    const firstLetter = data?.name?.charAt(0);
+    const firstLetter = data?.username?.charAt(0);
 
     const icon = data?.image;
 
-    console.log("icon", icon);
+    console.log("icon", icon, "first", firstLetter);
 
     useEffect(() => {
 
@@ -105,8 +105,9 @@ function Navbar({toggle}) {
                             style={{
                                 backgroundImage: `url(${icon})`,
                                 backgroundSize: 'cover',
-                                cursor: 'pointer'}}/> :
-                        <UserProfile to={"ucet"}>{firstLetter}</UserProfile>) :
+                                backgroundPosition: 'center'
+                            }}/> :
+                        <UserProfile style={{background: '#fc555f'}} to={"ucet"}>{firstLetter}</UserProfile>) :
 
                     <NavBtn>
                         <NavLink to={"prihlaseni"}>Přihlášení</NavLink>

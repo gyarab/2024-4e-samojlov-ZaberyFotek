@@ -59,7 +59,7 @@ function Account() {
     // Efekt pro zobrazení oznámení při úspěšné akci
     useEffect(() => {
         if (location.state?.successMessage) {
-            toast.success(location.state.successMessage); // Zobrazení oznámení o úspěchu
+            toast.success(location.state.successMessage);
         }
     }, [location.state]);
 
@@ -98,7 +98,7 @@ function Account() {
                     <ProjectsContainer>
                         <SectionTitle>{activeItem}</SectionTitle>
                         <EmptyMessage>Zatím žádné projekty.</EmptyMessage>
-                        <CreateButton><TbPhotoVideo style={{fontSize: '20px'}}/> Vytvořit nový klip</CreateButton>
+                        <CreateButton onClick={() => {navigate("/")}}><TbPhotoVideo style={{fontSize: '20px'}}/> Vytvořit nový klip</CreateButton>
                     </ProjectsContainer>
                 )}
                 {/*{activeItem === 'Můj plán' && (*/}

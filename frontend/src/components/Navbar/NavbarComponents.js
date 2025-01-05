@@ -107,7 +107,6 @@ export const NavBtnLink = styled(Link)`
 
 export const UserProfile = styled(Link)`
     align-items: center;
-    background: #fc555f;
     border-radius: 36px;
     box-shadow: inset 0 0 1px 0 rgba(0, 0, 0, .3);
     color: #fff;

@@ -46,14 +46,6 @@ function Zabery(props) {
     // Délka částice
     const [rangeValue, setRangeValue] = useState(15);
 
-    // Vlastní směr - Start
-    const [xArrowStart, setXArrowStart] = useState('');
-    const [yArrowStart, setYArrowStart] = useState('');
-
-    // Vlastní směr - End
-    const [xArrowEnd, setXArrowEnd] = useState('');
-    const [yArrowEnd, setYArrowEnd] = useState('');
-
     // Aktuální obrázek
     const [currentImage, setCurrentImage] = useState('');
 
@@ -70,6 +62,16 @@ function Zabery(props) {
 
     // Zobrazení směrů šipek a délky částice v časové ose Timeline
     const [pieceStatus, setPieceStatus] = useState(false);
+
+    // Vlastní směr - Start
+    const [xArrowStart, setXArrowStart] = useState('');
+    const [yArrowStart, setYArrowStart] = useState('');
+
+    console.log("X start", xArrowStart)
+
+    // Vlastní směr - End
+    const [xArrowEnd, setXArrowEnd] = useState('');
+    const [yArrowEnd, setYArrowEnd] = useState('');
 
     /** Kontrola nastavené šířky nebo výšky **/
     const handleInputChange = (e, setter) => {
@@ -130,11 +132,6 @@ function Zabery(props) {
     // Směr pohybu v klipu
     const [arrowDirection, setArrowDirection] = useState({x: "+", y: "-"});
 
-    /** Funkce, zda proměnná typu String obsahuje číslo **/
-    const containsNumber = (str) => {
-        return /\d/.test(str);
-    }
-
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction, directions) => {
 
@@ -143,20 +140,11 @@ function Zabery(props) {
 
         setFunction(prevActiveItem => {
 
-            //console.log("PREVITEM", prevActiveItem)
+            console.log("PREVITEM", prevActiveItem)
 
             const newActiveItem = (prevActiveItem === item ? null : item);
 
-            console.log("NEW", newActiveItem)
-
-            // if (newActiveItem === 'item4' || (prevActiveItem && (prevActiveItem.includes('arrow')))) {
-            //
-            //     setPieceStatus(true);
-            //
-            // } else if (newActiveItem !== null){
-            //
-            //     setPieceStatus(false);
-            // }
+            console.log("NEW", activeItem)
 
             return newActiveItem;
         });
@@ -172,10 +160,34 @@ function Zabery(props) {
     };
 
     useEffect(() => {
+        console.log("ACTIVE", arrowDirection);
+
+        const extractedNumber = parseInt(activeArrow.match(/\d+/)?.[0], 10);
+
+        if (activeItem !== 'item4') {
+
+            setPieceStatus(false);
+        }
+
+        // Některé šipky mají souřadnicovou osu také nula, proto nastavíme  obsah na prázdný
+        if (extractedNumber % 2 === 0 && extractedNumber < 10) {
+
+            setXArrowStart('');
+            setYArrowStart('');
+            setXArrowEnd('');
+            setYArrowEnd('');
+        } else {
+
+            setXArrowStart(arrowDirection?.x?.split(' ').map(Number)?.[0] ?? '');
+            setYArrowStart(arrowDirection?.y?.split(' ').map(Number)?.[0] ?? '');
+            setXArrowEnd(arrowDirection?.x?.split(' ').map(Number)?.[1] ?? '');
+            setYArrowEnd(arrowDirection?.y?.split(' ').map(Number)?.[1] ?? '');
+        }
 
         handleClickMark(false);
 
-    }, [activeArrow, arrowDirection]);
+    }, [activeArrow, arrowDirection, activeItem]);
+
 
     // Počet aktuálních sloupců a řádků v paneli nástrojů
     const [row, setAsRows] = useState(0);
@@ -614,7 +626,6 @@ function Zabery(props) {
         sortLines(positionY);
 
         console.log(positionX, positionY);
-
 
         // Pole pro částice
         const pieces = [];
@@ -1152,8 +1163,8 @@ function Zabery(props) {
                         <ContainerInputNumber
                             onClick={() =>
                                 handleVisibility('arrow13', setActiveArrow, {
-                                    x: `${xArrowStart} ${xArrowEnd}`,
-                                    y: `${yArrowStart} ${yArrowEnd}`,
+                                    x: `${xArrowStart || 0} ${xArrowEnd || 0}`,
+                                    y: `${yArrowStart || 0} ${yArrowEnd || 0}`,
                                 })
                             }
                         >

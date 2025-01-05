@@ -17,6 +17,7 @@ import {cameraOption} from "./Options/cameraOption";
 import {transitionOption} from "./Options/transitionOption";
 import {Bounce, toast, ToastContainer} from 'react-toastify';
 import {Transitions} from "../Transitions/Transitions";
+import axios from "axios";
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -285,7 +286,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
 
-                console.log("ARROW", arrowPosition)
+                console.log("ARROW", arrowPosition);
 
                 //const basicArrowType = arrowPosition.x !== "zoom" && arrowPosition.x !== "rotate";
 
@@ -509,8 +510,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     // Častice neobsahující klip
                 } else if (!currentPiece.isSubmitted && pieceTimeConditional) {
-
-                    console.log("HAFFF")
 
                     handlePieceUpdate(
                         currentPiece?.id,
@@ -959,6 +958,34 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         chunks.current = [];
                         setBarPosition(0);
                         setIsFirstRun(false);
+
+                        for (let i = 0; i < selectedPieces.length; i++) {
+
+                            const currentPiece = selectedPieces[i];
+
+                            axios.post('http://localhost:4000/data/addPiecesData', {
+                                id: currentPiece?.id,
+                                value: currentPiece?.value,
+                                src: currentPiece?.src,
+                                width: currentPiece?.width,
+                                left: currentPiece?.left,
+                                isSubmitted: currentPiece?.isSubmitted,
+                                arrow: currentPiece?.arrow,
+                                duration: currentPiece?.duration,
+                                special: currentPiece?.special,
+                                transition: currentPiece?.transition,
+                                cameraSize: currentPiece?.cameraSize,
+                                arrowDirection: currentPiece?.arrowDirection
+                            })
+                                .then(res => {
+                                    if (res.data.validation) {
+                                        toast.success(res.data.message);
+                                    }
+                                })
+                                .catch(err => {
+                                    toast.error(err.response?.data?.error);
+                                });
+                        }
                         return 0;
 
                     } else if (prevTime + 0.15 >= videoLength) {
@@ -966,11 +993,12 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         clearInterval(intervalId);
                         setIsPlaying(false);
                         stopRecording();
+                        setDownloadBtn(false);
 
                         return videoLength;
                     }
 
-                    return prevTime + 0.1;
+                    return prevTime + 0.15;
                 });
 
                 setBarPosition((prevPosition) => prevPosition + 0.25);
@@ -1102,6 +1130,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const handlePlay = () => {
 
         setIsPlaying(true);
+        setDownloadBtn(false);
     }
 
     /** Přenastavení času dle kliknutí uživatele **/
@@ -1703,7 +1732,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                         <DownloadBtn onClick={handleDownload}>
 
-                            <FaDownload style={{fontSize: "14px"}}/> Stáhnout
+                            <FaDownload style={{fontSize: "14px"}}/> Exportovat
+
 
                         </DownloadBtn>
                     </div>

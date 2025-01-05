@@ -46,7 +46,7 @@ const PopUpComponent = ({open, closeModal, userData, type}) => {
         // Změna údajů uživatele nebo smazání účtu
         axios.post('http://localhost:4000/auth/changePersonalData', {
             type: type,
-            username: userData?.name,
+            username: userData?.username,
             email: userData?.email,
             inputData: input
         })
@@ -69,7 +69,7 @@ const PopUpComponent = ({open, closeModal, userData, type}) => {
 
                             newData = {
                                 ...userData,
-                                name: input
+                                username: input
                             };
 
                         } else {

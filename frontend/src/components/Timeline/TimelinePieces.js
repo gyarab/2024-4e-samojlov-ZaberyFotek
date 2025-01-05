@@ -203,6 +203,8 @@ const TimelinePieces = ({
 
         pieceIsClicked = true;
 
+        console.log(piece);
+
         if (type === "piece" && cancelClipBtn) {
 
             handlePieceUpdate(
