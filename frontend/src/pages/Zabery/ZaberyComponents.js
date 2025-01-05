@@ -13,7 +13,7 @@ export const ZaberyPage = styled.div`
 
 
 export const ZaberySidebarContainer = styled.nav`
-    height: 75vh;
+    height: 85vh;
     width: 250px;
     margin-left: 50px;
     flex-direction: column;
@@ -90,7 +90,7 @@ export const SubmitBtn = styled.div.withConfig({
 })`
     height: 50px;
     padding: 15px;
-    margin-top: 10px;
+    margin-top: 5px;
     text-transform: uppercase;
     letter-spacing: 1px;
     background: transparent;
@@ -228,6 +228,64 @@ export const ArrowBtn = styled.button.withConfig({
     &:hover {
         opacity: 1;
     }
+`;
+
+export const StyledInputNumber = styled.input`
+    width: 50px;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    color: black;
+
+    &:focus {
+        border-color: #00ea76;
+        outline: none;
+    }
+`;
+
+export const ContainerInputNumber = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+`;
+
+export const LabelWrapper = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+`;
+
+export const StyledLabelInput = styled.label.withConfig({
+    shouldForwardProp: (prop) => !['isClicked'].includes(prop),
+})`
+    color: ${({isClicked}) => (isClicked ? '#005027' : '#ffee29')};;
+`;
+
+export const StyledLabel = styled.label.withConfig({
+    shouldForwardProp: (prop) => !['isClicked'].includes(prop),
+})`
+    color: ${({isClicked}) => (isClicked ? '#00e776' : '#ffee29')};
+`;
+
+export const SectionOwnDirection = styled.label.withConfig({
+    shouldForwardProp: (prop) => !['isClicked'].includes(prop),
+})`
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    background: ${({isClicked}) => (isClicked ? '#00cc66' : 'transparent')};
+    color: ${({isClicked}) => (isClicked ? '#00e776' : '#ffee29')};
+    padding: 2px;
+    border-radius: 5px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in;
 `;
 
 /** Citace, tento kód byl z části převzán z níže uvedeného zdroje:

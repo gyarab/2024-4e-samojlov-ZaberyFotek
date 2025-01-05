@@ -2,11 +2,11 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
     AddBtn,
     ArrowBtn,
-    CheckmarkIcon,
-    Foto,
+    CheckmarkIcon, ContainerInputNumber,
+    Foto, InputNumberContainer, InputNumberLabel, InputNumberWrapper, LabelWrapper,
     PieceImages,
-    PiecesContainer,
-    ShowNum,
+    PiecesContainer, SectionOwnDirection,
+    ShowNum, StyledInputNumber, StyledLabel, StyledLabelInput,
     SubmitBtn,
     TimeInput,
     ZaberyPage,
@@ -30,6 +30,8 @@ import Timeline from "../../components/Timeline/Timeline";
 import {IoIosCheckmarkCircleOutline} from "react-icons/io";
 import {MdOutlineZoomOutMap, MdZoomInMap} from "react-icons/md";
 import {AiOutlineRotateLeft, AiOutlineRotateRight} from "react-icons/ai";
+import {Container, InputWrapper, Label} from "../Prihlaseni/LoginComponents";
+import {toast} from "react-toastify";
 
 /** Hlavní funkce obsahující veškeré nástroje a komponenty k vytvoření daného klipu **/
 function Zabery(props) {
@@ -41,7 +43,16 @@ function Zabery(props) {
     // Vybrané částice obrázku uživatelem
     const [selectedPieces, setSelectedPieces] = useState([]);
 
-    const [rangeValue, setRangeValue] = useState(15)
+    // Délka částice
+    const [rangeValue, setRangeValue] = useState(15);
+
+    // Vlastní směr - Start
+    const [xArrowStart, setXArrowStart] = useState('');
+    const [yArrowStart, setYArrowStart] = useState('');
+
+    // Vlastní směr - End
+    const [xArrowEnd, setXArrowEnd] = useState('');
+    const [yArrowEnd, setYArrowEnd] = useState('');
 
     // Aktuální obrázek
     const [currentImage, setCurrentImage] = useState('');
@@ -59,6 +70,22 @@ function Zabery(props) {
 
     // Zobrazení směrů šipek a délky částice v časové ose Timeline
     const [pieceStatus, setPieceStatus] = useState(false);
+
+    /** Kontrola nastavené šířky nebo výšky **/
+    const handleInputChange = (e, setter) => {
+
+        const value = e.target.value;
+
+        // Maximální vstup je čtyřciferné číslo
+        if (value.length <= 4) {
+            setter(value);
+        }
+        if (value === "") {
+
+            toast.error("Vstupní pole nemůže být prázdné");
+
+        }
+    };
 
     /** Funkce pro přidání nové linie **/
     const addItem = (array, newItem) => {
@@ -103,6 +130,11 @@ function Zabery(props) {
     // Směr pohybu v klipu
     const [arrowDirection, setArrowDirection] = useState({x: "+", y: "-"});
 
+    /** Funkce, zda proměnná typu String obsahuje číslo **/
+    const containsNumber = (str) => {
+        return /\d/.test(str);
+    }
+
     // Funkce pro zobrazení jednoho prvku
     const handleVisibility = (item, setFunction, directions) => {
 
@@ -111,20 +143,20 @@ function Zabery(props) {
 
         setFunction(prevActiveItem => {
 
-            console.log("PREVITEM", prevActiveItem)
+            //console.log("PREVITEM", prevActiveItem)
 
             const newActiveItem = (prevActiveItem === item ? null : item);
 
             console.log("NEW", newActiveItem)
 
-            if (newActiveItem === 'item4' || (prevActiveItem && prevActiveItem.includes('arrow'))) {
-
-                setPieceStatus(true);
-
-            } else {
-
-                setPieceStatus(false);
-            }
+            // if (newActiveItem === 'item4' || (prevActiveItem && (prevActiveItem.includes('arrow')))) {
+            //
+            //     setPieceStatus(true);
+            //
+            // } else if (newActiveItem !== null){
+            //
+            //     setPieceStatus(false);
+            // }
 
             return newActiveItem;
         });
@@ -892,9 +924,9 @@ function Zabery(props) {
 
         const durationValue =
             (currentPiece?.transition?.transitionID !== null &&
-            currentPiece?.transition?.transitionID !== undefined) ||
+                currentPiece?.transition?.transitionID !== undefined) ||
             (previousPiece?.transition?.transitionID !== null &&
-            previousPiece?.transition?.transitionID !== undefined) ||
+                previousPiece?.transition?.transitionID !== undefined) ||
             !isMarked ? currentPiece?.duration : rangeValue;
 
         handlePieces(
@@ -931,6 +963,8 @@ function Zabery(props) {
         }
     };
 
+    // Styly pro vlastní směr
+    const rowStyles = {display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'center'};
 
     return (
         <ZaberyPage>
@@ -1011,7 +1045,7 @@ function Zabery(props) {
 
                 <ZaberySidebarItem isClicked={activeItem === 'item4'}
                                    onClick={() => handleVisibility('item4', setActiveItem)}
-                                   >
+                >
 
                     <PiNumberCircleFour style={{height: "35px", width: "35px"}}/> Vytvořit klipy
 
@@ -1113,16 +1147,77 @@ function Zabery(props) {
 
                         </div>
 
-                        <p style={{margin: "5px 0 5px 0"}}>Doba přehrávání:</p>
+                        <StyledLabel isClicked={activeArrow === 'arrow13'}>Vlastní směr:</StyledLabel>
+
+                        <ContainerInputNumber
+                            onClick={() =>
+                                handleVisibility('arrow13', setActiveArrow, {
+                                    x: `${xArrowStart} ${xArrowEnd}`,
+                                    y: `${yArrowStart} ${yArrowEnd}`,
+                                })
+                            }
+                        >
+                            {/* Sekce START */}
+                            <SectionOwnDirection isClicked={activeArrow === 'arrow13'}>
+
+                                <div style={rowStyles}>
+                                    <StyledLabel style={{color: 'white'}}>START:</StyledLabel>
+                                    <div style={rowStyles}>
+                                        <StyledLabelInput isClicked={activeArrow === 'arrow13'}>X:</StyledLabelInput>
+                                        <StyledInputNumber
+                                            type="number"
+                                            value={xArrowStart}
+                                            onChange={(e) => handleInputChange(e, setXArrowStart)}
+                                        />
+                                    </div>
+
+                                    <div style={rowStyles}>
+                                        <StyledLabelInput isClicked={activeArrow === 'arrow13'}>Y:</StyledLabelInput>
+                                        <StyledInputNumber
+                                            type="number"
+                                            value={yArrowStart}
+                                            onChange={(e) => handleInputChange(e, setYArrowStart)}
+                                        />
+                                    </div>
+                                </div>
+                            </SectionOwnDirection>
+
+                            {/* Sekce CÍL */}
+                            <SectionOwnDirection isClicked={activeArrow === 'arrow13'}>
+
+                                <div style={rowStyles}>
+                                    <StyledLabel style={{color: 'white'}}>CÍL:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</StyledLabel>
+                                    <div style={rowStyles}>
+                                        <StyledLabelInput isClicked={activeArrow === 'arrow13'}>X:</StyledLabelInput>
+                                        <StyledInputNumber
+                                            type="number"
+                                            value={xArrowEnd}
+                                            onChange={(e) => handleInputChange(e, setXArrowEnd)}
+                                        />
+                                    </div>
+
+                                    <div style={rowStyles}>
+                                        <StyledLabelInput isClicked={activeArrow === 'arrow13'}>Y:</StyledLabelInput>
+                                        <StyledInputNumber
+                                            type="number"
+                                            value={yArrowEnd}
+                                            onChange={(e) => handleInputChange(e, setYArrowEnd)}
+                                        />
+                                    </div>
+                                </div>
+                            </SectionOwnDirection>
+                        </ContainerInputNumber>
+
+                        <p style={{margin: '15px 0 5px 0'}}>Doba přehrávání:</p>
 
                         <div style={{
-                            display: "block",
-                            width: "100%",
-                            margin: "auto",
-                            textAlign: "center"
+                            display: 'block',
+                            width: '100%',
+                            margin: 'auto',
+                            textAlign: 'center'
                         }}>
 
-                            <TimeInput type={"range"} min={"0"} max={"60"} value={rangeValue}
+                            <TimeInput type={'range'} min={'0'} max={'60'} value={rangeValue}
                                        onChange={(e) => {
                                            console.log(rangeValue);
                                            setRangeValue(+e.target.value)

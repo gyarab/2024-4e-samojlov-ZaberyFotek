@@ -23,7 +23,7 @@ function Login() {
     const [passwordError, setPasswordError] = useState('');
 
     // Uchování přihlášeného uživatele
-    const [user, setUser] = useState(null);
+    //const [user, setUser] = useState(null);
 
     // Přesměrování uživatele
     const navigate = useNavigate();
@@ -62,7 +62,7 @@ function Login() {
                         })
                         .then((res) => {
                             if (res.data.validation) {
-                                setUser(googleData);
+                                //setUser(googleData);
 
                                 // // Serializace dat uživatele
                                 localStorage.setItem('user', JSON.stringify(res.data?.user));
@@ -103,16 +103,16 @@ function Login() {
             toast.success(location.state.successMessage);
         }
 
-        const loggedInUser = localStorage.getItem("user");
-        if (loggedInUser) {
-            try {
-                // Deserializace dat uživatele
-                const foundUser = JSON.parse(loggedInUser);
-                setUser(foundUser);
-            } catch (e) {
-                console.error("Chyba při parsování uživatelských dat z localStorage:", e);
-            }
-        }
+        // const loggedInUser = localStorage.getItem("user");
+        // if (loggedInUser) {
+        //     try {
+        //         // Deserializace dat uživatele
+        //         const foundUser = JSON.parse(loggedInUser);
+        //         setUser(foundUser);
+        //     } catch (e) {
+        //         console.error("Chyba při parsování uživatelských dat z localStorage:", e);
+        //     }
+        // }
 
     }, [location.state]);
 
@@ -132,7 +132,7 @@ function Login() {
         })
             .then(res => {
                 if (res.data.validation) {
-                    setUser(res.data);
+                    //setUser(res.data);
                     // Serializace dat uživatele
                     localStorage.setItem('user', JSON.stringify(res.data?.user));
                     // localStorage.setItem("user", JSON.stringify({

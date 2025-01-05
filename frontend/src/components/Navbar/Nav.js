@@ -54,9 +54,9 @@ function Navbar({toggle}) {
         window.addEventListener('scroll', controlNavbar);
 
         // Pokud uživatel není zaregistrovaný, dojde k přesměrování na adresu přihlášení
-        if (!loggedInUser) {
-            navigate('/prihlaseni');
-        }
+        // if (!loggedInUser) {
+        //     navigate('/prihlaseni');
+        // }
 
         return () => {
             window.removeEventListener('scroll', controlNavbar)

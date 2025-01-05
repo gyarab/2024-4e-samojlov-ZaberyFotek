@@ -285,6 +285,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
 
+                console.log("ARROW", arrowPosition)
+
                 //const basicArrowType = arrowPosition.x !== "zoom" && arrowPosition.x !== "rotate";
 
                 // console.log("zzzyzY " + ratioSelection[1].ratio)
@@ -313,6 +315,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 // Funkce pro určení správného směru pozice na základě směru pohybu
                 const arrowSetUp = (arrow, positionClip, maxDimension, cameraDimension) => {
+
                     if (arrow === "+") {
                         return positionClip;
                     } else if (arrow === "-") {
@@ -355,13 +358,26 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     positionX = squareRotation.positionX;
                     positionY = squareRotation.positionY;
 
+                    // Vlastní směr - START => CÍL
+                } else if (containsNumber(arrowPosition.x)){
+
+                    // Načtení startu a cíle
+                    const [startX, endX] = arrowPosition.x.split(' ').map(Number);
+                    const [startY, endY] = arrowPosition.y.split(' ').map(Number);
+
+                    // Posun během délky částice
+                    const progressX = (count - startPiece) / duration;
+                    const progressY = (count - startPiece) / duration;
+
+                    // Výsledná pozice po přičtení posunu
+                    positionX = startX + progressX * (endX - startX);
+                    positionY = startY + progressY * (endY - startY);
+
                 } else {
 
                     // Vypočítání pozic kamery na základě směru šipek
                     positionX = arrowSetUp(arrowPosition.x, positionX, img.width, cameraWidth);
                     positionY = arrowSetUp(arrowPosition.y, positionY, img.height, cameraHeight);
-
-                    // console.log("POSITION " + positionX + " " + canvas.width);
                 }
 
                 // Nastavení vypočítaných pozic pro animaci
@@ -408,13 +424,16 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 // Částice obsahující klip
                 if (currentPiece.isSubmitted && pieceTimeConditional) {
 
-                    //console.log("COORDINATE X", coordinateX, coordinateY)
-
-                    setPieceClicked(false);
                     handlePieceClick(false);
+                    setPieceClicked(false);
+
+                    //console.log("COORDINATE X", coordinateX, coordinateY)
 
                     // Funkce pro vytvoření klipu
                     const createClip = () => {
+
+                        // handlePieceClick(true);
+                        // setPieceClicked(false);
 
                         // console.log(coordinateY + " " + canvas.width + " " + img.width + " " + coordinateX);
 
@@ -1108,6 +1127,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             handleFunction(event);
         }
     };
+
+    /** Funkce, zda proměnná typu String obsahuje číslo **/
+    const containsNumber = (str) => {
+        return /\d/.test(str);
+    }
 
     /** Funkce pro zobrazení úplné rotace obrázku ve směru nebo proti směru hodinových ručiček **/
     const getSquareRotation = (arrowPosition, positionX, newSpeedX, positionY, cameraWidth, newSpeedY, cameraHeight, startClip, duration) => {
