@@ -17,7 +17,7 @@ import {cameraOption} from "./Options/cameraOption";
 import {transitionOption} from "./Options/transitionOption";
 import {Bounce, toast, ToastContainer} from 'react-toastify';
 import {Transitions} from "../Transitions/Transitions";
-import axios from "axios";
+import PopUpComponent from "../PopUp/PopUp";
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -55,6 +55,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     // Inicializace plochy pro vytváření klipu
     const videoRef = useRef(null);
 
+    // Ověření zda program běží poprvé
     const [isFirstRun, setIsFirstRun] = useState(true);
 
     /** Proměnné pro sekci - VELIKOST PLÁTNA **/
@@ -80,6 +81,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         // Link pro stažení výsledného videa
     const [downloadLink, setDownloadLink] = useState(null);
 
+    // Proměnná pro zjištění zda stažení proběhlo úspěšně
+    const [success, setSuccess] = useState(false);
+
     // Proměnné pro ukládání klipu
     const [isRecording, setIsRecording] = useState(false);
     const mediaRecorderRef = useRef(null);
@@ -87,6 +91,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     // Tlačítko pro ukládání vytvořeného klipu
     const [downloadBtn, setDownloadBtn] = useState(false);
+
+    // Viditelnost modalu
+    const [open, setOpen] = useState(false);
+
+    /** Funkce určuje danou viditelnost modalu **/
+    const closeModal = () => {
+        setOpen(false);
+    };
 
     /** Proměnné pro sekci - PŘECHODY **/
 
@@ -183,18 +195,21 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     /**
      * Funkce umožňuje stáhnout video. Vytvoří a klikne na odkaz pro stažení videa.
      */
-    const handleDownload = () => {
+    const handleDownload = (clipName) => {
 
         // setDownloadLink(null);
         // chunks.current = [];
 
+        setOpen(o => !o);
+
         setDownloadBtn(true);
 
-        if (downloadLink) {
+        // původně pouze downloadLink
+        if (downloadLink && success) {
 
             const link = document.createElement('a');
             link.href = downloadLink.toString();
-            link.download = 'canvas-video.webm';
+            link.download = clipName ? `${clipName}.mp4` : 'canvas-video.mp4';
             link.click();
         }
     };
@@ -207,6 +222,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         if (mediaRecorderRef.current && isRecording) {
             mediaRecorderRef.current.stop();
             setIsRecording(false);
+            setSuccess(true);
         }
     };
 
@@ -237,6 +253,33 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
             // Zahájení snímaní videa
             startRecording(canvas);
+        }
+
+        if (success) {
+
+            const activeUser = localStorage.getItem("user");
+            const data = JSON.parse(activeUser);
+
+            if (activeUser) {
+
+                // axios.post('http://localhost:4000/data/addPiecesData', {
+                //     user_id: data?.id,
+                //     name: 'ZXWYaa klip',
+                //     description: 'Popis ...',
+                //     pieces: selectedPieces
+                // })
+                //     .then(res => {
+                //         if (res.data.validation) {
+                //             toast.success(res.data.message);
+                //         }
+                //     })
+                //     .catch(err => {
+                //         toast.error(err.response?.data?.error);
+                //     });
+
+                // původně
+                // setSuccess(false);
+            }
         }
 
         // Funkce pro vykreslení aktuálního snímku
@@ -360,7 +403,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     positionY = squareRotation.positionY;
 
                     // Vlastní směr - START => CÍL
-                } else if (containsNumber(arrowPosition.x)){
+                } else if (containsNumber(arrowPosition.x)) {
 
                     // Načtení startu a cíle
                     const [startX, endX] = arrowPosition.x.split(' ').map(Number);
@@ -417,7 +460,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                     3: {func: slideTransition, duration: 1500},
                     4: {func: flipTransition, duration: 1500},
                     5: {func: pullInTransition, duration: 1500},
-                    6: {func: blurTransition, duration: 1500}
+                    6: {func: blurTransition, duration: 1500},
                 };
 
                 //console.log("COUNT", Math.abs(endPiece - count).toFixed(1))
@@ -958,34 +1001,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         chunks.current = [];
                         setBarPosition(0);
                         setIsFirstRun(false);
+                        setIsPlaying(true);
 
-                        for (let i = 0; i < selectedPieces.length; i++) {
-
-                            const currentPiece = selectedPieces[i];
-
-                            axios.post('http://localhost:4000/data/addPiecesData', {
-                                id: currentPiece?.id,
-                                value: currentPiece?.value,
-                                src: currentPiece?.src,
-                                width: currentPiece?.width,
-                                left: currentPiece?.left,
-                                isSubmitted: currentPiece?.isSubmitted,
-                                arrow: currentPiece?.arrow,
-                                duration: currentPiece?.duration,
-                                special: currentPiece?.special,
-                                transition: currentPiece?.transition,
-                                cameraSize: currentPiece?.cameraSize,
-                                arrowDirection: currentPiece?.arrowDirection
-                            })
-                                .then(res => {
-                                    if (res.data.validation) {
-                                        toast.success(res.data.message);
-                                    }
-                                })
-                                .catch(err => {
-                                    toast.error(err.response?.data?.error);
-                                });
-                        }
                         return 0;
 
                     } else if (prevTime + 0.15 >= videoLength) {
@@ -994,6 +1011,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         setIsPlaying(false);
                         stopRecording();
                         setDownloadBtn(false);
+                        setIsPlaying(false);
 
                         return videoLength;
                     }
@@ -1555,6 +1573,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     return (
         <div>
             <ClipContainer>
+
+                {(downloadBtn || success) && <PopUpComponent open={open}
+                                                closeModal={closeModal}
+                                                userData={null}
+                                                type={'saveClip'}
+                                                blur={true}
+                                                width={'500px'}
+                                                handleDownload={handleDownload}
+                                                clipReady={success}
+                                                setIsPlaying={setIsPlaying}
+                                                setDownloadBtn={setDownloadBtn}
+                                                stop={stopRecording}
+                                                link={setDownloadLink}
+                                                chunks={chunks}
+                                                setSuccess={setSuccess}
+                />}
 
                 <VideoTools isFlexStart={isFlexStart}>
 

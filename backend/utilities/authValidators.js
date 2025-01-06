@@ -245,8 +245,11 @@ const addUserDB = (username, email, password, type, image, res) => {
             return res.status(500).json({validation: false, message: 'Chyba při přidávání uživatele do databáze'});
         }
 
+        const id = this.lastID;
+
         return res.status(200).json({
             validation: true, message: 'Registrace probíhla úspěšně', user: {
+                id: id,
                 username: username,
                 email: email,
                 password: password,

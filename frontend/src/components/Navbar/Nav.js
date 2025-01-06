@@ -37,8 +37,6 @@ function Navbar({toggle}) {
 
     console.log(loggedInUser);
 
-    // localStorage.clear();
-
     const data = JSON.parse(loggedInUser);
 
     const firstLetter = data?.username?.charAt(0);

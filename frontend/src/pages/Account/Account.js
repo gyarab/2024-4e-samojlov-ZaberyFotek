@@ -67,7 +67,6 @@ function Account() {
     const [open, setOpen] = useState(false);
     const closeModal = () => setOpen(false);
 
-
     // Ověření typu účtu uživatele
     const connected = data?.verified_email !== null;
 
@@ -152,6 +151,8 @@ function Account() {
                                                      closeModal={closeModal}
                                                      userData={data}
                                                      type={type}
+                                                     blur={false}
+                                                     width={false}
                             />}
                         </InfoCard>
 

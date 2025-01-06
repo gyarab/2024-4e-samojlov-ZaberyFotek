@@ -57,6 +57,13 @@ function Home(props) {
             // // Reset úložiště
             // localStorage.clear();
 
+            // props.setImage(null);
+
+            localStorage.removeItem('savedImage');
+            // localStorage.setItem('img', URL.createObjectURL(file));
+
+            // localStorage.removeItem('img');
+            //
             // Nastavení fotky jako nově vytvořené url souboru obrázku
             props.setImage(URL.createObjectURL(file));
 

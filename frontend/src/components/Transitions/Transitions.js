@@ -463,15 +463,20 @@ export const Transitions = (ctx,
      * Funkce pro vytvoření přechodu typu "Blur" (Rozmazat)
      */
     const blurTransition = (totalDuration, onComplete) => {
-        amount = 0;
+        let amount = 0;
+        const totalFrames = totalDuration / (1000 / 60); // Počet snímků při 60 FPS
         const halfFrames = totalFrames / 2;
 
         const blur = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Vypočítání intenzity rozmazání a opacity
-            const blurAmount = amount <= halfFrames ? (amount / halfFrames) * 20 : (1 - (amount - halfFrames) / halfFrames) * 20;
-            const opacity = amount <= halfFrames ? 1 - (amount / halfFrames) : (amount - halfFrames) / halfFrames;
+            const blurAmount = amount <= halfFrames
+                ? (amount / halfFrames) * 20
+                : (1 - (amount - halfFrames) / halfFrames) * 20;
+            const opacity = amount <= halfFrames
+                ? 1 - (amount / halfFrames)
+                : (amount - halfFrames) / halfFrames;
 
             // První polovina: rozmazání aktuálního obrázku
             if (amount <= halfFrames) {
@@ -499,7 +504,7 @@ export const Transitions = (ctx,
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(nextImg, coordinateNext.x, coordinateNext.y, sizeNext.x, sizeNext.y, 0, 0, canvas.width, canvas.height);
 
-                if (onComplete) onComplete();
+                if (typeof onComplete === "function") onComplete();
             }
         };
 
