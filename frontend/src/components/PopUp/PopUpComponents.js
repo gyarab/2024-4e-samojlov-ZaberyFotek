@@ -1,5 +1,6 @@
 import styled, {keyframes} from "styled-components";
 import "reactjs-popup/dist/index.css";
+import {css} from "@emotion/react";
 
 export const PopupHeader = styled.div`
   display: flex;
@@ -53,49 +54,22 @@ export const PopupStyledCheckbox = styled.input`
   cursor: pointer;
 `;
 
-/** Animace načítání klipu **/
-const shimmer = keyframes`
-    0% {
-        background-position: -200px 0;
-    }
-    100% {
-        background-position: 200px 0;
-    }
-`;
-
-export const ClipSection = styled.div`
+export const ClipSection = styled.div.withConfig({
+    shouldForwardProp: (prop) => !['clipReady'].includes(prop),
+})`
     width: 100%;
-    height: 200px;
-    background: linear-gradient(90deg, var(--color-shadow-9) 25%, var(--color-shadow-7) 50%, var(--color-shadow-9) 75%);
-    animation: backwards ${shimmer} 1.5s infinite;
+    height: auto;
+    min-height: 200px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-`;
-
-export const PlayButtonOverlay = styled.div`
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-
-    &::after {
-        content: '';
-        display: block;
-        width: 0;
-        height: 0;
-        border-left: 12px solid #333;
-        border-top: 8px solid transparent;
-        border-bottom: 8px solid transparent;
+    
+    video {
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-shadow: 0 3px 15px var(--color-shadow-6);
     }
 `;
 

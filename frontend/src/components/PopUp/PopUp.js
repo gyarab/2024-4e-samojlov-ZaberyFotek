@@ -6,7 +6,6 @@ import {
     ClipSection,
     CloseButton,
     EditableTitle,
-    FileMetaInfo,
     Loader,
     PopupCheckboxContainer,
     PopupFooter,
@@ -25,7 +24,8 @@ import {useNavigate} from "react-router-dom";
 /** Hlavní komponenta vstupujícího okna **/
 const PopUpComponent = ({
                             open, closeModal, userData, type, blur, width, handleDownload, clipReady,
-                            setIsPlaying, setDownloadBtn, stop, link, chunks, setSuccess
+                            setIsPlaying, setDownloadBtn, stop, link, chunks, setSuccess, downloadLink,
+                            setSaveClip, selectedPieces
                         }) => {
 
     const [input, setInput] = useState(userData?.email);
@@ -42,11 +42,9 @@ const PopUpComponent = ({
         setIsChecked(e.target.checked);
     };
 
-    console.log(clipReady, "SHHHHHHHHHHHHHHH")
-
     const getType = (type === 'username');
 
-    console.log(userData);
+    console.log(userData, localStorage.getItem('user'));
 
     useEffect(() => {
 
@@ -55,7 +53,7 @@ const PopUpComponent = ({
         } else {
             setInput(userData?.email);
         }
-    }, [getType, userData]);
+    }, [getType, userData, clipReady]);
 
     // Přesměrování uživatele
     const navigate = useNavigate();
@@ -188,8 +186,19 @@ const PopUpComponent = ({
                     <CardContent>
 
                         <ClipSection>
-                            <Loader/>
+                            {clipReady ? (<div>
+                                    <video
+                                        controls
+                                        src={downloadLink}
+                                    >
+                                        Zdá se, že váš prohlížeč nepodporuje tento typ videa
+                                    </video>
+                                </div>
+                            ) : (
+                                <Loader/>
+                            )}
                         </ClipSection>
+
 
                         <EditableTitle
                             type="text"
@@ -198,16 +207,44 @@ const PopUpComponent = ({
                             placeholder="Jméno projektu"
                         />
 
-                        <FileMetaInfo>172.5 KB / MP4</FileMetaInfo>
-
                         <ActionButtonGroup>
-                            <ActionButton bg="#ff4757" hover="#e84118">Uložit projekt</ActionButton>
                             <ActionButton onClick={() => {
+                                // if (clipReady) {
+                                //     setSaveClip(true);
+                                //     handleDownload(title, 'save', description);
+                                // }
                                 if (clipReady) {
-                                    handleDownload(title);
-                                    setSuccess(false);
-                                }
+                                    axios.post('http://localhost:4000/data/addPiecesData', {
+                                        user_id: userData?.id,
+                                        name: title,
+                                        description: description,
+                                        pieces: selectedPieces,
+                                        src: downloadLink.toString()
+                                    })
+                                        .then(res => {
+                                            if (res.data.validation) {
+                                                toast.success(res.data.message);
+                                            }
+                                        })
+                                        .catch(err => {
+                                            toast.error(err.response?.data?.error);
+                                        });
 
+                                    // původně
+                                    //setSuccess(false);
+                                }
+                            }
+                            }
+                                bg={clipReady ? "#ff4757" : "grey"}
+                                hover= {clipReady ? "#e84118" : "grey"}
+                                disabled={!clipReady}
+                                style={{cursor: clipReady ? "pointer" : "not-allowed"}}>Uložit projekt</ActionButton>
+
+                                <ActionButton onClick={() => {
+                                if (clipReady) {
+                                handleDownload(title, 'download', null, null);
+                                setSuccess(false);
+                            }
                             }}
                                           disabled={!clipReady}
                                           bg={clipReady ? "var(--home-blue-light)" : "grey"}
@@ -227,7 +264,9 @@ const PopUpComponent = ({
 
                         <ProjectDescriptionInput
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={(e) => {
+                                setDescription(e.target.value);
+                            }}
                             placeholder="Zde můžete popsat váš projekt..."
                         />
                     </CardContent>

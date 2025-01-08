@@ -7,7 +7,7 @@ const db = require('../utilities/db');
  */
 const addPiecesData = (req, res) => {
 
-    const {user_id, name, description, pieces} = req.body;
+    const {user_id, name, description, pieces, src} = req.body;
 
     console.log("DATA", user_id, name, description);
 
@@ -25,18 +25,19 @@ const addPiecesData = (req, res) => {
 
     // Přidání klipu
     const insertClipQuery = `
-      INSERT INTO clips (user_id, name, description, created_at) 
-      VALUES (?, ?, ?, ?)
+      INSERT INTO clips (user_id, name, description, created_at, src) 
+      VALUES (?, ?, ?, ?, ?)
     `;
 
-    db.run(insertClipQuery, [user_id, name, description, createdAt], function (err) {
+    db.run(insertClipQuery, [user_id, name, description, createdAt, src], function (err) {
         if (err) {
             console.error("Error adding clip:", err);
             //db.run("ROLLBACK");
             return res.status(500).json({error: "Failed to add clip."});
         }
 
-        const clipId = this.lastID; // ID vytvořeného klipu
+        // ID vytvořeného klipu
+        const clipId = this.lastID;
 
         // Vložení částic a jejich vazeb
         const insertPieceQuery = `

@@ -18,6 +18,7 @@ import {transitionOption} from "./Options/transitionOption";
 import {Bounce, toast, ToastContainer} from 'react-toastify';
 import {Transitions} from "../Transitions/Transitions";
 import PopUpComponent from "../PopUp/PopUp";
+import axios from "axios";
 
 /** Prvek časové osy **/
 function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
@@ -38,7 +39,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const [isPlaying, setIsPlaying] = useState(false);
 
     // Celková délka videa
-    const videoLength = 60;
+    const videoLength = 5;
 
     // Kontrola, zda tah je v pohybu
     const [isDragging, setIsDragging] = useState(false);
@@ -94,6 +95,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     // Viditelnost modalu
     const [open, setOpen] = useState(false);
+
+    // Viditelnost modalu
+    const [saveClip, setSaveClip] = useState(false);
 
     /** Funkce určuje danou viditelnost modalu **/
     const closeModal = () => {
@@ -195,7 +199,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     /**
      * Funkce umožňuje stáhnout video. Vytvoří a klikne na odkaz pro stažení videa.
      */
-    const handleDownload = (clipName) => {
+    const handleDownload = (clipName, type, description) => {
 
         // setDownloadLink(null);
         // chunks.current = [];
@@ -204,8 +208,42 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         setDownloadBtn(true);
 
+        console.log("SAVE", saveClip, localStorage.getItem("user"));
+
+        //if (saveClip && downloadLink !== null && type === 'save' && clipName && description) {
+            //
+            // const activeUser = localStorage.getItem("user");
+            // const data = JSON.parse(activeUser);
+            //
+            // console.log("TITLE", clipName, description)
+            //
+            // if (activeUser) {
+
+            //     axios.post('http://localhost:4000/data/addPiecesData', {
+            //         user_id: data?.id,
+            //         name: clipName,
+            //         description: description,
+            //         pieces: selectedPieces,
+            //         src: downloadLink.toString()
+            //     })
+            //         .then(res => {
+            //             if (res.data.validation) {
+            //                 toast.success(res.data.message);
+            //             }
+            //         })
+            //         .catch(err => {
+            //             toast.error(err.response?.data?.error);
+            //         });
+            //
+            //     // původně
+            //     //setSuccess(false);
+            // }
+
+            //setSaveClip(false);
+        //}
+
         // původně pouze downloadLink
-        if (downloadLink && success) {
+        if (downloadLink && success && type === 'download') {
 
             const link = document.createElement('a');
             link.href = downloadLink.toString();
@@ -255,34 +293,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             startRecording(canvas);
         }
 
-        if (success) {
-
-            const activeUser = localStorage.getItem("user");
-            const data = JSON.parse(activeUser);
-
-            if (activeUser) {
-
-                // axios.post('http://localhost:4000/data/addPiecesData', {
-                //     user_id: data?.id,
-                //     name: 'ZXWYaa klip',
-                //     description: 'Popis ...',
-                //     pieces: selectedPieces
-                // })
-                //     .then(res => {
-                //         if (res.data.validation) {
-                //             toast.success(res.data.message);
-                //         }
-                //     })
-                //     .catch(err => {
-                //         toast.error(err.response?.data?.error);
-                //     });
-
-                // původně
-                // setSuccess(false);
-            }
-        }
-
-        // Funkce pro vykreslení aktuálního snímku
+        /** Funkce pro vykreslení aktuálního snímku **/
         const createFrame = (count) => {
 
             // Procházení pole částic
@@ -1575,19 +1586,22 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
             <ClipContainer>
 
                 {(downloadBtn || success) && <PopUpComponent open={open}
-                                                closeModal={closeModal}
-                                                userData={null}
-                                                type={'saveClip'}
-                                                blur={true}
-                                                width={'500px'}
-                                                handleDownload={handleDownload}
-                                                clipReady={success}
-                                                setIsPlaying={setIsPlaying}
-                                                setDownloadBtn={setDownloadBtn}
-                                                stop={stopRecording}
-                                                link={setDownloadLink}
-                                                chunks={chunks}
-                                                setSuccess={setSuccess}
+                                                             closeModal={closeModal}
+                                                             userData={JSON.parse(localStorage.getItem('user'))}
+                                                             type={'saveClip'}
+                                                             blur={true}
+                                                             width={'500px'}
+                                                             handleDownload={handleDownload}
+                                                             clipReady={success}
+                                                             setIsPlaying={setIsPlaying}
+                                                             setDownloadBtn={setDownloadBtn}
+                                                             stop={stopRecording}
+                                                             link={setDownloadLink}
+                                                             chunks={chunks}
+                                                             setSuccess={setSuccess}
+                                                             downloadLink={downloadLink}
+                                                             setSaveClip={setSaveClip}
+                                                             selectedPieces={selectedPieces}
                 />}
 
                 <VideoTools isFlexStart={isFlexStart}>
