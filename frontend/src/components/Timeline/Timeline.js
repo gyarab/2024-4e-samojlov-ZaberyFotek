@@ -289,6 +289,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         if (!isRecording && downloadBtn) {
 
+            console.log("ZDE");
+
             // Zahájení snímaní videa
             startRecording(canvas);
         }
@@ -920,8 +922,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                             coordinateRes = piece1?.width;
 
-                            console.log("XXXXXXXX000", coordinateRes)
-
                             handlePieceUpdate(
                                 id1,
                                 piece1.src,
@@ -1023,6 +1023,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         stopRecording();
                         setDownloadBtn(false);
                         setIsPlaying(false);
+                        setIsFirstRun(true);
 
                         return videoLength;
                     }
@@ -1781,7 +1782,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         <DownloadBtn onClick={handleDownload}>
 
                             <FaDownload style={{fontSize: "14px"}}/> Exportovat
-
 
                         </DownloadBtn>
                     </div>

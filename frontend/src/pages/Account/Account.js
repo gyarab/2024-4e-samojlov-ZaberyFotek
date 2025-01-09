@@ -1,34 +1,45 @@
 import React, {useEffect, useState} from "react";
 import {Bounce, toast, ToastContainer} from "react-toastify";
-import {Link, Navigate, useLocation, useNavigate} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import {
-    AccountContainer, CreateButton, EditIcon,
-    EmptyMessage, Footer,
-    MainContent,
-    ProjectsContainer,
-    Sidebar,
-    SidebarItem,
-    Title,
+    AccountButton,
+    AccountContainer,
     AccountSettingsContainer,
+    ButtonContainer,
+    Card,
+    CardContent,
+    CardDescription,
+    CardMedia,
+    CardTitle,
+    ChangeContainer,
+    CreateButton,
+    EditIcon,
+    EmptyMessage,
+    GridContainer,
     InfoCard,
     InfoLabel,
     InfoValue,
     LoginOptions,
-    OptionRow,
+    LogOutBtn,
+    MainContent,
     OptionIcon,
     OptionLabel,
-    AccountButton,
-    SectionTitle, LogOutBtn, ChangeContainer, Section, ButtonContainer, SectionParagraph
+    OptionRow,
+    ProjectsContainer,
+    Section,
+    SectionParagraph,
+    SectionTitle,
+    Sidebar,
+    SidebarItem
 } from "./AccountComponents";
-import {FaApple, FaGoogle, FaRegFolder, FaRegUserCircle} from "react-icons/fa";
+import {FaRegFolder, FaRegUserCircle} from "react-icons/fa";
 import {MdLogout} from "react-icons/md";
 import {FcGoogle} from "react-icons/fc";
 import {FiEdit} from "react-icons/fi";
 import {IoSettingsOutline} from "react-icons/io5";
 import {TbPhotoVideo} from "react-icons/tb";
-import Popup from "reactjs-popup";
 import PopUpComponent from "../../components/PopUp/PopUp";
-import {Button} from "../Prihlaseni/LoginComponents";
+import axios from "axios";
 
 /** Komponenta Account umožňuje uživateli prohlížet a spravovat jeho vytvořené klipy **/
 function Account() {
@@ -48,7 +59,9 @@ function Account() {
     const loggedInUser = localStorage.getItem("user");
 
     // Parsování dat uživatele z JSON řetězce
-    const data = JSON.parse(loggedInUser);
+    const userData = JSON.parse(loggedInUser);
+
+    console.log("LOGGED", userData);
 
     // Přesměrování uživatele na jinou stránku pomocí hooku navigate
     const navigate = useNavigate();
@@ -68,14 +81,36 @@ function Account() {
     const closeModal = () => setOpen(false);
 
     // Ověření typu účtu uživatele
-    const connected = data?.verified_email !== null;
+    const connected = userData?.verified_email !== null;
+
+    const [clips, setClips] = useState([]);
+
+    useEffect(() => {
+
+        console.log("KLIPY", clips);
+
+    }, [clips]);
 
     return (
         <AccountContainer>
             <Sidebar>
                 <SidebarItem
                     active={activeItem === 'Moje projekty'}
-                    onClick={() => handleItemClick('Moje projekty')}
+                    onClick={() => {
+                        handleItemClick('Moje projekty')
+                        axios
+                            .post('http://localhost:4000/data/getClips', {
+                                user_id: userData?.id,
+                            })
+                            .then((res) => {
+                                setClips(res.data?.clips);
+
+                            })
+                            .catch((err) => {
+                                toast.error('Error fetching clips');
+                                console.log(err);
+                            });
+                    }}
                 >
                     <FaRegFolder style={{fontSize: '18px'}}/> Moje projekty
                 </SidebarItem>
@@ -94,11 +129,40 @@ function Account() {
             </Sidebar>
             <MainContent>
                 {activeItem === 'Moje projekty' && (
-                    <ProjectsContainer>
-                        <SectionTitle>{activeItem}</SectionTitle>
-                        <EmptyMessage>Zatím žádné projekty.</EmptyMessage>
-                        <CreateButton onClick={() => {navigate("/")}}><TbPhotoVideo style={{fontSize: '20px'}}/> Vytvořit nový klip</CreateButton>
-                    </ProjectsContainer>
+
+                    <div>
+
+                        {clips.length > 0 ? (
+                            <ProjectsContainer>
+                                <SectionTitle>{activeItem}</SectionTitle>
+                                <GridContainer>
+                                    {clips.map((clip) => (
+                                        <Card key={clip.id}>
+                                            <video
+                                                controls
+                                                src={clip.src.toString()}
+                                            >
+                                                Zdá se, že váš prohlížeč nepodporuje tento typ videa
+                                            </video>
+                                            <CardContent>
+                                                <CardTitle>{clip.name}</CardTitle>
+                                                <CardDescription>{clip.description || 'No description provided.'}</CardDescription>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </GridContainer>
+                            </ProjectsContainer>
+
+                        ) : (
+                            <ProjectsContainer style={{alignItems: 'center', justifyContent: 'center'}}>
+                            <SectionTitle>{activeItem}</SectionTitle>
+                                <EmptyMessage>Zatím žádné projekty.</EmptyMessage>
+                                <CreateButton onClick={() => navigate("/")}>
+                                    <TbPhotoVideo style={{fontSize: '20px'}}/> Vytvořit nový klip
+                                </CreateButton>
+                            </ProjectsContainer>
+                        )}
+                    </div>
                 )}
                 {/*{activeItem === 'Můj plán' && (*/}
                 {/*    <PlanContainer>*/}
@@ -123,23 +187,23 @@ function Account() {
 
                         <InfoCard>
                             <InfoLabel>Jméno</InfoLabel>
-                            <InfoValue>{data?.username}</InfoValue>
+                            <InfoValue>{userData?.username}</InfoValue>
                             <EditIcon onClick={() => {
-                                setOpen(o => !o)
-                                setType('username')
+                                setOpen(o => !o);
+                                setType('username');
                             }
                             }>
                                 <FiEdit/>
                             </EditIcon>
                             {open && <PopUpComponent open={open}
                                                      closeModal={closeModal}
-                                                     userData={data}
+                                                     userData={userData}
                                                      type={type}
                             />}
                         </InfoCard>
                         <InfoCard>
                             <InfoLabel>Email</InfoLabel>
-                            <InfoValue>{data?.email}</InfoValue>
+                            <InfoValue>{userData?.email}</InfoValue>
                             <EditIcon onClick={() => {
                                 setOpen(o => !o)
                                 setType('email')
@@ -149,7 +213,7 @@ function Account() {
 
                             {open && <PopUpComponent open={open}
                                                      closeModal={closeModal}
-                                                     userData={data}
+                                                     userData={userData}
                                                      type={type}
                                                      blur={false}
                                                      width={false}

@@ -169,6 +169,35 @@ const addPiecesData = (req, res) => {
     });
 };
 
+/**
+ * Sekce: Získání částic daného uživatele
+ * Endpoint: /getClips
+*/
+const getClips = (req, res) => {
+    const { user_id } = req.body;
+
+    console.log("ID", user_id);
+
+    let query = `SELECT * FROM clips`;
+    const params = [];
+
+    if (user_id) {
+        query += ` WHERE user_id = ?`;
+        params.push(user_id);
+    }
+
+    db.all(query, params, (err, rows) => {
+        if (err) {
+            console.error("Error fetching clips:", err);
+            console.log(err);
+            return res.status(500).json({ error: "Failed to fetch clips." });
+        }
+
+        return res.status(200).json({ clips: rows });
+    });
+};
+
 module.exports = {
-    addPiecesData
+    addPiecesData,
+    getClips
 };

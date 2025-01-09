@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const AccountContainer = styled.div`
     display: flex;
     background-color: #f9f9f9;
-    height: 100vh;
+    height: auto;
     justify-content: flex-start;
 `;
 
@@ -18,7 +18,7 @@ export const Sidebar = styled.aside`
     border-radius: 10px;
     margin-top: 120px; 
     margin-left: 25px;
-    height: 50rem;
+    height: 100%;
 `;
 
 export const SidebarItem = styled.div.withConfig({
@@ -52,8 +52,8 @@ export const MainContent = styled.main`
 export const ProjectsContainer = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     border: 1px solid #eaeaea;
     border-radius: 10px;
     background-color: #fff;
@@ -61,8 +61,74 @@ export const ProjectsContainer = styled.div`
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     min-height: 300px;
     width: 100%;
-    height: 50rem;
+    height: auto;
 `;
+export const GridContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+    gap: 20px;
+    width: 100%;
+`;
+
+export const Card = styled.div`
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+`;
+
+export const CardMedia = styled.video`
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #000;
+`;
+
+export const CardContent = styled.div`
+    text-align: center;
+    padding: 10px;
+`;
+
+export const CardTitle = styled.h2`
+    font-size: 18px;
+    color: var(--color-shadow-9);
+    margin: 0 0 10px;
+`;
+
+export const CardDescription = styled.p`
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+`;
+
+// const EmptyMessage = styled.p`
+//     font-size: 16px;
+//     color: #999;
+//     text-align: center;
+// `;
+//
+// const CreateButton = styled.button`
+//     background-color: var(--home-blue-light);
+//     color: #fff;
+//     padding: 10px 20px;
+//     border: none;
+//     border-radius: 4px;
+//     cursor: pointer;
+//     display: flex;
+//     align-items: center;
+//     gap: 10px;
+//     font-size: 16px;
+//
+//     &:hover {
+//         background-color: #5aafff;
+//     }
+// `;
 export const PlanContainer = styled(ProjectsContainer)`
     background-color: #fefefe;
 `;

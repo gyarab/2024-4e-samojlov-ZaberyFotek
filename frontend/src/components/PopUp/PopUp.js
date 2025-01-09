@@ -44,7 +44,7 @@ const PopUpComponent = ({
 
     const getType = (type === 'username');
 
-    console.log(userData, localStorage.getItem('user'));
+    // console.log(userData, localStorage.getItem('user'));
 
     useEffect(() => {
 
@@ -235,16 +235,22 @@ const PopUpComponent = ({
                                 }
                             }
                             }
-                                bg={clipReady ? "#ff4757" : "grey"}
-                                hover= {clipReady ? "#e84118" : "grey"}
-                                disabled={!clipReady}
-                                style={{cursor: clipReady ? "pointer" : "not-allowed"}}>Uložit projekt</ActionButton>
+                                          bg={clipReady ? "#ff4757" : "grey"}
+                                          hover={clipReady ? "#e84118" : "grey"}
+                                          disabled={!clipReady}
+                                          style={{cursor: clipReady ? "pointer" : "not-allowed"}}>Uložit
+                                projekt</ActionButton>
 
-                                <ActionButton onClick={() => {
+                            <ActionButton onClick={() => {
                                 if (clipReady) {
-                                handleDownload(title, 'download', null, null);
-                                setSuccess(false);
-                            }
+                                    handleDownload(title, 'download', null, null);
+                                    setIsPlaying(false);
+                                    setDownloadBtn(false);
+                                    stop();
+                                    link(null);
+                                    chunks.current = [];
+                                    setSuccess(false);
+                                }
                             }}
                                           disabled={!clipReady}
                                           bg={clipReady ? "var(--home-blue-light)" : "grey"}
