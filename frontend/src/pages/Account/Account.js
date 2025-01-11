@@ -136,11 +136,24 @@ function Account() {
                             <ProjectsContainer>
                                 <SectionTitle>{activeItem}</SectionTitle>
                                 <GridContainer>
-                                    {clips.map((clip) => (
-                                        <Card key={clip.id}>
+                                    {clips.map((clip) => {
+
+                                        let videoSrc = clip.src;
+
+                                        if (clip?.src.toString().startsWith('data:')) {
+                                            videoSrc = clip.src;
+                                        } else if (clip?.src.toString().startsWith('blob:')) {
+                                            videoSrc = clip.src;
+                                        } else {
+                                            const videoBlob = new Blob([clip.src], { type: 'video/mp4' });
+                                            videoSrc = URL.createObjectURL(videoBlob);
+                                        }
+
+                                        return (<Card key={clip.id}>
                                             <video
                                                 controls
-                                                src={clip.src.toString()}
+                                                src={videoSrc}
+                                                poster={clip.poster}
                                             >
                                                 Zdá se, že váš prohlížeč nepodporuje tento typ videa
                                             </video>
@@ -148,8 +161,8 @@ function Account() {
                                                 <CardTitle>{clip.name}</CardTitle>
                                                 <CardDescription>{clip.description || 'No description provided.'}</CardDescription>
                                             </CardContent>
-                                        </Card>
-                                    ))}
+                                        </Card>);
+                                    })}
                                 </GridContainer>
                             </ProjectsContainer>
 

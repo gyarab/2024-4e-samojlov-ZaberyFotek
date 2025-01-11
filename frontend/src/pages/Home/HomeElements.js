@@ -6,17 +6,19 @@ export const HomeContainer = styled.div`
     display: grid;
     background: radial-gradient(circle at top left, var(--color-blue-9) 0%, var(--color-blue-5) 10%, transparent 20%),
                 radial-gradient(circle at bottom right, var(--color-blue-9) 0%, var(--color-blue-5) 10%, transparent 20%);
-    height: 100vh; 
     width: 100vw;
+    height: 100vh;
+    min-height: 800px;
     z-index: -1;
     justify-items: center;
     align-content: center;
+    overflow: hidden;
 `;
 
 export const TextElements = styled.div`
     display: block;
     text-align: center;
-    margin-top: 50px;
+    margin-top: 80px;
 `;
 
 export const HeadingContainer = styled.h1`

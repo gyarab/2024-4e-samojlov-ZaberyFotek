@@ -3,11 +3,11 @@ const db = require('../utilities/db');
 /**
  * Sekce: Přidání dat o všech částicích
  * POST routa pro přidání dat o částicích do databáze.
- * Endpoint: /addPiecesData
+ * Endpoint: /addClip
  */
 const addPiecesData = (req, res) => {
 
-    const {user_id, name, description, pieces, src} = req.body;
+    const {user_id, name, description, pieces, src, poster} = req.body;
 
     console.log("DATA", user_id, name, description);
 
@@ -18,6 +18,8 @@ const addPiecesData = (req, res) => {
         });
     }
 
+    const videoBuffer = Buffer.from(src.split(',')[1], 'base64');
+
     const createdAt = new Date().toISOString();
 
     // Transakční logika pro přidání klipu a jeho částic
@@ -25,11 +27,11 @@ const addPiecesData = (req, res) => {
 
     // Přidání klipu
     const insertClipQuery = `
-      INSERT INTO clips (user_id, name, description, created_at, src) 
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO clips (user_id, name, description, created_at, src, poster) 
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    db.run(insertClipQuery, [user_id, name, description, createdAt, src], function (err) {
+    db.run(insertClipQuery, [user_id, name, description, createdAt, videoBuffer, poster], function (err) {
         if (err) {
             console.error("Error adding clip:", err);
             //db.run("ROLLBACK");
@@ -89,7 +91,8 @@ const addPiecesData = (req, res) => {
                     return;
                 }
 
-                const pieceId = this.lastID; // ID vytvořené částice
+                // ID vytvořené částice
+                const pieceId = this.lastID;
 
                 // Přidání přechodů (transition)
                 if (transition) {
@@ -170,7 +173,7 @@ const addPiecesData = (req, res) => {
 };
 
 /**
- * Sekce: Získání částic daného uživatele
+ * Sekce: Získání všech klipů daného uživatele
  * Endpoint: /getClips
 */
 const getClips = (req, res) => {
@@ -193,7 +196,14 @@ const getClips = (req, res) => {
             return res.status(500).json({ error: "Failed to fetch clips." });
         }
 
-        return res.status(200).json({ clips: rows });
+        const clipsData = rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            description: row.description,
+            src: `data:video/mp4;base64,${row.src.toString('base64')}`,
+        }));
+
+        return res.status(200).json({ clips: clipsData });
     });
 };
 

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const AccountContainer = styled.div`
     display: flex;
     background-color: #f9f9f9;
-    height: auto;
+    height: 100vh;
     justify-content: flex-start;
 `;
 
@@ -18,7 +18,7 @@ export const Sidebar = styled.aside`
     border-radius: 10px;
     margin-top: 120px; 
     margin-left: 25px;
-    height: 100%;
+    height: min-content;
 `;
 
 export const SidebarItem = styled.div.withConfig({
@@ -68,6 +68,7 @@ export const GridContainer = styled.div`
     grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
     gap: 20px;
     width: 100%;
+    margin-top: 25px;
 `;
 
 export const Card = styled.div`

@@ -5,10 +5,11 @@ export const Container = styled.div`
     justify-content: center;
     align-items: center;
     height: 100vh;
+    min-height: 700px;
     background-image: url('/backgroundIMG.jpg');
     background-size: cover;
     background-position: unset;
-    background-repeat: no-repeat; 
+    background-repeat: no-repeat;
 `;
 
 export const FormWrapper = styled.div`
@@ -17,6 +18,7 @@ export const FormWrapper = styled.div`
     box-shadow: 0 5px 20px 0 #d6aaff;
     padding: 40px 32px;
     width: 400px;
+    margin-top: 80px;
 `;
 
 export const Title = styled.h1`

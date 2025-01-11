@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {
     ActionButton,
     ActionButtonGroup,
@@ -19,7 +19,7 @@ import Popup from "reactjs-popup";
 import {Button, ErrorMessage, Label} from "../../pages/Prihlaseni/LoginComponents";
 import axios from "axios";
 import {toast} from "react-toastify";
-import {useNavigate} from "react-router-dom";
+import {redirect, useNavigate} from "react-router-dom";
 
 /** Hlavní komponenta vstupujícího okna **/
 const PopUpComponent = ({
@@ -30,6 +30,8 @@ const PopUpComponent = ({
 
     const [input, setInput] = useState(userData?.email);
     const [inputError, setInputError] = useState('');
+
+    const videoRef = useRef(null);
 
     // Aktuální hodnota pro element Checkbox
     const [isChecked, setIsChecked] = useState(false);
@@ -121,6 +123,31 @@ const PopUpComponent = ({
             });
     }
 
+    const getBlobFromURLSync = (url) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, false); // Synchronous request
+        xhr.overrideMimeType("application/octet-stream"); // To ensure binary data is handled correctly
+        xhr.send();
+
+        if (xhr.status === 200) {
+            return new Blob([xhr.response], { type: xhr.getResponseHeader("Content-Type") });
+        } else {
+            throw new Error(`Failed to fetch Blob from URL: ${xhr.statusText}`);
+        }
+    };
+
+    // Function to convert Blob to Base64 using a callback
+    const convertBlobToBase64 = (blob, callback) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            callback(reader.result); // Call the callback with the Base64 string
+        };
+        reader.onerror = (err) => {
+            throw new Error(`FileReader error: ${err}`);
+        };
+        reader.readAsDataURL(blob);
+    };
+
     return (
         <Popup
             open={open}
@@ -190,9 +217,14 @@ const PopUpComponent = ({
                                     <video
                                         controls
                                         src={downloadLink}
+                                        poster={localStorage.getItem('savedImage').toString()}
+                                        // ref={videoRef}
+                                        // onLoadedMetadata={handleLoadedMetadata}
                                     >
                                         Zdá se, že váš prohlížeč nepodporuje tento typ videa
                                     </video>
+
+                                    {/*<div>{videoRef.current ? videoRef.current.duration : null}</div>*/}
                                 </div>
                             ) : (
                                 <Loader/>
@@ -209,33 +241,50 @@ const PopUpComponent = ({
 
                         <ActionButtonGroup>
                             <ActionButton onClick={() => {
-                                // if (clipReady) {
-                                //     setSaveClip(true);
-                                //     handleDownload(title, 'save', description);
-                                // }
+
                                 if (clipReady) {
-                                    axios.post('http://localhost:4000/data/addPiecesData', {
-                                        user_id: userData?.id,
-                                        name: title,
-                                        description: description,
-                                        pieces: selectedPieces,
-                                        src: downloadLink.toString()
-                                    })
-                                        .then(res => {
-                                            if (res.data.validation) {
-                                                toast.success(res.data.message);
-                                            }
+                                    fetch(downloadLink)
+                                        .then((response) => response.blob())
+                                        .then((videoBlob) => {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                const base64String = reader.result;
+                                                axios.post('http://localhost:4000/data/addClip', {
+                                                    user_id: userData?.id,
+                                                    name: title,
+                                                    description: description,
+                                                    pieces: selectedPieces,
+                                                    src: base64String,
+                                                    poster: localStorage.getItem('savedImage').toString()
+                                                })
+                                                    .then(res => {
+                                                        if (res.data.validation) {
+                                                            toast.success(res.data.message);
+                                                        }
+                                                    })
+                                                    .catch(err => {
+                                                        toast.error(err.response?.data?.error);
+                                                    });
+                                            };
+                                            reader.onerror = (error) => {
+                                                console.error("FileReader error: ", error);
+                                                toast.error("Error converting file to Base64.");
+                                            };
+                                            reader.readAsDataURL(videoBlob);
                                         })
-                                        .catch(err => {
-                                            toast.error(err.response?.data?.error);
+                                        .catch((error) => {
+                                            console.error("Fetch error: ", error);
+                                            toast.error("Failed to fetch the video.");
                                         });
 
-                                    // původně
-                                    //setSuccess(false);
+                                    // navigate('/ucet');
+                                    // closeModal();
+                                    // toast.success("Klip byl úspěšně uložen");
                                 }
                             }
                             }
-                                          bg={clipReady ? "#ff4757" : "grey"}
+
+                                bg={clipReady ? "#ff4757" : "grey"}
                                           hover={clipReady ? "#e84118" : "grey"}
                                           disabled={!clipReady}
                                           style={{cursor: clipReady ? "pointer" : "not-allowed"}}>Uložit

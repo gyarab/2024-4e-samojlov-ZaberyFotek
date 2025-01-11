@@ -32,14 +32,16 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     /** Proměnné pro sekci - INFORMACE O TIMELINE **/
 
-        // Aktuální čas na Timeline
+    // Aktuální čas na Timeline
     const [currentTime, setCurrentTime] = useState(0);
 
     // Nastavení přehrávání
     const [isPlaying, setIsPlaying] = useState(false);
 
     // Celková délka videa
-    const videoLength = 5;
+    const videoLength = 60;
+
+    const [timeLength, setTimeLength] = useState(0);
 
     // Kontrola, zda tah je v pohybu
     const [isDragging, setIsDragging] = useState(false);
@@ -207,6 +209,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         setOpen(o => !o);
 
         setDownloadBtn(true);
+        setCurrentTime(0);
+        // setIsPlaying(true);
 
         console.log("SAVE", saveClip, localStorage.getItem("user"));
 
@@ -289,8 +293,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         if (!isRecording && downloadBtn) {
 
-            console.log("ZDE");
-
             // Zahájení snímaní videa
             startRecording(canvas);
         }
@@ -309,6 +311,19 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 // Konečný bod částice
                 const endPiece = ((selectedPieces[i].left + selectedPieces[i].width) * videoLength) / barWidth;
+
+                // Čas u poslední částice
+                const lastPiece = ((selectedPieces[selectedPieces.length - 1].left + selectedPieces[selectedPieces.length - 1].width) * videoLength) / barWidth;
+
+                // Čas přidáme pouze v případě, pokud pole neobsahuje tuto hodnotu
+                setTimeLength((prevTimeLength) => {
+
+                    if (prevTimeLength !== lastPiece) {
+                        return lastPiece;
+                    }
+
+                    return prevTimeLength;
+                });
 
                 // Proměnná pro zjištění zda další částice je na časové ose
                 const nextPiece = selectedPieces[i + 1]
@@ -342,7 +357,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 const arrowPosition = currentPiece.arrowDirection || {x: "+", y: "-"};
 
-                console.log("ARROW", arrowPosition);
+                // console.log("ARROW", arrowPosition);
 
                 //const basicArrowType = arrowPosition.x !== "zoom" && arrowPosition.x !== "rotate";
 
@@ -367,8 +382,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 let positionX = speedX * startClip;
                 let positionY = speedY * startClip;
 
+                console.log(positionX, positionY)
+
                 // Další prvek na časové ose
                 const nextValue = selectedPieces[i + 1];
+
 
                 // Funkce pro určení správného směru pozice na základě směru pohybu
                 const arrowSetUp = (arrow, positionClip, maxDimension, cameraDimension) => {
@@ -441,6 +459,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                 setCoordinateX(positionX);
                 setCoordinateY(positionY);
 
+                console.log(coordinateX, coordinateY)
+
                 // Jednotlivé metody vytvářející dané přechody
                 const {
                     blinkTransition,
@@ -510,10 +530,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         );
                     }
 
+                    console.log("TRAns", currentPiece?.transition?.transitionID, isPlaying, pieceTimeConditional)
+
                     // Přehrání klipu
                     if (isPlaying && pieceTimeConditional) {
 
-                        if (currentPiece?.transition?.transitionID !== null && count < endPiece
+                        if (currentPiece?.transition?.transitionID !== null &&
+                            currentPiece?.transition?.transitionID !== undefined &&
+                            count < endPiece
                             && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
                                 && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
                             && once) {
@@ -545,6 +569,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         }
 
                     } else {
+                        console.log(coordinateX, coordinateY)
+
                         // Vykreslení aktuálního snímku klipu
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         ctx.drawImage(
@@ -562,6 +588,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         setOnce(true);
                     }
 
+                    handlePieceClick(false);
+                    setPieceClicked(false);
+
                     break;
 
                     // Častice neobsahující klip
@@ -576,12 +605,14 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                         currentPiece.arrow,
                         currentPiece.duration,
                         0,
-                        currentPiece.arrowDirection,
+                        currentPiece?.arrowDirection,
                         currentPiece?.transition,
-                        currentPiece.cameraSize
+                        cameraSize
                     );
 
-                    if (currentPiece?.transition?.transitionID !== null && count < endPiece
+                    if (currentPiece?.transition?.transitionID !== null &&
+                        currentPiece?.transition?.transitionID !== undefined &&
+                        count <= endPiece
                         && ((Math.abs(endPiece - count).toFixed(1) >= "0.5")
                             && (Math.abs(endPiece - count).toFixed(1) <= "0.7"))
                         && once) {
@@ -998,6 +1029,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
         // console.log("Count: ", currentTime, "s");
 
+        const time = timeLength > 0 ? timeLength : videoLength;
+
         // Pokud uživatel klikne na tlačítko 'Stáhnout video'
         if (downloadBtn) {
 
@@ -1005,25 +1038,19 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 setCurrentTime((prevTime) => {
 
-                    // console.log(isFirstRun)
-
                     if (isFirstRun && currentTime !== 0) {
                         setDownloadLink(null);
                         chunks.current = [];
                         setBarPosition(0);
                         setIsFirstRun(false);
-                        setIsPlaying(true);
-
+                        //setIsPlaying(true);
                         return 0;
 
-                    } else if (prevTime + 0.15 >= videoLength) {
+                    } else if (prevTime + 0.15 >= time) {
 
                         clearInterval(intervalId);
                         setIsPlaying(false);
                         stopRecording();
-                        setDownloadBtn(false);
-                        setIsPlaying(false);
-                        setIsFirstRun(true);
 
                         return videoLength;
                     }
@@ -1033,8 +1060,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 setBarPosition((prevPosition) => prevPosition + 0.25);
 
-                // 150
-            }, 100);
+            }, 150);
 
         } else if (isPlaying && !isDragging) {
 
@@ -1160,7 +1186,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     const handlePlay = () => {
 
         setIsPlaying(true);
-        setDownloadBtn(false);
     }
 
     /** Přenastavení času dle kliknutí uživatele **/
@@ -1189,8 +1214,9 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
     /** Funkce, zda proměnná typu String obsahuje číslo **/
     const containsNumber = (str) => {
-        return /\d/.test(str);
-    }
+        const numbers = str.match(/\d/g);
+        return numbers && numbers.length === 2;
+    };
 
     /** Funkce pro zobrazení úplné rotace obrázku ve směru nebo proti směru hodinových ručiček **/
     const getSquareRotation = (arrowPosition, positionX, newSpeedX, positionY, cameraWidth, newSpeedY, cameraHeight, startClip, duration) => {

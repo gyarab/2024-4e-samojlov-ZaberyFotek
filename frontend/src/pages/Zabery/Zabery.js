@@ -67,8 +67,6 @@ function Zabery(props) {
     const [xArrowStart, setXArrowStart] = useState('');
     const [yArrowStart, setYArrowStart] = useState('');
 
-    console.log("X start", xArrowStart)
-
     // Vlastní směr - End
     const [xArrowEnd, setXArrowEnd] = useState('');
     const [yArrowEnd, setYArrowEnd] = useState('');
@@ -969,7 +967,7 @@ function Zabery(props) {
 
         if (activeItem === 'item4') {
 
-            console.log("STATUS", status)
+            console.log("STATUS:", status)
             setPieceStatus(status);
         }
     };

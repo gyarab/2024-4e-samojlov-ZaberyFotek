@@ -5,7 +5,7 @@ const { addPiecesData, getClips } = require('../controllers/pieceControllers');
 const router = express.Router();
 
 // Definování POST rout
-router.post('/addPiecesData', addPiecesData);
+router.post('/addClip', addPiecesData);
 router.post('/getClips', getClips);
 
 // Export routeru pro použití v jiných souborech

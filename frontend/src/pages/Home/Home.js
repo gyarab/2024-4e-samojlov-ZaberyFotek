@@ -96,7 +96,7 @@ function Home(props) {
 
                 <HeadingContainer>
 
-                    <div> Vytvářím </div>
+                    <div> Vytvářím</div>
 
                     <ReactTyped
                         strings={["klipy", "animace", "přechody"]}
@@ -122,7 +122,8 @@ function Home(props) {
 
             </TextElements>
 
-            <ImageArea isClicked={isChanged} backgroundIsVisible={isChanged} imageHeight={isChanged} imageWidth={isChanged} >
+            <ImageArea isClicked={isChanged} backgroundIsVisible={isChanged} imageHeight={isChanged}
+                       imageWidth={isChanged}>
 
                 {/* Načtená fotografie */}
 
@@ -136,14 +137,14 @@ function Home(props) {
                 {/*             enable={enable}*/}
                 {/*>*/}
 
-                    {imageSrc && (
-                        <img id={"foto"} src={imageSrc} alt="Vaše fotografie"
-                             style={{
-                                 width: '100%', height: '100%', objectFit: 'contain', padding: '25px'
-                             }}
-                        />
+                {imageSrc && (
+                    <img id={"foto"} src={imageSrc} alt="Vaše fotografie"
+                         style={{
+                             width: '100%', height: '100%', objectFit: 'contain', padding: '25px'
+                         }}
+                    />
 
-                    )}
+                )}
 
                 {/*</ResizeImage>*/}
 
@@ -170,7 +171,7 @@ function Home(props) {
 
             </ImageArea>
 
-            {imageSrc && <DefaultBtn onClick={() => redirectPage()}>Pokračovat <ArrowIcon /> </DefaultBtn>}
+            {imageSrc && <DefaultBtn onClick={() => redirectPage()}>Pokračovat <ArrowIcon/> </DefaultBtn>}
 
         </HomeContainer>
     );
