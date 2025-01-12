@@ -249,48 +249,36 @@ const deleteClip = (db, clip_id, res) => {
                     return res.status(500).json({error: 'Chyba při načítání piece_ids'});
                 }
 
-                if (pieceResult.length > 0) {
-                    const pieceIds = pieceResult.map((row) => row.piece_id);
+                // Definice tabulek, ze kterých se budou mazat data
+                const tablesToDeleteFrom = [
+                    'transition',
+                    'arrowDirection',
+                    'transition_idPieces',
+                    'cameraSize',
+                    'piece',
+                ];
 
-                    // Vytvoření zástupců pro jednotlivé ID kusů
-                    const placeholders = pieceIds.map(() => '?').join(', ');
+                // Vytvoření seznamu ID jako čárkami odděleného řetězce pro použití v SQL dotazech
+                const pieceIdsList = pieceIds.join(', ');
 
-                    // Smazání souvisejících dat v tabulkách transition, arrowDirection, transition_idPieces, cameraSize, a piece
-                    db.run(`DELETE FROM transition WHERE piece_id IN (${placeholders})`, pieceIds, (err) => {
+                // Procházení tabulek a provedení mazání pro každou z nich
+                tablesToDeleteFrom.forEach((table) => {
+                    // Nastavení názvu sloupce - pro tabulku "piece" je sloupec "id", jinak "piece_id"
+                    const column = table === 'piece' ? 'id' : 'piece_id';
+
+                    // Sestavení SQL dotazu pro mazání
+                    const query = `DELETE FROM ${table} WHERE ${column} IN (${pieceIdsList})`;
+
+                    // Spuštění dotazu
+                    db.run(query, (err) => {
                         if (err) {
-                            console.error(err);
-                            return res.status(500).json({error: 'Chyba při mazání transition'});
+                            // Ošetření chyby při mazání z konkrétní tabulky
+                            console.error(`Chyba při mazání z tabulky ${table}:`, err);
+                            return res.status(500).json({ error: `Chyba při mazání ${table}` });
                         }
                     });
+                });
 
-                    db.run(`DELETE FROM arrowDirection WHERE piece_id IN (${placeholders})`, pieceIds, (err) => {
-                        if (err) {
-                            console.error(err);
-                            return res.status(500).json({error: 'Chyba při mazání arrowDirection'});
-                        }
-                    });
-
-                    db.run(`DELETE FROM transition_idPieces WHERE piece_id IN (${placeholders})`, pieceIds, (err) => {
-                        if (err) {
-                            console.error(err);
-                            return res.status(500).json({error: 'Chyba při mazání transition_idPieces'});
-                        }
-                    });
-
-                    db.run(`DELETE FROM cameraSize WHERE piece_id IN (${placeholders})`, pieceIds, (err) => {
-                        if (err) {
-                            console.error(err);
-                            return res.status(500).json({error: 'Chyba při mazání cameraSize'});
-                        }
-                    });
-
-                    db.run(`DELETE FROM piece WHERE id IN (${placeholders})`, pieceIds, (err) => {
-                        if (err) {
-                            console.error(err);
-                            return res.status(500).json({error: 'Chyba při mazání piece'});
-                        }
-                    });
-                }
 
                 // Nakonec smažeme samotný klip
                 db.run('DELETE FROM clips WHERE id = ?', [clip_id], (err) => {
