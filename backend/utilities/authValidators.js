@@ -167,8 +167,10 @@ const emailCheck = (db, username, email, password, type, image, res) => {
     });
 }
 
-/** Aktualizace dat uživatele na základě vybraného typu **/
-/** Ověření, zda se email již nachází v databázi **/
+/**
+ * Aktualizace dat uživatele na základě vybraného typu
+ *  Ověření, zda se email již nachází v databázi
+ **/
 const updateUserData = (db, type, username, email, inputData, res) => {
 
     db.get(sqlEmailCheck, [email], (err, row) => {
@@ -205,6 +207,7 @@ const updateUserData = (db, type, username, email, inputData, res) => {
                 }
                 return res.status(200).json({validation: true, message: 'Váš účet byl úspěšně smazán'});
             });
+
         }
 
         // Aktualizace dat uživatele
@@ -213,6 +216,93 @@ const updateUserData = (db, type, username, email, inputData, res) => {
                 return res.status(500).json({validation: false, message: 'Chyba databáze'});
             }
             return res.status(200).json({validation: true, message: 'Údaje byly úspěšně změněny', user: row});
+        });
+    });
+}
+
+/** Funkce pro smazání klipu **/
+const deleteClip = (db, clip_id, res) => {
+
+    console.log("JSME TADY", clip_id)
+
+    // Získání klipu podle ID
+    db.get('SELECT * FROM clips WHERE id = ?', [clip_id], (err, row) => {
+        if (err) {
+            return res.status(500).json({error: 'Chyba při kontrole klipu'});
+        }
+
+        if (!row) {
+            return res.status(404).json({error: 'Klip nenalezen'});
+        }
+
+        // Smazání souvisejících vztahů z tabulky clip_pieces
+        db.run('DELETE FROM clip_pieces WHERE clip_id = ?', [clip_id], (err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({error: 'Chyba při mazání clip_pieces'});
+            }
+
+            // Načtení souvisejících kusů pro smazání
+            db.all('SELECT piece_id FROM clip_pieces WHERE clip_id = ?', [clip_id], (err, pieceResult) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({error: 'Chyba při načítání piece_ids'});
+                }
+
+                if (pieceResult.length > 0) {
+                    const pieceIds = pieceResult.map((row) => row.piece_id);
+
+                    // Vytvoření zástupců pro jednotlivé ID kusů
+                    const placeholders = pieceIds.map(() => '?').join(', ');
+
+                    // Smazání souvisejících dat v tabulkách transition, arrowDirection, transition_idPieces, cameraSize, a piece
+                    db.run(`DELETE FROM transition WHERE piece_id IN (${placeholders})`, pieceIds, (err) => {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({error: 'Chyba při mazání transition'});
+                        }
+                    });
+
+                    db.run(`DELETE FROM arrowDirection WHERE piece_id IN (${placeholders})`, pieceIds, (err) => {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({error: 'Chyba při mazání arrowDirection'});
+                        }
+                    });
+
+                    db.run(`DELETE FROM transition_idPieces WHERE piece_id IN (${placeholders})`, pieceIds, (err) => {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({error: 'Chyba při mazání transition_idPieces'});
+                        }
+                    });
+
+                    db.run(`DELETE FROM cameraSize WHERE piece_id IN (${placeholders})`, pieceIds, (err) => {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({error: 'Chyba při mazání cameraSize'});
+                        }
+                    });
+
+                    db.run(`DELETE FROM piece WHERE id IN (${placeholders})`, pieceIds, (err) => {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({error: 'Chyba při mazání piece'});
+                        }
+                    });
+                }
+
+                // Nakonec smažeme samotný klip
+                db.run('DELETE FROM clips WHERE id = ?', [clip_id], (err) => {
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).json({error: 'Chyba při mazání klipu'});
+                    }
+
+                    // Odpověď, že klip byl úspěšně smazán
+                    return res.status(200).json({message: 'Klip byl úspěšně smazán'});
+                });
+            });
         });
     });
 }
@@ -353,5 +443,6 @@ module.exports = {
     checkData,
     emailCheck,
     otpVerification,
-    updateUserData
+    updateUserData,
+    deleteClip
 };

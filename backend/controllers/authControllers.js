@@ -2,7 +2,8 @@ const db = require('../utilities/db');
 const {checkData,
     emailCheck,
     otpVerification,
-    updateUserData} =
+    updateUserData, deleteClip
+} =
     require('../utilities/authValidators');
 
 /**
@@ -122,16 +123,24 @@ const resetPassword = (req, res) => {
  */
 const changePersonalData = (req, res) => {
 
-    const {type, username, email, inputData} = req.body;
+    const {type, username, email, inputData, clip_id} = req.body;
+
     let validationErrors = [];
 
-    if (type === 'username') {
+    if (type === 'deleteClip') {
 
-        checkData("username", inputData, res, validationErrors);
+        console.log("POPRVE")
+
+        return deleteClip(db, clip_id, res);
 
     } else {
 
-        checkData("email", email, res, validationErrors);
+        if (type === 'username') {
+            checkData("username", inputData, res, validationErrors);
+
+        } else {
+            checkData("email", email, res, validationErrors);
+        }
     }
 
     if (validationErrors.length > 0) {
@@ -142,36 +151,9 @@ const changePersonalData = (req, res) => {
     } else {
 
         // Aktualizace dat uživatele na stránce Účet
-        updateUserData(db, type, username, email, inputData, res);
+        updateUserData(db, type, username, email, inputData, clip_id, res);
     }
 };
-
-// /**
-//  * Sekce: Získání všech dat o uživateli
-//  * Endpoint: /changePersonalData
-//  */
-// const selectUserData = (req, res) => {
-//
-//     const {email} = req.body;
-//
-//     const sqlEmailCheck = 'SELECT * FROM user WHERE email = ?';
-//
-//     db.get(sqlEmailCheck, [email], (err, row) => {
-//
-//         if (err) {
-//             return res.status(500).json({validation: false, message: 'Chyba databáze'});
-//         }
-//
-//         if (!row) {
-//             return res.status(404).json({ validation: false, message: 'User not found' });
-//         }
-//
-//         return res.status(200).json({
-//             validation: true,
-//             user: row
-//         });
-//     });
-// };
 
 module.exports = {
     loginUser,

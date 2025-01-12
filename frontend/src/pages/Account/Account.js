@@ -88,6 +88,15 @@ function Account() {
     const [editedTitle, setEditedTitle] = useState('');
     const [editedDescription, setEditedDescription] = useState('');
 
+    const [loading, setLoading] = useState(false);
+
+    // Otevření a zavření modálního okna
+    const [open, setOpen] = useState(false);
+    const closeModal = () => setOpen(false);
+
+    // Ověření typu účtu uživatele
+    const connected = userData?.verified_email !== null;
+
     /** Aktivní prvek při filtru **/
     const handleSortChange = (e) => {
         setSortCriteria(e.target.value);
@@ -101,17 +110,31 @@ function Account() {
         }
     }, [location.state]);
 
-    // Otevření a zavření modálního okna
-    const [open, setOpen] = useState(false);
-    const closeModal = () => setOpen(false);
+    /** Okno pro smazání klipu **/
+    const handleDeleteClick = (id) => {
+        setOpen(o => !o);
 
-    // Ověření typu účtu uživatele
-    const connected = userData?.verified_email !== null;
+        localStorage.removeItem('idClip');
+        localStorage.setItem('idClip', id);
 
-    const [loading, setLoading] = useState(false);
+        setIdClip(id);
+    };
 
     /** Načítání nejnovějších verzí klipů **/
     useEffect(() => {
+
+        const storedClipId = localStorage.getItem('idClip');
+
+        console.log("STORED", storedClipId)
+
+        if (storedClipId !== idClip) {
+            setIdClip(storedClipId);
+        }
+
+        if (storedClipId === 'clipDeleted') {
+            toast.success('Klip byl úspěšně smazán');
+        }
+
         if ((activeItem === 'Moje projekty' || clips.length === 0) && !loading) {
             setLoading(true);
 
@@ -121,22 +144,27 @@ function Account() {
                     sortBy: sortCriteria,
                 })
                 .then((res) => {
+
                     setClips(res.data?.clips);
+
                 })
                 .catch((err) => {
-                    toast.error(err.response?.data?.error || 'Error fetching clips');
+                    toast.error(err.response?.data?.error || 'Chyba načtení klipů');
                 })
                 .finally(() => {
                     setLoading(false);
                 });
         }
-    }, [sortCriteria, isEditing]);
+
+    }, [sortCriteria, activeItem]);
 
     /** Změna informací o daném klipu **/
     const handleEditClick = (id, action) => {
+
         if (action === 'edit') {
             setIdClip(id);
             setIsEditing(true);
+
         } else if (action === 'save') {
             axios
                 .post('http://localhost:4000/data/updateClip', {
@@ -203,7 +231,7 @@ function Account() {
                                     <div>
                                         <Label htmlFor='sort-select'>Seřadit podle:</Label>
                                         <Select id='sort-select' value={sortCriteria} onChange={handleSortChange}>
-                                            <Option value=''>Vyberte...</Option>
+                                            <Option value=''>Výchozí</Option>
                                             <Option value='name'>Název</Option>
                                             <Option value='new'>Od nejnovějšího</Option>
                                             <Option value='old'>Od nejstaršího</Option>
@@ -243,16 +271,52 @@ function Account() {
                                                 controls
                                                 src={videoSrc}
                                                 poster={clip.poster}
+                                                style={{width: '100%', objectFit: 'cover', height: '250px'}}
                                             >
                                                 Zdá se, že váš prohlížeč nepodporuje tento typ videa
                                             </video>
                                             <CardContent>
-                                                    <CardBtn isEditing={(checkIdPiece) || !isEditing}
-                                                             onClick={() => handleEditClick(clip.id, checkIdPiece ? 'save' : 'edit')}>
-                                                        {checkIdPiece ? (
-                                                            <MdCheck style={{color: 'white'}}/>
-                                                        ) : <MdModeEditOutline style={{color: 'white'}}/>}
+                                                <CardBtn
+                                                    className="edit"
+                                                    index={0}
+                                                    onClick={() => handleEditClick(clip.id, checkIdPiece ? 'save' : 'edit')}>
+                                                    {checkIdPiece ? (
+                                                        <MdCheck style={{color: 'white'}}/>
+                                                    ) : <MdModeEditOutline style={{color: 'white'}}/>}
+                                                </CardBtn>
+
+                                                <a
+                                                    href={videoSrc}
+                                                    download={`${clip.name}.mp4`}
+                                                    style={{textDecoration: 'none'}}
+                                                >
+                                                    <CardBtn
+                                                        className="download"
+                                                        index={1}
+                                                    >
+                                                        <MdDownload style={{color: 'white'}}/>
                                                     </CardBtn>
+                                                </a>
+
+                                                <CardBtn
+                                                    className="delete"
+                                                    index={2}
+                                                    onClick={() => handleDeleteClick(clip.id)}
+                                                >
+
+                                                    {open && (
+                                                        <PopUpComponent
+                                                            open={open}
+                                                            closeModal={closeModal}
+                                                            userData={userData}
+                                                            type={'deleteClip'}
+                                                            blur={true}
+                                                        />
+                                                    )}
+
+                                                    <MdDelete style={{color: 'white'}}/>
+
+                                                </CardBtn>
 
                                                 {checkIdPiece ? (
                                                     <>

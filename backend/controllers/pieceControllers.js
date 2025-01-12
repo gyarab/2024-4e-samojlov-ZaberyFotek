@@ -238,10 +238,6 @@ const getClips = (req, res) => {
 const updateClip = (req, res) => {
     const { clip_id, name, description } = req.body;
 
-    if (!clip_id || !name || !description) {
-        return res.status(400).json({ error: 'Chybí údaje' });
-    }
-
     // Čas obnovení klipu
     const updatedAt = new Date().toISOString();
 

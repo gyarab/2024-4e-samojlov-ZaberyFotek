@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     ActionButton,
     ActionButtonGroup,
@@ -19,7 +19,7 @@ import Popup from "reactjs-popup";
 import {Button, ErrorMessage, Label} from "../../pages/Prihlaseni/LoginComponents";
 import axios from "axios";
 import {toast} from "react-toastify";
-import {redirect, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 /** Hlavní komponenta vstupujícího okna **/
 const PopUpComponent = ({
@@ -31,13 +31,11 @@ const PopUpComponent = ({
     const [input, setInput] = useState(userData?.email);
     const [inputError, setInputError] = useState('');
 
-    const videoRef = useRef(null);
-
     // Aktuální hodnota pro element Checkbox
     const [isChecked, setIsChecked] = useState(false);
 
     const [title, setTitle] = useState("Nový projekt");
-    const [description, setDescription] = useState("Upravit popis klipu ...");
+    const [description, setDescription] = useState("");
 
     /** Uložení aktuální hodnoty pro element Checkbox **/
     const handleCheckboxChange = (e) => {
@@ -60,16 +58,20 @@ const PopUpComponent = ({
     // Přesměrování uživatele
     const navigate = useNavigate();
 
+    /** Funkce pro změnu údajů uživatele nebo smazání účtu / klipu **/
     const handleSubmit = () => {
 
-        // Změna údajů uživatele nebo smazání účtu
+        const clipId = localStorage.getItem('idClip');
+
         axios.post('http://localhost:4000/auth/changePersonalData', {
             type: type,
             username: userData?.username,
             email: userData?.email,
-            inputData: input
+            inputData: input,
+            clip_id: clipId
         })
             .then(res => {
+
                 if (res.data.validation) {
 
                     toast.success(res.data.message);
@@ -103,8 +105,6 @@ const PopUpComponent = ({
 
                         localStorage.setItem("user", JSON.stringify(newData));
                     }
-
-                    closeModal();
                 }
             })
             .catch(err => {
@@ -121,6 +121,13 @@ const PopUpComponent = ({
                     toast.error(err.response?.data?.message || 'Někde nastala chyba');
                 }
             });
+
+        if (type === 'deleteClip') {
+
+            localStorage.setItem('idClip', 'clipDeleted');
+            closeModal();
+            window.location.reload();
+        }
     }
 
     return (
@@ -137,7 +144,7 @@ const PopUpComponent = ({
             }}
             overlayStyle={{
                 ...(blur && {
-                    background: 'rgba(0, 0, 0, 0.5)',
+                    background: 'transparent',
                     backdropFilter: 'blur(20px)',
                     transition: 'backdrop-filter 0.3s ease',
                 }),
@@ -259,7 +266,7 @@ const PopUpComponent = ({
                             }
                             }
 
-                                bg={clipReady ? "#ff4757" : "grey"}
+                                          bg={clipReady ? "#ff4757" : "grey"}
                                           hover={clipReady ? "#e84118" : "grey"}
                                           disabled={!clipReady}
                                           style={{cursor: clipReady ? "pointer" : "not-allowed"}}>Uložit
@@ -303,17 +310,21 @@ const PopUpComponent = ({
                 </div>
             ) : null}
 
-            {type === 'deleteAccount' ? (
+            {type === 'deleteAccount' || type === 'deleteClip' ? (
                 <div>
                     <PopupHeader>
-                        <PopupTitle>Smazání účtu</PopupTitle>
+                        <PopupTitle>Smazání {type === 'deleteAccount' ? 'účtu' : 'klipu'}</PopupTitle>
                         <CloseButton onClick={closeModal}>&times;</CloseButton>
                     </PopupHeader>
 
-                    <p style={{color: 'var(--color-shadow-7)', lineHeight: '1.5', fontSize: '16px'}}>
-                        Jste si jisti, že chcete smazat svůj účet? <br/> Smazání účtu odstraní všechna vaše
-                        přidružená data trvale. Tuto operaci nelze vrátit zpět.
-                    </p>
+                    {type === 'deleteAccount' ?
+                        <p style={{color: 'var(--color-shadow-7)', lineHeight: '1.5', fontSize: '16px'}}>
+                            Jste si jisti, že chcete smazat svůj účet? <br/> Smazání účtu odstraní všechna vaše
+                            přidružená data trvale. Tuto operaci nelze vrátit zpět.
+                        </p> : <p style={{color: 'var(--color-shadow-7)', lineHeight: '1.5', fontSize: '16px'}}>
+                            Jste si jisti, že chcete smazat tento klip? <br/> Smazání klipu jej trvale odstraní z vašeho
+                            profilu. Tuto operaci nelze vrátit zpět.
+                        </p>}
 
                     <PopupCheckboxContainer>
                         <PopupStyledCheckbox
@@ -322,7 +333,7 @@ const PopUpComponent = ({
                             onChange={handleCheckboxChange}
                         />
                         <Label style={{color: 'var(--color-shadow-6)', lineHeight: '1.5', fontSize: '14px'}}>
-                            Souhlasím se smazáním účtu
+                            Souhlasím se smazáním {type === 'deleteAccount' ? 'účtu' : 'klipu'}
                         </Label>
                     </PopupCheckboxContainer>
 

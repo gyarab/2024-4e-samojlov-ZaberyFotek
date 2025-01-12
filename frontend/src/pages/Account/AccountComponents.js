@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const AccountContainer = styled.div`
     display: flex;
     background-color: #f9f9f9;
-    height: 150vh;
+    height: 100vh;
     justify-content: flex-start;
 `;
 
@@ -71,29 +71,9 @@ export const GridContainer = styled.div`
     margin-top: 25px;
 `;
 
-export const Card = styled.div`
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease-in-out;
-
-    &:hover {
-        transform: translateY(-5px);
-    }
-`;
-
-export const CardMedia = styled.video`
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    background: #000;
-`;
-
 export const CardContent = styled.div`
     text-align: center;
-    padding: 10px;
+    padding: 5px;
 `;
 
 export const CardTitle = styled.h2`
@@ -353,7 +333,7 @@ export const Option = styled.option`
 export const CardBtn = styled.button.withConfig({
     shouldForwardProp: (prop) => !['color'].includes(prop)})`
     position: absolute;
-    top: 10px;
+    top: ${({ index }) => `${index * 50 + 10}px`};
     right: 10px;
     width: 40px;
     height: 40px;
@@ -364,8 +344,7 @@ export const CardBtn = styled.button.withConfig({
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(10px); 
-    display: ${({ isEditing }) =>
-            isEditing ? "flex" : "none"};;
+    display: none;
     align-items: center;
     justify-content: center;
     cursor: pointer;
@@ -373,5 +352,35 @@ export const CardBtn = styled.button.withConfig({
     &:hover {
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2),
         inset 0 2px 2px rgba(255, 255, 255, 0.35);
+    }
+
+    &.edit {
+        background: var(--color-blue-8);
+    }
+
+    &.download {
+        background: green;  
+    }
+
+    &.delete {
+        background: red; 
+    }
+`;
+
+export const Card = styled.div`
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    position: relative;
+    
+    &:hover ${CardBtn} {
+        display: flex;
+    }
+
+    &:hover {
+        transform: translateY(-5px);
     }
 `;

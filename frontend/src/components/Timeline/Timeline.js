@@ -201,49 +201,11 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
     /**
      * Funkce umožňuje stáhnout video. Vytvoří a klikne na odkaz pro stažení videa.
      */
-    const handleDownload = (clipName, type, description) => {
-
-        // setDownloadLink(null);
-        // chunks.current = [];
+    const handleDownload = (clipName, type) => {
 
         setOpen(o => !o);
 
         setDownloadBtn(true);
-        // setIsPlaying(true);
-
-        console.log("SAVE", saveClip, localStorage.getItem("user"));
-
-        //if (saveClip && downloadLink !== null && type === 'save' && clipName && description) {
-            //
-            // const activeUser = localStorage.getItem("user");
-            // const data = JSON.parse(activeUser);
-            //
-            // console.log("TITLE", clipName, description)
-            //
-            // if (activeUser) {
-
-            //     axios.post('http://localhost:4000/data/addPiecesData', {
-            //         user_id: data?.id,
-            //         name: clipName,
-            //         description: description,
-            //         pieces: selectedPieces,
-            //         src: downloadLink.toString()
-            //     })
-            //         .then(res => {
-            //             if (res.data.validation) {
-            //                 toast.success(res.data.message);
-            //             }
-            //         })
-            //         .catch(err => {
-            //             toast.error(err.response?.data?.error);
-            //         });
-            //
-            //     // původně
-            //     //setSuccess(false);
-            // }
-
-            //setSaveClip(false);
-        //}
 
         // původně pouze downloadLink
         if (downloadLink && success && type === 'download') {
@@ -506,13 +468,8 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                     //console.log("COORDINATE X", coordinateX, coordinateY)
 
-                    // Funkce pro vytvoření klipu
+                    /** Funkce pro vytvoření klipu **/
                     const createClip = () => {
-
-                        // handlePieceClick(true);
-                        // setPieceClicked(false);
-
-                        // console.log(coordinateY + " " + canvas.width + " " + img.width + " " + coordinateX);
 
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -529,8 +486,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
                             canvas.height
                         );
                     }
-
-                    console.log("TRAns", currentPiece?.transition?.transitionID, isPlaying, pieceTimeConditional)
 
                     // Přehrání klipu
                     if (isPlaying && pieceTimeConditional) {
