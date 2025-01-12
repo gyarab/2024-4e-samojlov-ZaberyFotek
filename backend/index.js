@@ -27,6 +27,7 @@ const env = require('dotenv').config();
 // Použití rout pro autentifikaci uživatele
 app.use('/auth', authRoutes);
 
+// Použití rout pro práci s jednotlivými klipy a částicemi
 app.use('/data', pieceRoutes);
 
 // Spuštění serveru na portu 4000

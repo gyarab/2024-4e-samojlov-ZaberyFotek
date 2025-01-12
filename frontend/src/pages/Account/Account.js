@@ -7,9 +7,11 @@ import {
     AccountSettingsContainer,
     ButtonContainer,
     Card,
+    CardBtn,
     CardContent,
     CardDescription,
-    CardMedia,
+    CardInput,
+    CardTextArea,
     CardTitle,
     ChangeContainer,
     CreateButton,
@@ -22,6 +24,7 @@ import {
     LoginOptions,
     LogOutBtn,
     MainContent,
+    Option,
     OptionIcon,
     OptionLabel,
     OptionRow,
@@ -29,17 +32,19 @@ import {
     Section,
     SectionParagraph,
     SectionTitle,
+    Select,
     Sidebar,
     SidebarItem
 } from "./AccountComponents";
 import {FaRegFolder, FaRegUserCircle} from "react-icons/fa";
-import {MdLogout} from "react-icons/md";
+import {MdCheck, MdDelete, MdDownload, MdLogout, MdModeEditOutline} from "react-icons/md";
 import {FcGoogle} from "react-icons/fc";
 import {FiEdit} from "react-icons/fi";
 import {IoSettingsOutline} from "react-icons/io5";
 import {TbPhotoVideo} from "react-icons/tb";
 import PopUpComponent from "../../components/PopUp/PopUp";
 import axios from "axios";
+import {Label} from "../Prihlaseni/LoginComponents";
 
 /** Komponenta Account umožňuje uživateli prohlížet a spravovat jeho vytvořené klipy **/
 function Account() {
@@ -63,14 +68,34 @@ function Account() {
 
     console.log("LOGGED", userData);
 
+    // Načtené klipy
+    const [clips, setClips] = useState([]);
+
     // Přesměrování uživatele na jinou stránku pomocí hooku navigate
     const navigate = useNavigate();
 
     // Nastavení typu akce (např. změna hesla, smazání účtu apod.)
     const [type, setType] = useState('');
 
+    // Seřazení klipu podle daného typu
+    const [sortCriteria, setSortCriteria] = useState('');
+
+    // Aktivní id klipu
+    const [idClip, setIdClip] = useState(null);
+
+    // Proměnné určené dle úpravy klipu
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedTitle, setEditedTitle] = useState('');
+    const [editedDescription, setEditedDescription] = useState('');
+
+    /** Aktivní prvek při filtru **/
+    const handleSortChange = (e) => {
+        setSortCriteria(e.target.value);
+    };
+
     // Efekt pro zobrazení oznámení při úspěšné akci
     useEffect(() => {
+
         if (location.state?.successMessage) {
             toast.success(location.state.successMessage);
         }
@@ -83,13 +108,59 @@ function Account() {
     // Ověření typu účtu uživatele
     const connected = userData?.verified_email !== null;
 
-    const [clips, setClips] = useState([]);
+    const [loading, setLoading] = useState(false);
 
+    /** Načítání nejnovějších verzí klipů **/
     useEffect(() => {
+        if ((activeItem === 'Moje projekty' || clips.length === 0) && !loading) {
+            setLoading(true);
 
-        console.log("KLIPY", clips);
+            axios
+                .post('http://localhost:4000/data/getClips', {
+                    user_id: userData?.id,
+                    sortBy: sortCriteria,
+                })
+                .then((res) => {
+                    setClips(res.data?.clips);
+                })
+                .catch((err) => {
+                    toast.error(err.response?.data?.error || 'Error fetching clips');
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }
+    }, [sortCriteria, isEditing]);
 
-    }, [clips]);
+    /** Změna informací o daném klipu **/
+    const handleEditClick = (id, action) => {
+        if (action === 'edit') {
+            setIdClip(id);
+            setIsEditing(true);
+        } else if (action === 'save') {
+            axios
+                .post('http://localhost:4000/data/updateClip', {
+                    clip_id: idClip,
+                    name: editedTitle,
+                    description: editedDescription,
+                })
+
+                .then((res) => {
+
+                    if (res.data.message) {
+                        toast.success(res.data.message);
+                    }
+
+                    setIsEditing(false);
+                    setEditedTitle('');
+                    setEditedDescription('');
+
+                })
+                .catch((err) => {
+                    toast.error(err.response?.data?.error || 'Error occurred while saving');
+                });
+        }
+    };
 
     return (
         <AccountContainer>
@@ -98,18 +169,6 @@ function Account() {
                     active={activeItem === 'Moje projekty'}
                     onClick={() => {
                         handleItemClick('Moje projekty')
-                        axios
-                            .post('http://localhost:4000/data/getClips', {
-                                user_id: userData?.id,
-                            })
-                            .then((res) => {
-                                setClips(res.data?.clips);
-
-                            })
-                            .catch((err) => {
-                                toast.error('Error fetching clips');
-                                console.log(err);
-                            });
                     }}
                 >
                     <FaRegFolder style={{fontSize: '18px'}}/> Moje projekty
@@ -134,9 +193,39 @@ function Account() {
 
                         {clips.length > 0 ? (
                             <ProjectsContainer>
-                                <SectionTitle>{activeItem}</SectionTitle>
+                                <div style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <SectionTitle>{activeItem}</SectionTitle>
+                                    <div>
+                                        <Label htmlFor='sort-select'>Seřadit podle:</Label>
+                                        <Select id='sort-select' value={sortCriteria} onChange={handleSortChange}>
+                                            <Option value=''>Vyberte...</Option>
+                                            <Option value='name'>Název</Option>
+                                            <Option value='new'>Od nejnovějšího</Option>
+                                            <Option value='old'>Od nejstaršího</Option>
+                                            <Option value='lastEdit'>Poslední úprava</Option>
+                                        </Select>
+                                    </div>
+                                </div>
+
                                 <GridContainer>
                                     {clips.map((clip) => {
+
+                                        const checkIdPiece = isEditing && clip.id === idClip;
+
+                                        if (checkIdPiece) {
+
+                                            if (editedTitle.length === 0) {
+                                                setEditedTitle(clip.name);
+                                            }
+                                            if (editedDescription.length === 0) {
+                                                setEditedDescription(clip.description);
+                                            }
+                                        }
 
                                         let videoSrc = clip.src;
 
@@ -145,7 +234,7 @@ function Account() {
                                         } else if (clip?.src.toString().startsWith('blob:')) {
                                             videoSrc = clip.src;
                                         } else {
-                                            const videoBlob = new Blob([clip.src], { type: 'video/mp4' });
+                                            const videoBlob = new Blob([clip.src], {type: 'video/mp4'});
                                             videoSrc = URL.createObjectURL(videoBlob);
                                         }
 
@@ -158,8 +247,34 @@ function Account() {
                                                 Zdá se, že váš prohlížeč nepodporuje tento typ videa
                                             </video>
                                             <CardContent>
-                                                <CardTitle>{clip.name}</CardTitle>
-                                                <CardDescription>{clip.description || 'No description provided.'}</CardDescription>
+                                                    <CardBtn isEditing={(checkIdPiece) || !isEditing}
+                                                             onClick={() => handleEditClick(clip.id, checkIdPiece ? 'save' : 'edit')}>
+                                                        {checkIdPiece ? (
+                                                            <MdCheck style={{color: 'white'}}/>
+                                                        ) : <MdModeEditOutline style={{color: 'white'}}/>}
+                                                    </CardBtn>
+
+                                                {checkIdPiece ? (
+                                                    <>
+                                                        <CardInput
+                                                            value={editedTitle}
+                                                            onChange={(e) => setEditedTitle(e.target.value)}
+                                                            placeholder="Nový nadpis"
+                                                        />
+                                                        <CardTextArea
+                                                            value={editedDescription}
+                                                            onChange={(e) => setEditedDescription(e.target.value)}
+                                                            placeholder="Upravit popis"
+                                                        />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <CardTitle>{clip.name}</CardTitle>
+                                                        <CardDescription>
+                                                            {clip.description || 'Popis ke klipu nebyl uveden.'}
+                                                        </CardDescription>
+                                                    </>
+                                                )}
                                             </CardContent>
                                         </Card>);
                                     })}
@@ -168,7 +283,7 @@ function Account() {
 
                         ) : (
                             <ProjectsContainer style={{alignItems: 'center', justifyContent: 'center'}}>
-                            <SectionTitle>{activeItem}</SectionTitle>
+                                <SectionTitle>{activeItem}</SectionTitle>
                                 <EmptyMessage>Zatím žádné projekty.</EmptyMessage>
                                 <CreateButton onClick={() => navigate("/")}>
                                     <TbPhotoVideo style={{fontSize: '20px'}}/> Vytvořit nový klip

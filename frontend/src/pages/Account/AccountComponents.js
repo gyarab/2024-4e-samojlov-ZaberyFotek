@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const AccountContainer = styled.div`
     display: flex;
     background-color: #f9f9f9;
-    height: 100vh;
+    height: 150vh;
     justify-content: flex-start;
 `;
 
@@ -18,7 +18,7 @@ export const Sidebar = styled.aside`
     border-radius: 10px;
     margin-top: 120px; 
     margin-left: 25px;
-    height: min-content;
+    height: max-content;
 `;
 
 export const SidebarItem = styled.div.withConfig({
@@ -108,34 +108,32 @@ export const CardDescription = styled.p`
     margin: 0;
 `;
 
-// const EmptyMessage = styled.p`
-//     font-size: 16px;
-//     color: #999;
-//     text-align: center;
-// `;
-//
-// const CreateButton = styled.button`
-//     background-color: var(--home-blue-light);
-//     color: #fff;
-//     padding: 10px 20px;
-//     border: none;
-//     border-radius: 4px;
-//     cursor: pointer;
-//     display: flex;
-//     align-items: center;
-//     gap: 10px;
-//     font-size: 16px;
-//
-//     &:hover {
-//         background-color: #5aafff;
-//     }
-// `;
-export const PlanContainer = styled(ProjectsContainer)`
-    background-color: #fefefe;
+export const CardInput = styled.input`
+    font-size: 18px;
+    color: var(--color-shadow-9);
+    margin: 0 0 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+
+    &:focus {
+        outline: none;
+        border-color: #0073e6;
+        box-shadow: 0 0 4px rgba(0, 115, 230, 0.4);
+    }
 `;
 
-export const SettingsContainer = styled(ProjectsContainer)`
-    background-color: #f8f8f8;
+export const CardTextArea = styled.input`
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    border: 1px solid #ccc;
+    text-align: center;
+
+    &:focus {
+        outline: none;
+        border-color: #0073e6;
+        box-shadow: 0 0 4px rgba(0, 115, 230, 0.4);
+    }
 `;
 
 export const EmptyMessage = styled.p`
@@ -311,7 +309,8 @@ export const ButtonContainer = styled.div`
   align-items: center;
 `;
 
-export const AccountButton = styled.button`
+export const AccountButton = styled.button.withConfig({
+    shouldForwardProp: (prop) => !['color'].includes(prop)})`
   margin-top: 20px;
   padding: 10px 20px;
   font-size: 14px;
@@ -330,20 +329,49 @@ export const AccountButton = styled.button`
   }
 `;
 
-export const Footer = styled.div`
-    display: flex;
-    justify-content: space-between;
+export const Select = styled.select`
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  color: #333;
+  outline: none;
+  cursor: pointer;
+
+  &:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+  }
+`;
+
+export const Option = styled.option`
+  font-size: 16px;
+  color: #333;
+`;
+
+export const CardBtn = styled.button.withConfig({
+    shouldForwardProp: (prop) => !['color'].includes(prop)})`
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-blue-8); 
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px); 
+    display: ${({ isEditing }) =>
+            isEditing ? "flex" : "none"};;
     align-items: center;
-    margin-top: 20px;
-    font-size: 12px;
-    color: #999;
+    justify-content: center;
+    cursor: pointer;
 
-    a {
-        color: var(--home-blue-light);
-        text-decoration: none;
-
-        &:hover {
-            text-decoration: underline;
-        }
+    &:hover {
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2),
+        inset 0 2px 2px rgba(255, 255, 255, 0.35);
     }
 `;

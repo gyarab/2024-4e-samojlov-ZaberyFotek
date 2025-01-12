@@ -37,7 +37,7 @@ const PopUpComponent = ({
     const [isChecked, setIsChecked] = useState(false);
 
     const [title, setTitle] = useState("Nový projekt");
-    const [description, setDescription] = useState("");
+    const [description, setDescription] = useState("Upravit popis klipu ...");
 
     /** Uložení aktuální hodnoty pro element Checkbox **/
     const handleCheckboxChange = (e) => {
@@ -122,31 +122,6 @@ const PopUpComponent = ({
                 }
             });
     }
-
-    const getBlobFromURLSync = (url) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", url, false); // Synchronous request
-        xhr.overrideMimeType("application/octet-stream"); // To ensure binary data is handled correctly
-        xhr.send();
-
-        if (xhr.status === 200) {
-            return new Blob([xhr.response], { type: xhr.getResponseHeader("Content-Type") });
-        } else {
-            throw new Error(`Failed to fetch Blob from URL: ${xhr.statusText}`);
-        }
-    };
-
-    // Function to convert Blob to Base64 using a callback
-    const convertBlobToBase64 = (blob, callback) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            callback(reader.result); // Call the callback with the Base64 string
-        };
-        reader.onerror = (err) => {
-            throw new Error(`FileReader error: ${err}`);
-        };
-        reader.readAsDataURL(blob);
-    };
 
     return (
         <Popup

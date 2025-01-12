@@ -18,8 +18,10 @@ const addPiecesData = (req, res) => {
         });
     }
 
+    // Vytvoření bufferu z base64 zakódovaného video zdroje (src).
     const videoBuffer = Buffer.from(src.split(',')[1], 'base64');
 
+    // Získání aktuálního data a času ve formátu ISO
     const createdAt = new Date().toISOString();
 
     // Transakční logika pro přidání klipu a jeho částic
@@ -27,11 +29,11 @@ const addPiecesData = (req, res) => {
 
     // Přidání klipu
     const insertClipQuery = `
-      INSERT INTO clips (user_id, name, description, created_at, src, poster) 
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO clips (user_id, name, description, created_at, updated_at, src, poster) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
-    db.run(insertClipQuery, [user_id, name, description, createdAt, videoBuffer, poster], function (err) {
+    db.run(insertClipQuery, [user_id, name, description, createdAt, createdAt, videoBuffer, poster], function (err) {
         if (err) {
             console.error("Error adding clip:", err);
             //db.run("ROLLBACK");
@@ -177,7 +179,7 @@ const addPiecesData = (req, res) => {
  * Endpoint: /getClips
 */
 const getClips = (req, res) => {
-    const { user_id } = req.body;
+    const { user_id, sortBy } = req.body;
 
     console.log("ID", user_id);
 
@@ -189,25 +191,82 @@ const getClips = (req, res) => {
         params.push(user_id);
     }
 
+    if (sortBy) {
+        let sortColumn;
+        switch (sortBy) {
+            case 'name':
+                sortColumn = 'name';
+                break;
+            case 'new':
+                sortColumn = 'created_at DESC';
+                break;
+            case 'old':
+                sortColumn = 'created_at ASC';
+                break;
+            case 'lastEdit':
+                sortColumn = 'updated_at DESC';
+                break;
+            default:
+                sortColumn = 'id';
+        }
+        query += ` ORDER BY ${sortColumn}`;
+    }
+
     db.all(query, params, (err, rows) => {
         if (err) {
-            console.error("Error fetching clips:", err);
-            console.log(err);
-            return res.status(500).json({ error: "Failed to fetch clips." });
+            return res.status(500).json({ error: "Chyba při načtení klipů" });
         }
 
         const clipsData = rows.map((row) => ({
             id: row.id,
             name: row.name,
             description: row.description,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
             src: `data:video/mp4;base64,${row.src.toString('base64')}`,
+            poster: row?.poster
         }));
 
         return res.status(200).json({ clips: clipsData });
     });
 };
 
+/**
+ * Sekce: Obnovení informací o daném klipu
+ * Endpoint: /updateClip
+ */
+const updateClip = (req, res) => {
+    const { clip_id, name, description } = req.body;
+
+    if (!clip_id || !name || !description) {
+        return res.status(400).json({ error: 'Chybí údaje' });
+    }
+
+    // Čas obnovení klipu
+    const updatedAt = new Date().toISOString();
+
+    // Aktualizace dat klipu
+    const query = `
+        UPDATE clips
+        SET name = ?, description = ?, updated_at = ?
+        WHERE id = ?
+    `;
+
+    db.run(query, [name, description, updatedAt, clip_id], function(err) {
+        if (err) {
+            return res.status(500).json({ error: 'Chyba obnovení klipu' });
+        }
+
+        if (this.changes > 0) {
+            return res.status(200).json({ message: 'Informace o klipu byly změněny' });
+        } else {
+            return res.status(404).json({ error: 'Klip nenalezen' });
+        }
+    });
+};
+
 module.exports = {
     addPiecesData,
-    getClips
+    getClips,
+    updateClip
 };

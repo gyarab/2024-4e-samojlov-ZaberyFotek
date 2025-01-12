@@ -209,7 +209,6 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
         setOpen(o => !o);
 
         setDownloadBtn(true);
-        setCurrentTime(0);
         // setIsPlaying(true);
 
         console.log("SAVE", saveClip, localStorage.getItem("user"));
@@ -295,6 +294,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
             // Zahájení snímaní videa
             startRecording(canvas);
+            setIsPlaying(true);
         }
 
         /** Funkce pro vykreslení aktuálního snímku **/
@@ -564,8 +564,28 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                         } else if (!already) {
 
-                            requestAnimationFrame(createClip);
-                            setOnce(true);
+                            if (downloadBtn) {
+
+                                // Vykreslení aktuálního snímku klipu
+                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                ctx.drawImage(
+                                    img,
+                                    coordinateX,
+                                    coordinateY,
+                                    cameraWidth,
+                                    cameraHeight,
+                                    0,
+                                    0,
+                                    canvas.width,
+                                    canvas.height
+                                );
+
+                                setOnce(true);
+                            } else {
+
+                                requestAnimationFrame(createClip);
+                                setOnce(true);
+                            }
                         }
 
                     } else {
@@ -1038,21 +1058,24 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 setCurrentTime((prevTime) => {
 
-                    if (isFirstRun && currentTime !== 0) {
+                    console.log("PARAMETRY", isPlaying, currentTime)
+
+                    if (isFirstRun) {
                         setDownloadLink(null);
                         chunks.current = [];
                         setBarPosition(0);
                         setIsFirstRun(false);
-                        //setIsPlaying(true);
+                        // startRecording(videoRef.current);
                         return 0;
 
                     } else if (prevTime + 0.15 >= time) {
 
                         clearInterval(intervalId);
                         setIsPlaying(false);
+                        setDownloadBtn(false);
                         stopRecording();
 
-                        return videoLength;
+                        return time;
                     }
 
                     return prevTime + 0.15;
@@ -1060,7 +1083,7 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick}) {
 
                 setBarPosition((prevPosition) => prevPosition + 0.25);
 
-            }, 150);
+            }, 130);
 
         } else if (isPlaying && !isDragging) {
 
