@@ -7,10 +7,13 @@ const cors = require('cors');
 
 //const bodyParser = require('body-parser');
 
+// Případné vytvoření tabulek
+require('./utilities/dbLoad');
+
 // Import rout pro autentifikaci z authRoutes
 const authRoutes = require('./routes/authRoutes');
 
-// pieceRoutes
+// Import rout pro použití pieceRoutes
 const pieceRoutes = require('./routes/pieceRoutes');
 
 // Inicializace aplikace Express

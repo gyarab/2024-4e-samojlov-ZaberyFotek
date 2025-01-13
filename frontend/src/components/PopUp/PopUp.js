@@ -124,8 +124,8 @@ const PopUpComponent = ({
 
         if (type === 'deleteClip') {
 
-            localStorage.setItem('idClip', 'clipDeleted');
-            closeModal();
+            // localStorage.setItem('idClip', 'clipDeleted');
+            // closeModal();
             window.location.reload();
         }
     }

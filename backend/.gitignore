@@ -25,4 +25,4 @@ yarn-error.log*
 *.db
 
 # Environment files
-.env
+*.env

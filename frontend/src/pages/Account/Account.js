@@ -71,6 +71,8 @@ function Account() {
     // Načtené klipy
     const [clips, setClips] = useState([]);
 
+    const [final, setFinal] = useState(false);
+
     // Přesměrování uživatele na jinou stránku pomocí hooku navigate
     const navigate = useNavigate();
 
@@ -123,17 +125,17 @@ function Account() {
     /** Načítání nejnovějších verzí klipů **/
     useEffect(() => {
 
-        const storedClipId = localStorage.getItem('idClip');
+        // const storedClipId = localStorage.getItem('idClip');
 
-        console.log("STORED", storedClipId)
+        // console.log("STORED", storedClipId)
 
-        if (storedClipId !== idClip) {
-            setIdClip(storedClipId);
-        }
+        // if (storedClipId !== idClip) {
+        //     setIdClip(storedClipId);
+        // }
 
-        if (storedClipId === 'clipDeleted') {
-            toast.success('Klip byl úspěšně smazán');
-        }
+        // if (storedClipId === 'clipDeleted') {
+        //     toast.success('Klip byl úspěšně smazán');
+        // }
 
         if ((activeItem === 'Moje projekty' || clips.length === 0) && !loading) {
             setLoading(true);
@@ -156,39 +158,47 @@ function Account() {
                 });
         }
 
-    }, [sortCriteria, activeItem]);
+    }, [sortCriteria, idClip, isEditing, activeItem]);
+
+    /** Inicializuje stav úprav pro vybraný klip, pokud je aktivní režim úprav **/
+    useEffect(() => {
+        if (isEditing && idClip) {
+            const clip = clips.find((clip) => clip.id === idClip);
+            if (clip) {
+                if (!editedTitle) setEditedTitle(clip.name);
+                if (!editedDescription) setEditedDescription(clip.description);
+            }
+        }
+    }, [isEditing, idClip, clips, editedTitle, editedDescription]);
 
     /** Změna informací o daném klipu **/
     const handleEditClick = (id, action) => {
 
-        if (action === 'edit') {
-            setIdClip(id);
+        if (!action) {
             setIsEditing(true);
-
-        } else if (action === 'save') {
+            setIdClip(id);
+            setEditedTitle('');
+            setEditedDescription('');
+        } else {
             axios
                 .post('http://localhost:4000/data/updateClip', {
                     clip_id: idClip,
                     name: editedTitle,
                     description: editedDescription,
                 })
-
                 .then((res) => {
-
                     if (res.data.message) {
                         toast.success(res.data.message);
                     }
-
                     setIsEditing(false);
                     setEditedTitle('');
                     setEditedDescription('');
-
                 })
                 .catch((err) => {
                     toast.error(err.response?.data?.error || 'Error occurred while saving');
                 });
         }
-    };
+    }
 
     return (
         <AccountContainer>
@@ -243,17 +253,7 @@ function Account() {
                                 <GridContainer>
                                     {clips.map((clip) => {
 
-                                        const checkIdPiece = isEditing && clip.id === idClip;
-
-                                        if (checkIdPiece) {
-
-                                            if (editedTitle.length === 0) {
-                                                setEditedTitle(clip.name);
-                                            }
-                                            if (editedDescription.length === 0) {
-                                                setEditedDescription(clip.description);
-                                            }
-                                        }
+                                        const isEditingCurrentClip = isEditing && clip.id === idClip;
 
                                         let videoSrc = clip.src;
 
@@ -279,8 +279,10 @@ function Account() {
                                                 <CardBtn
                                                     className="edit"
                                                     index={0}
-                                                    onClick={() => handleEditClick(clip.id, checkIdPiece ? 'save' : 'edit')}>
-                                                    {checkIdPiece ? (
+                                                    onClick={() => {
+                                                        handleEditClick(clip.id, isEditingCurrentClip);
+                                                    }}>
+                                                    {isEditingCurrentClip ? (
                                                         <MdCheck style={{color: 'white'}}/>
                                                     ) : <MdModeEditOutline style={{color: 'white'}}/>}
                                                 </CardBtn>
@@ -318,7 +320,7 @@ function Account() {
 
                                                 </CardBtn>
 
-                                                {checkIdPiece ? (
+                                                {isEditingCurrentClip ? (
                                                     <>
                                                         <CardInput
                                                             value={editedTitle}
