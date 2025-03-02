@@ -4,12 +4,43 @@ import {css} from "@emotion/react";
 
 
 export const ZaberyPage = styled.div`
-    display: flex;  
-    height: 100vh;  
+    display: flex;
+    height: 100vh;
     overflow: hidden;
     padding-top: 50px;
     align-items: flex-start;
     font-size: 14px;
+
+    @media (max-width: 1400px) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        text-align: center;
+
+        * {
+            display: none;
+        }
+
+        &::after {
+            content: "Tato stránka je momentálně ve vývoji. Brzy budete moci vytvářet záběry přímo na vašem zařízení!";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: radial-gradient(circle at top left, var(--color-blue-9) 0%, var(--color-blue-5) 10%, transparent 25%),
+            radial-gradient(circle at bottom right, var(--color-blue-9) 0%, var(--color-blue-5) 10%, transparent 25%);
+            height: 100vh;
+            width: 100vw;
+            min-height: 800px;
+            z-index: -1;
+            overflow: hidden;
+            text-align: center;
+            font-weight: 700;
+            font-size: 25px;
+            padding: 50px;
+        }
+    }
 `;
 
 
@@ -26,12 +57,8 @@ export const ZaberySidebarContainer = styled.nav`
     min-height: 465px;
     margin-top: 50px;
 
-    // 520px
-    @media screen and (max-width: 768px) {
-        height: 100px;
-        width: 100%;
-        flex-direction: row;
-        bottom: 0;
+    @media (max-width: 1400px) {
+        display: none;
     }
 `;
 
@@ -79,7 +106,7 @@ export const Foto = styled.div`
         //max-height: 75%; 
         //width: calc(100vw * 0.75);
         //height: calc(100vw * 0.75);
-        object-fit: contain;  
+        object-fit: contain;
     }
 
     // 520px
@@ -127,12 +154,12 @@ export const CheckmarkIcon = styled.div`
 `;
 
 const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 `;
 
 export const PiecesContainer = styled.div`
@@ -154,7 +181,7 @@ export const AddBtn = styled.button`
     border-radius: 50px;
     opacity: 0.5;
     transition: opacity 0.25s ease-in-out;
-    
+
     &:hover {
         opacity: 1;
     }
@@ -181,7 +208,7 @@ export const PieceImages = styled.div`
     max-width: 100%;
     width: 100%;
     position: relative;
-    
+
     div {
 
         display: flex;
@@ -199,7 +226,7 @@ export const PieceImages = styled.div`
             object-fit: contain;
         }
     }
-    
+
 
     @media screen and (max-width: 768px) {
         margin-left: 0;
@@ -227,7 +254,7 @@ export const ArrowBtn = styled.button.withConfig({
     transition: opacity 0.25s ease-in-out;
     border: ${({isClicked}) => (isClicked ? '1px solid #00cc66' : 'none')};
     box-shadow: ${({isClicked}) => (isClicked ? '0 5px 5px #00cc66' : '0 5px 5px var(--color-shadow-8)')};
-    
+
     &:hover {
         opacity: 1;
     }
@@ -297,7 +324,7 @@ export const SectionOwnDirection = styled.label.withConfig({
  *
  * **/
 export const TimeInput = styled.input`
-    
+
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
@@ -322,7 +349,7 @@ export const TimeInput = styled.input`
 
     /* Webkit prohlížeče */
     &::-webkit-slider-thumb {
-        
+
         -webkit-appearance: none;
         appearance: none;
         height: 15px;

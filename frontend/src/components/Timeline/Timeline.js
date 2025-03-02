@@ -1614,22 +1614,23 @@ function Timeline({canvasRef, selectedPieces, handlePieces, handlePieceClick, im
                 <VideoTools isFlexStart={isFlexStart}>
 
                     {activeTool === null ? (
-
                         clipTools.map((item, index) => (
-
                             <ClipTool
                                 key={index}
                                 onClick={() => handleToolClick(index)}
+                                style={{
+                                    backgroundColor: index === 0 || index === 2 || index === 3 ? 'grey' : 'var(--color-shadow-8)',
+                                    cursor: index === 0 || index === 2 || index === 3 ? 'default' : 'pointer',
+                                }}
                             >
-                                {/** Nadpisy všech nástrojů (před otěvřením) **/}
+                                {/** Nadpisy všech nástrojů (před otevřením) **/}
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '10px'
+                                    gap: '10px',
                                 }}>
                                     {item.icon} {item.label}
                                 </div>
-
                             </ClipTool>
                         ))
                     ) : (

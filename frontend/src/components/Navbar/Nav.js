@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Bars, Nav, NavBtn, NavBtnLink, NavLink, NavMenu, UserProfile} from './NavbarComponents'
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 
 /** Funkce zobrazující navigační panel **/
 function Navbar({toggle}) {
@@ -23,6 +23,14 @@ function Navbar({toggle}) {
     }
 
     const loggedInUser = localStorage.getItem("user");
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.pathname === "/ucet") {
+            console.log("Logged in user when on /ucet:", loggedInUser);
+        }
+    }, [location, loggedInUser]);
 
     console.log(loggedInUser);
 
@@ -84,9 +92,9 @@ function Navbar({toggle}) {
 
             <NavMenu>
 
-                <NavLink to={"o-projektu"}>O projektu</NavLink>
-                <NavLink to={"kontakt"}>Kontakt</NavLink>
-                <NavLink to={""}>Vyzkoušet nyní</NavLink>
+                <NavLink to={"/o-projektu"}>O projektu</NavLink>
+                <NavLink to={"/kontakt"}>Kontakt</NavLink>
+                <NavLink to={"/"}>Vyzkoušet nyní</NavLink>
 
             </NavMenu>
 
@@ -95,7 +103,7 @@ function Navbar({toggle}) {
                 {loggedInUser ?
 
                     (icon ?
-                        <UserProfile to={"ucet"}
+                        <UserProfile to={"/ucet"}
                         >
                             <img
                                 src={icon}
@@ -109,11 +117,11 @@ function Navbar({toggle}) {
                                 referrerPolicy="no-referrer"
                             />
                         </UserProfile> :
-                        <UserProfile style={{background: '#fc555f'}} to={"ucet"}>{firstLetter}</UserProfile>) :
+                        <UserProfile style={{background: '#fc555f'}} to={"/ucet"}>{firstLetter}</UserProfile>) :
 
                     <NavBtn>
-                        <NavLink to={"prihlaseni"}>Přihlášení</NavLink>
-                        <NavBtnLink to={"registrace"}>Registrace</NavBtnLink>
+                        <NavLink to={"/prihlaseni"}>Přihlášení</NavLink>
+                        <NavBtnLink to={"/registrace"}>Registrace</NavBtnLink>
                     </NavBtn>}
 
             </NavBtn>

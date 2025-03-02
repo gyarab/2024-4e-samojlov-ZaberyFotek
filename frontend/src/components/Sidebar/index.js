@@ -22,7 +22,7 @@ function Sidebar({isOpen, toggle}) {
 
     const icon = data?.image;
 
-    console.log(data.username);
+    console.log(data?.username);
 
     return (
         <SidebarContainer isOpen={isOpen} onClick={toggle}>
@@ -37,9 +37,10 @@ function Sidebar({isOpen, toggle}) {
 
                 <SidebarMenu>
 
-                    <SidebarLink to={"o-projektu"}>O projektu</SidebarLink>
-                    <SidebarLink to={"kontakt"}>Kontakt</SidebarLink>
+                    <SidebarLink to={"/o-projektu"}>O projektu</SidebarLink>
+                    <SidebarLink to={"/kontakt"}>Kontakt</SidebarLink>
                     <SidebarLink to={""}>Vyzkoušet nyní</SidebarLink>
+                    {loggedInUser ? <SidebarLink to={"/"}/> : <SidebarLink to={"/prihlaseni"}>Přihlášení</SidebarLink>}
 
                 </SidebarMenu>
 
@@ -53,10 +54,10 @@ function Sidebar({isOpen, toggle}) {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}
-                            to={'ucet'}
+                            to={'/ucet'}
                         >
                             {icon ? (
-                                <UserProfile to={"ucet"}>
+                                <UserProfile to={"/ucet"}>
                                     <img
                                         src={icon}
                                         alt={'Ikona Google'}
@@ -68,7 +69,7 @@ function Sidebar({isOpen, toggle}) {
                                     />
                                 </UserProfile>
                             ) : (
-                                <UserProfile style={{ background: '#fc555f' }} to={"ucet"}>
+                                <UserProfile style={{ background: '#fc555f' }} to={"/ucet"}>
                                     {firstLetter}
                                 </UserProfile>
                             )}
@@ -76,8 +77,7 @@ function Sidebar({isOpen, toggle}) {
                         </SidebarBtnLink>
                     ) : (
                         <SidebarBtn>
-                            <SidebarLink to={"prihlaseni"}>Přihlášení</SidebarLink>
-                            <SidebarBtnLink to={"registrace"}>Registrace</SidebarBtnLink>
+                            <SidebarBtnLink to={"/registrace"}>Registrace</SidebarBtnLink>
                         </SidebarBtn>
                     )}
                 </SidebarBtn>

@@ -12,7 +12,7 @@ export const AccountContainer = styled.div`
     }
 `;
 
-export const Sidebar = styled.aside`
+export const Sidebar = styled.div`
     display: flex;
     flex-direction: column;
     width: 240px;
@@ -21,16 +21,16 @@ export const Sidebar = styled.aside`
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border: 1px solid #eaeaea;
     border-radius: 10px;
-    margin-top: 120px; 
+    margin-top: 120px;
     margin-left: 25px;
     height: max-content;
 
     @media screen and (max-width: 875px) {
-        position: fixed;    
-        bottom: 0;          
-        left: 0;         
-        width: fit-content;      
-        z-index: 50;      
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: fit-content;
+        z-index: 50;
         flex-direction: row;
         justify-content: center;
     }
@@ -85,7 +85,7 @@ export const GridContainer = styled.div`
     margin-top: 25px;
 
     @media screen and (max-width: 650px) {
-        grid-template-columns: 1fr; 
+        grid-template-columns: 1fr;
     }
 `;
 
@@ -234,7 +234,7 @@ export const EditIcon = styled.button`
     position: absolute;
     right: 20px;
     top: 50%;
-    transform: translateY(-50%); 
+    transform: translateY(-50%);
 
     &:hover {
         color: var(--home-blue-dark);
@@ -275,7 +275,7 @@ export const OptionLabel = styled.label.withConfig({
     padding: 5px 15px;
     font-size: 14px;
     background-color: ${({ connected }) =>
-    connected ? "#e0e0e0" : "var(--home-blue-light)"};
+            connected ? "#e0e0e0" : "var(--home-blue-light)"};
     color: ${({ connected }) => (connected ? "#666" : "#fff")};
     border: none;
     border-radius: 4px;
@@ -283,7 +283,7 @@ export const OptionLabel = styled.label.withConfig({
 
     &:hover {
         background-color: ${({ connected }) =>
-    connected ? "#c0c0c0" : "var(--home-blue-dark)"};
+                connected ? "#c0c0c0" : "var(--home-blue-dark)"};
     }
 `;
 
@@ -295,70 +295,70 @@ export const ChangeContainer = styled.div`
 `;
 
 export const Section = styled.div`
-  flex: 1;
-  padding: 15px;
-  border: 1px solid var(--color-shadow-3);
-  border-radius: 8px;
-  background-color: #fff;
+    flex: 1;
+    padding: 15px;
+    border: 1px solid var(--color-shadow-3);
+    border-radius: 8px;
+    background-color: #fff;
 `;
 
 export const SectionParagraph = styled.p`
-  color: var(--color-shadow-7);
-  line-height: 1.5;
-  font-size: 16px;
+    color: var(--color-shadow-7);
+    line-height: 1.5;
+    font-size: 16px;
 `;
 
 export const ButtonContainer = styled.div`
-  margin-top: 15px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
 `;
 
 export const AccountButton = styled.button.withConfig({
     shouldForwardProp: (prop) => !['color'].includes(prop)})`
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 14px;
-  color: ${({ color }) => color || '#d9534f'};
-  background-color: transparent;
-  border: 1px solid ${({ color }) => color || '#d9534f'};
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in;
-  font-weight: 700;
-  width: 100%;
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: ${({ color }) => color || '#d9534f'};
+    background-color: transparent;
+    border: 1px solid ${({ color }) => color || '#d9534f'};
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in;
+    font-weight: 700;
+    width: 100%;
 
-  &:hover {
-    background-color: ${({ color }) => color || '#d9534f'};
-    color: white;
-  }
+    &:hover {
+        background-color: ${({ color }) => color || '#d9534f'};
+        color: white;
+    }
 `;
 
 export const Select = styled.select`
-  padding: 8px 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  color: #333;
-  outline: none;
-  cursor: pointer;
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    color: #333;
+    outline: none;
+    cursor: pointer;
     width: fit-content;
 
     @media screen and (max-width: 550px) {
         width: 25%;
     }
 
-  &:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
-  }
+    &:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+    }
 `;
 
 export const Option = styled.option`
-  font-size: 16px;
-  color: #333;
+    font-size: 16px;
+    color: #333;
 `;
 
 export const CardBtn = styled.button.withConfig({
@@ -370,11 +370,11 @@ export const CardBtn = styled.button.withConfig({
     height: 40px;
     border-radius: 50%;
     border: none;
-    background: var(--color-blue-8); 
+    background: var(--color-blue-8);
     color: white;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(10px); 
+    backdrop-filter: blur(10px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -390,11 +390,11 @@ export const CardBtn = styled.button.withConfig({
     }
 
     &.download {
-        background: green;  
+        background: green;
     }
 
     &.delete {
-        background: red; 
+        background: red;
     }
 `;
 
@@ -406,7 +406,7 @@ export const Card = styled.div`
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease-in-out;
     position: relative;
-    
+
     &:hover ${CardBtn} {
         display: flex;
     }

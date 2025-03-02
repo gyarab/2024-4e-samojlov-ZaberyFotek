@@ -1,11 +1,8 @@
 const express = require('express');
-
 const dotenv = require('dotenv');
 dotenv.config();
-
 const cors = require('cors');
-
-//const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
 
 // Případné vytvoření tabulek
 require('./utilities/dbLoad');
@@ -22,8 +19,18 @@ const app = express();
 // Povolení požadavků z jiných domén
 app.use(cors());
 
+// Nastavení limitu pro požadavky
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minut
+    max: 100, // Limit 100 požadavků na IP během 15 minut
+    message: "Překročili jste limit požadavků na server, zkuste to prosím později."
+});
+
+// Použití rate limiter pro všechny požadavky
+app.use(limiter);
+
 // Parsování příchozích JSON požadavků
-app.use(express.json({limit: '10mb'}));
+app.use(express.json({ limit: '10mb' }));
 
 const env = require('dotenv').config();
 
