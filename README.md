@@ -1,5 +1,16 @@
-# Záběry fotek
+# 📸 Záběry fotek
+Jedná se o webovou aplikaci, která umožňuje uživatelům snadno upravovat obrázky, rozdělovat je na části, vytvářet klipy a následně je spojovat do finálního videa. Inspirací pro tento projekt byla autorova snaha posunout prezentaci svých uměleckých děl na vyšší úroveň – místo jednoduchého sdílení fotografií na sociálních sítích chtěl nabídnout dynamickou formu prezentace prostřednictvím krátkých videoklipů.
+  
+# 📚Studentský projekt
 
+## ▶ Účel:
+Tvorba záběrů z obrázků a jejich spojení do videoklipů  
+
+## ▶ Myšlenka:
+Prezentace uměleckých děl formou záběrů fotek  
+
+## ▶ Přínos:
+Rychlé a jednoduché vytváření videí  
 
 
 # ⬇️ Instalace
