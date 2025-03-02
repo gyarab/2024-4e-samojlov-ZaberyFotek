@@ -7,7 +7,7 @@
 ## 🔁 Klonování repozitáře
 Nejprve si klonujte repozitář do svého lokálního prostředí pomocí následujícího příkazu:
 ```sh
-git clone https://github.com/
+git clone https://github.com/gyarab/2024-4e-samojlov-ZaberyFotek.git
 ```
 
 ## ⚛️ Frontend (React)
@@ -51,6 +51,6 @@ Nainstaluje všechny potřebné balíčky z `package.json`.
 ### 3️⃣ Spuštění vývojového serveru  
 Pro spuštění backendu v režimu vývoje použijte příkaz:
 ```sh
-nodemon index.js
+node index.js
 ```
 Backend aplikaci otevřete v prohlížeči na adrese: [http://localhost:4000](http://localhost:4000)  
