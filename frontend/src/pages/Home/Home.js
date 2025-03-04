@@ -117,7 +117,7 @@ function Home(props) {
                     <div> Vytvářím</div>
 
                     <ReactTyped
-                        strings={["klipy", "animace", "přechody"]}
+                        strings={["klipy", "animace", "přechody", "snímky", "efekty", "videa", "částice"]}
                         typeSpeed={200}
                         loop
                         backSpeed={40}

@@ -49,7 +49,7 @@ function SignUp() {
 
                     localStorage.setItem('user', JSON.stringify(res.data?.user));
 
-                    navigate('/prihlaseni', {
+                    navigate('/ucet', {
                         state: { successMessage: res.data.message },
                     });
                 }

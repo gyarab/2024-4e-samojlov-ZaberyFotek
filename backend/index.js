@@ -17,7 +17,10 @@ const pieceRoutes = require('./routes/pieceRoutes');
 const app = express();
 
 // Povolení požadavků z jiných domén
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true
+}));
 
 // Nastavení limitu pro požadavky
 const limiter = rateLimit({
@@ -41,6 +44,7 @@ app.use('/auth', authRoutes);
 app.use('/data', pieceRoutes);
 
 // Spuštění serveru na portu 4000
-app.listen(4000, () => {
-    console.log('Server běží na portu 4000');
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Server běží na portu ${PORT}`);
 });

@@ -38,12 +38,19 @@ function Navbar({toggle}) {
 
     const firstLetter = data?.username?.charAt(0);
 
-    const icon = data?.image;
+    const [icon, setIcon] = useState(data?.image || false);
 
     console.log("icon", icon, "first", firstLetter);
 
-    const loadedIcon = new Image();
-    loadedIcon.src = icon;
+    useEffect(() => {
+        if (data?.image) {
+            const loadedIcon = new Image();
+            loadedIcon.src = data.image;
+
+            loadedIcon.onload = () => setIcon(data.image);
+            loadedIcon.onerror = () => setIcon(false);
+        }
+    }, [data?.image]);
 
     useEffect(() => {
 
@@ -65,6 +72,7 @@ function Navbar({toggle}) {
     /** Zjištění chyby při načtení obrázku **/
     const handleImageError = (event) => {
         console.error("Chyba načtení fotografie", event.target.src);
+        setIcon(false);
     };
 
 
@@ -106,7 +114,7 @@ function Navbar({toggle}) {
                         <UserProfile to={"/ucet"}
                         >
                             <img
-                                src={icon}
+                                src={icon.toString()}
                                 alt={'Ikona Google'}
                                 onError={handleImageError}
                                 style={{
