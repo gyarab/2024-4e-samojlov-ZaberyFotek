@@ -31,7 +31,7 @@ export const HeadingContainer = styled.h1`
     margin-top: 25px;
     gap: 20px;
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 850px) {
         display: grid;
         font-size: 4em;
         gap: 0;
@@ -63,7 +63,7 @@ export const ImageArea = styled.div.withConfig({
     width: ${({ isClicked, imageWidth }) =>
             (isClicked && imageWidth.width !== 0 ? `${imageWidth.width}px` : 'calc(100vw * 0.75)')};
     transition: width 0.5s ease;
-    max-width: 750px;
+    //max-width: 1200px;
     min-width: 200px;
     min-height: 200px;
     max-height: ${({ maxHeight }) => (maxHeight ? '500px' : '625px')};

@@ -57,9 +57,9 @@ function Zabery(props) {
     // Aktivní vybraný filtr obrázku
     const [imgFilter, setImgFilter] = useState('Bez filtru');
 
-    let positionX = [];
-
-    let positionY = [];
+    // let positionX = [];
+    //
+    // let positionY = [];
 
     let [vertIndex, setVertIndex] = useState(0);
 
@@ -78,6 +78,9 @@ function Zabery(props) {
     // Vlastní směr - End
     const [xArrowEnd, setXArrowEnd] = useState('');
     const [yArrowEnd, setYArrowEnd] = useState('');
+
+    // Uložené obrázky
+    const savedImages = localStorage.getItem('savedImage');
 
     /** Kontrola nastavené šířky nebo výšky **/
     const handleInputChange = (e, setter) => {
@@ -194,6 +197,8 @@ function Zabery(props) {
 
     }, [activeArrow, arrowDirection, activeItem]);
 
+    // Aktuální index obrázku
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     // Počet aktuálních sloupců a řádků v paneli nástrojů
     const [row, setAsRows] = useState(0);
@@ -336,6 +341,18 @@ function Zabery(props) {
         return filters.find(filter => filter.name === imgFilter)?.value || 'none';
     };
 
+    /** Funkce pro změnu obrázku **/
+    const showNextImage = () => {
+
+        const imageArray = savedImages ? savedImages.split(',') : [];
+
+        if (currentIndex < imageArray.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+        } else {
+            setCurrentIndex(0);
+        }
+    };
+
     /** Vykreslení plochy **/
     const drawCanvas = () => {
 
@@ -346,25 +363,17 @@ function Zabery(props) {
         // Obrázek
         const image = new Image();
 
-        const savedImage = localStorage.getItem('savedImage');
-
-        // console.log(savedImage);
+        const savedImages = localStorage.getItem('savedImage');
 
         let isSaved = false;
 
-        // Pokud fotografie není uložená
-        if (!savedImage) {
+        const imageArray = savedImages.split(',');
 
-            image.src = props.image;
-            setCurrentImage(props.image);
-            isSaved = false;
+        console.log(imageArray[0]);
 
-            // Pokud fotografie je uložená
-        } else {
-
-            image.src = savedImage;
-            setCurrentImage(savedImage);
-            isSaved = true;
+        if (imageArray.length > 0) {
+            image.src = imageArray[currentIndex];
+            setCurrentImage(imageArray[currentIndex]);
         }
 
         image.style.border = '5px solid red';
@@ -405,13 +414,6 @@ function Zabery(props) {
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
             });
-
-
-            if (!isSaved) {
-
-                // Přidání nové fotky
-                localStorage.setItem('savedImage', canvas.toDataURL());
-            }
         }
     };
 
@@ -622,7 +624,7 @@ function Zabery(props) {
     /** Vykreslení obrázku a plochy **/
     useEffect(() => {
         drawCanvas();
-    }, [props.image, imgFilter, lines, dragging]);
+    }, [props.image, imgFilter, lines, dragging, currentIndex]);
 
 
     /** Třídicí algoritmus **/
@@ -649,75 +651,82 @@ function Zabery(props) {
     /** Funkce pro zobrazení jednotlivých částic z fotografie **/
     const getPieces = () => {
 
-        // Nahraná fotografie
-        const image = new Image();
-        image.src = currentImage;
-
-        items.forEach(line => {
-
-            if (line.type === 'vertical') {
-
-                const w = (line.position * image.width) / canvasRef.current.width;
-
-                positionX.push(w);
-
-            } else {
-
-                const h = (line.position * image.height) / canvasRef.current.height;
-
-                positionY.push(h);
-            }
-        });
-
-        sortLines(positionX);
-        sortLines(positionY);
-
-        console.log(positionX, positionY);
-
         // Pole pro částice
         const pieces = [];
-
-        // console.log("REAL", image.width, image.height)
-
-        // Souřadnicová pole
-        const finalPositionX = [0, ...positionX, image.width];
-        const finalPositionY = [0, ...positionY, image.height];
+        const imageArray = savedImages ? savedImages.split(',') : [];
 
         // ID částice
         let idImg = 0;
 
-        // Procházení řádků
-        for (let i = 0; i < finalPositionY.length - 1; i++) {
+        for (let i = 0; i < imageArray.length; i++) {
 
-            // Procházení sloupců
-            for (let j = 0; j < finalPositionX.length - 1; j++) {
+            // Nahraná fotografie
+            const image = new Image();
+            image.src = imageArray[i];
 
-                // Pozice x, y na ploše
-                const x = finalPositionX[j];
-                const y = finalPositionY[i];
+            let positionX = [];
+            let positionY = [];
 
-                // Šířka a výška částice
-                const width = finalPositionX[j + 1] - x;
-                const height = finalPositionY[i + 1] - y;
+            items.forEach(line => {
 
-                // Nová plocha
-                const pieceCanvas = document.createElement('canvas');
-                pieceCanvas.width = width;
-                pieceCanvas.height = height;
+                if (line.type === 'vertical') {
 
-                // Nová částice
-                const pieceContext = pieceCanvas.getContext('2d');
-                pieceContext.filter = getFilter();
+                    const w = (line.position * image.width) / canvasRef.current.width;
 
-                // Vykreslení částice do plochy canvas
-                pieceContext.drawImage(image, x, y, width, height, 0, 0, width, height);
+                    positionX.push(w);
 
-                // Přidání údajů o částicích do pole
-                pieces.push({
-                    id: idImg,
-                    src: pieceCanvas.toDataURL()
-                });
-                idImg++;
+                } else {
+
+                    const h = (line.position * image.height) / canvasRef.current.height;
+
+                    positionY.push(h);
+                }
+            });
+
+            sortLines(positionX);
+            sortLines(positionY);
+
+            console.log(positionX, positionY);
+
+            // console.log("REAL", image.width, image.height)
+
+            // Souřadnicová pole
+            const finalPositionX = [0, ...positionX, image.width];
+            const finalPositionY = [0, ...positionY, image.height];
+
+            // Procházení řádků
+            for (let i = 0; i < finalPositionY.length - 1; i++) {
+
+                // Procházení sloupců
+                for (let j = 0; j < finalPositionX.length - 1; j++) {
+
+                    // Pozice x, y na ploše
+                    const x = finalPositionX[j];
+                    const y = finalPositionY[i];
+
+                    // Šířka a výška částice
+                    const width = finalPositionX[j + 1] - x;
+                    const height = finalPositionY[i + 1] - y;
+
+                    // Nová plocha
+                    const pieceCanvas = document.createElement('canvas');
+                    pieceCanvas.width = width;
+                    pieceCanvas.height = height;
+
+                    // Nová částice
+                    const pieceContext = pieceCanvas.getContext('2d');
+                    pieceContext.filter = getFilter();
+
+                    // Vykreslení částice do plochy canvas
+                    pieceContext.drawImage(image, x, y, width, height, 0, 0, width, height);
+
+                    // Přidání údajů o částicích do pole
+                    pieces.push({
+                        id: idImg,
+                        src: pieceCanvas.toDataURL()
+                    });
+                    idImg++;
+                }
             }
         }
 
@@ -758,7 +767,8 @@ function Zabery(props) {
                                     rangeValue,
                                     1,
                                     arrowDirection,
-                                    null)}}
+                                    null)
+                            }}
 
                             style={{
                                 position: "relative"
@@ -1363,6 +1373,9 @@ function Zabery(props) {
             <Foto id={"Foto"} item={activeItem} ref={timelineRef}>
 
                 <canvas ref={canvasRef}></canvas>
+
+                {(activeItem === 'item1' || activeItem === 'item2') &&
+                    <ArrowBtn onClick={showNextImage} style={{background: 'black', marginLeft: '25px'}} title={"Další"}><GoArrowRight/></ArrowBtn>}
 
                 {/* Vybrané částice */}
                 {activeItem === 'item3' && getPieces()}

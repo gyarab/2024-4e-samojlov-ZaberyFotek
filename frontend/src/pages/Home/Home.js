@@ -21,10 +21,10 @@ function Home(props) {
     // Kontrola, zda je tlačítko zobrazeno
     const [isUploadBtnVisible, setIsUploadBtnVisible] = useState(true);
 
-    // Změna rozvržení ImageArea
+// Změna rozvržení ImageArea
     const [isChanged, changeAreaDisplay] = useState(false);
 
-    // Reference na vstupní soubor uživatele
+// Reference na vstupní soubor uživatele
     const fileInputRef = useRef(null);
 
     /** Výběr souboru uživatele **/
@@ -32,56 +32,39 @@ function Home(props) {
         fileInputRef.current.click();
     };
 
-    // Obsah fotky
-    const [imageSrc, setImageSrc] = useState(null);
+// Obsah fotky (nyní pole pro více obrázků)
+    const [imageSrcs, setImageSrcs] = useState([]);
 
     /** Funkce pro načtení obrázku **/
     const imageUpload = (event) => {
+        const files = event.target.files;
 
-        // načtený soubor
-        const file = event.target.files[0];
+        if (files?.length > 3) {
+            alert("Maximálně můžete nahrát 3 fotografie.");
+            return;
+        }
 
-        if (file) {
-
-            // Přečtení souboru
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-
-                // Funkce pro načtení obsahu obrázku, imageSrc je získaná URL obrázku
-                setImageSrc(e.target.result);
-            };
-
-            // Přečtení souboru jako URL
-            reader.readAsDataURL(file);
+        if (files) {
+            const newImageSrcs = Array.from(files).map(file => URL.createObjectURL(file));
+            setImageSrcs(prevImages => [...prevImages, ...newImageSrcs]); // Přidání nových obrázků do seznamu
             changeAreaDisplay(!isChanged);
             setIsUploadBtnVisible(false);
 
-            // // Reset úložiště
-            // localStorage.clear();
-
-            // props.setImage(null);
-
-            localStorage.removeItem('savedImage');
-            // localStorage.setItem('img', URL.createObjectURL(file));
-
-            // localStorage.removeItem('img');
-            //
-            // Nastavení fotky jako nově vytvořené url souboru obrázku
-            props.setImage(URL.createObjectURL(file));
-
+            // Reset úložiště
+            localStorage.setItem('savedImage', newImageSrcs.toString());
+            //props.setImage(newImageSrcs);
         }
     };
 
-    // Přesměrování na jinou adresu
-    const navigate = useNavigate()
+// Přesměrování na jinou adresu
+    const navigate = useNavigate();
 
     /** Přesměrování **/
-    const redirectPage = ()=> {
+    const redirectPage = () => {
         navigate("/zabery");
-    }
+    };
 
-    // Proměnná pro stav přetahování
+// Proměnná pro stav přetahování
     const [isDragging, setIsDragging] = useState(false);
 
     /** Kurzor se nachází nad plochou **/
@@ -100,14 +83,14 @@ function Home(props) {
         e.preventDefault();
         setIsDragging(false);
 
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith("image/")) {
-            imageUpload({ target: { files: [file] } });
+        const files = e.dataTransfer.files;
+        if (files) {
+            const newImageSrcs = Array.from(files).map(file => URL.createObjectURL(file));
+            setImageSrcs(prevImages => [...prevImages, ...newImageSrcs]);
         }
     };
 
     return (
-
         <HomeContainer>
 
             <TextElements>
@@ -150,11 +133,12 @@ function Home(props) {
                 onDrop={handleDrop}
                 className={isDragging ? "drag-over" : ""}
             >
-                {imageSrc && (
+                {/* Zobrazení všech vybraných obrázků */}
+                {imageSrcs.length > 0 && imageSrcs.map((src, index) => (
                     <img
-                        id="foto"
-                        src={imageSrc}
-                        alt="Vaše fotografie"
+                        key={index}
+                        src={src}
+                        alt={`Vaše fotografie ${index + 1}`}
                         style={{
                             width: "100%",
                             height: "100%",
@@ -162,20 +146,28 @@ function Home(props) {
                             padding: "25px",
                         }}
                     />
-                )}
+                ))}
 
                 {isUploadBtnVisible && (
                     <DefaultBtn onClick={fileBtnClick}>
                         <PlusIcon />
                         <span>Vyberte fotografii</span>
-                        <input type="file" accept="image/*" onChange={imageUpload} ref={fileInputRef} hidden />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={imageUpload}
+                            ref={fileInputRef}
+                            max={3}
+                            hidden
+                            multiple
+                        />
                     </DefaultBtn>
                 )}
 
                 {isUploadBtnVisible && <TextDesc>Nebo můžete přetáhnout obrázek sem</TextDesc>}
             </ImageArea>
 
-            {imageSrc && <DefaultBtn onClick={() => redirectPage()}>Pokračovat <ArrowIcon/> </DefaultBtn>}
+            {imageSrcs.length > 0 && <DefaultBtn onClick={() => redirectPage()}>Pokračovat <ArrowIcon/> </DefaultBtn>}
 
         </HomeContainer>
     );
